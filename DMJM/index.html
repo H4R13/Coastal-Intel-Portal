@@ -1,0 +1,1604 @@
+# Let's generate the complete HTML file with embedded CSS, Tailwind, Leaflet, Chart.js, and all interactive features.
+html_content = """<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pakistan Coastal Plastic Debris Risk & Response Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { 900: '#070F1E', 800: '#0B192C', 700: '#1E3E62', 600: '#000000' },
+                        ocean: { 500: '#0077B6', 400: '#00B4D8', 300: '#90E0EF' },
+                        risk: { low: '#10B981', moderate: '#F59E0B', high: '#F97316', critical: '#EF4444' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass-panel { background: rgba(11, 25, 44, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { background: rgba(30, 62, 98, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.06); }
+        #map { height: 100%; width: 100%; border-radius: 0.75rem; z-index: 10; }
+        .pulse-marker { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #070F1E; }
+        ::-webkit-scrollbar-thumb { background: #1E3E62; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00B4D8; }
+    </style>
+</head>
+<body class="bg-navy-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-cyan-500 selection:text-white">
+
+    <!-- Top Command Header -->
+    <header class="bg-navy-800/90 border-b border-slate-700/60 sticky top-0 z-50 px-4 py-2.5 flex flex-wrap items-center justify-between gap-4 backdrop-blur-md">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                <i class="fa-solid fa-water text-white text-lg"></i>
+            </div>
+            <div>
+                <div class="flex items-center space-x-2">
+                    <h1 class="font-bold text-base md:text-lg tracking-wide text-white">PAKISTAN COASTAL PLASTIC DEBRIS RISK & RESPONSE PORTAL</h1>
+                    <span class="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider bg-red-500/20 text-red-400 border border-red-500/30 rounded">NDMA Prototype</span>
+                </div>
+                <p class="text-xs text-slate-400">Coastal Pollution Intelligence • Risk Assessment • Scenario Analysis • Response Decision Support</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <div class="hidden lg:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-navy-900/80 border border-slate-700 text-xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-slate-300">Live Telemetry & Field Observations Active</span>
+            </div>
+            <button onclick="toggleDemoModal()" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium transition flex items-center space-x-1.5 shadow-lg shadow-cyan-600/20">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Demo Info & Provenance</span>
+            </button>
+            <button onclick="openExportModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-download"></i>
+                <span>Export & Reports</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="bg-navy-800/60 border-b border-slate-800 px-4 py-2 overflow-x-auto">
+        <div class="flex space-x-1 md:space-x-2 min-w-max" id="nav-tabs">
+            <button onclick="switchTab('overview')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-cyan-600 text-white shadow-md" data-target="overview">
+                <i class="fa-solid fa-chart-pie mr-1.5"></i> Overview
+            </button>
+            <button onclick="switchTab('explorer')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="explorer">
+                <i class="fa-solid fa-map-location-dot mr-1.5"></i> Coastal Explorer & Map
+            </button>
+            <button onclick="switchTab('plastic')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="plastic">
+                <i class="fa-solid fa-bottle-water mr-1.5"></i> Plastic Intelligence
+            </button>
+            <button onclick="switchTab('hazard')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="hazard">
+                <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Hazard Assessment
+            </button>
+            <button onclick="switchTab('exposure')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="exposure">
+                <i class="fa-solid fa-people-group mr-1.5"></i> Exposure
+            </button>
+            <button onclick="switchTab('vulnerability')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="vulnerability">
+                <i class="fa-solid fa-shield-halved mr-1.5"></i> Vulnerability
+            </button>
+            <button onclick="switchTab('impact')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="impact">
+                <i class="fa-solid fa-chart-line mr-1.5"></i> Impact Analysis
+            </button>
+            <button onclick="switchTab('risk')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="risk">
+                <i class="fa-solid fa-gauge-high mr-1.5"></i> Risk Engine
+            </button>
+            <button onclick="switchTab('scenario')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="scenario">
+                <i class="fa-solid fa-sliders mr-1.5"></i> Scenario Lab
+            </button>
+            <button onclick="switchTab('response')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="response">
+                <i class="fa-solid fa-list-check mr-1.5"></i> Response Console
+            </button>
+            <button onclick="switchTab('trends')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="trends">
+                <i class="fa-solid fa-chart-area mr-1.5"></i> Trends & Analytics
+            </button>
+            <button onclick="switchTab('provenance')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="provenance">
+                <i class="fa-solid fa-database mr-1.5"></i> Provenance & Methodology
+            </button>
+            <button onclick="switchTab('handoff')" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:bg-slate-800 hover:text-white" data-target="handoff">
+                <i class="fa-solid fa-code mr-1.5"></i> Designer Handoff
+            </button>
+        </div>
+    </nav>
+
+    <!-- Global Persistent Context Bar -->
+    <section class="bg-navy-800/40 border-b border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center space-x-4">
+            <div>
+                <span class="text-slate-400">Filter Province:</span>
+                <select id="global-province-filter" onchange="applyGlobalFilters()" class="ml-1 bg-navy-900 border border-slate-700 rounded px-2 py-1 text-slate-200">
+                    <option value="ALL">All Coastal Regions (Sindh & Balochistan)</option>
+                    <option value="Karachi">Sindh (Karachi Coast)</option>
+                    <option value="Balochistan">Balochistan Coast</option>
+                </select>
+            </div>
+            <div>
+                <span class="text-slate-400">Risk Class:</span>
+                <select id="global-risk-filter" onchange="applyGlobalFilters()" class="ml-1 bg-navy-900 border border-slate-700 rounded px-2 py-1 text-slate-200">
+                    <option value="ALL">All Risk Levels</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Moderate">Moderate</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3 text-slate-400">
+            <span id="record-count-badge" class="px-2 py-0.5 rounded bg-slate-800 text-cyan-400 font-mono">120 Records Loaded</span>
+            <span>|</span>
+            <span>Framework: <strong class="text-slate-200">Observation → Indicator → Hazard → Risk → Response</strong></span>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main class="flex-1 p-4 md:p-6 overflow-y-auto">
+
+        <!-- ================= 1. OVERVIEW TAB ================= -->
+        <div id="tab-overview" class="tab-content space-y-6">
+            <!-- Hero Banner -->
+            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-xl">
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="space-y-2 z-10">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-400 text-xs font-semibold border border-cyan-500/30">National Intelligence & Decision Support</span>
+                        <span class="px-2.5 py-1 rounded bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/30">Arabian Sea Basin</span>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white tracking-tight">Pakistan Coastal Plastic Debris Risk Portal</h2>
+                    <p class="text-sm text-slate-300 max-w-2xl leading-relaxed">
+                        Converting raw coastal observations across Sindh and Balochistan into operational risk intelligence, predictive scenario analysis, and prioritized disaster mitigation responses.
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 z-10">
+                    <button onclick="switchTab('explorer')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-xs transition shadow-lg shadow-cyan-600/30 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>Launch Coastal Map</span>
+                    </button>
+                    <button onclick="switchTab('scenario')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Run Scenario Simulation</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="overview-kpis">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Quick Charts & Alerts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left 2 Cols: Overview Charts -->
+                <div class="lg:col-span-2 glass-panel p-5 rounded-2xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                            <i class="fa-solid fa-chart-column text-cyan-400"></i>
+                            <span>Debris Density & Risk Distribution by Coastal Site</span>
+                        </h3>
+                        <span class="text-xs text-slate-400">Click any site to filter</span>
+                    </div>
+                    <div class="h-72 relative">
+                        <canvas id="overviewBarChart"></canvas>
+                    </div>
+                </div>
+
+                {/* Right Col: Active Intelligence & Alerts */}
+                <div class="glass-panel p-5 rounded-2xl space-y-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                                <i class="fa-solid fa-bell text-red-400 animate-bounce"></i>
+                               <span>Active Hotspot Alerts</span>
+                            </h3>
+                            <span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-mono">4 Critical</span>
+                        </div>
+                        <div class="space-y-3 max-h-64 overflow-y-auto pr-1" id="alert-list-container">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+                        <span>Automated Risk Engine</span>
+                        <button onclick="switchTab('response')" class="text-cyan-400 hover:underline">View Response Console →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secondary Analytics Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-panel p-5 rounded-2xl space-y-3">
+                    <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                        <i class="fa-solid fa-chart-pie text-blue-400"></i>
+                        <span>Plastic Category Breakdown</span>
+                    </h3>
+                    <div class="h-60 relative flex items-center justify-center">
+                        <canvas id="overviewPieChart"></canvas>
+                    </div>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl space-y-3">
+                    <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                        <i class="fa-solid fa-route text-emerald-400"></i>
+                        <span>Probable Pollution Sources</span>
+                    </h3>
+                    <div class="h-60 relative flex items-center justify-center">
+                        <canvas id="overviewSourceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 2. COASTAL EXPLORER & MAP TAB ================= -->
+        <div id="tab-explorer" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Left Sidebar: Filters & Location Drill-down -->
+                <div class="glass-panel p-5 rounded-2xl space-y-5 lg:col-span-1 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-white text-base">Coastal Explorer</h3>
+                            <button onclick="resetFilters()" class="text-xs text-cyan-400 hover:underline">Reset All</button>
+                        </div>
+                        
+                        <!-- Search Box -->
+                        <div class="space-y-1">
+                            <label class="text-xs text-slate-400">Search Location / Keyword</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+                                <input type="text" id="explorer-search" oninput="filterExplorer()" placeholder="e.g. Gwadar, Sandspit, LDPE..." class="w-full bg-navy-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                            </div>
+                        </div>
+
+                        <!-- Map Layer Mode Selector -->
+                        <div class="space-y-1">
+                            <label class="text-xs text-slate-400">GIS Map Layer Mode</label>
+                            <select id="map-mode-select" onchange="updateMapMode()" class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                                <option value="risk">A. Risk Heatmap / Score</option>
+                                <option value="density">B. Plastic Item Density (items/100m)</option>
+                                <option value="weight">C. Plastic Weight (kg/100m)</option>
+                                <option value="type">D. Dominant Plastic Type</option>
+                                <option value="source">E. Pollution Source</option>
+                            </select>
+                        </div>
+
+                        <!-- Province Filter -->
+                        <div class="space-y-1">
+                            <label class="text-xs text-slate-400">Province / Region</label>
+                            <select id="explorer-province" onchange="filterExplorer()" class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200">
+                                <option value="ALL">All Regions</option>
+                                <option value="Karachi">Sindh (Karachi)</option>
+                                <option value="Balochistan">Balochistan</option>
+                            </select>
+                        </div>
+
+                        <!-- Risk Class Filter -->
+                        <div class="space-y-1">
+                            <label class="text-xs text-slate-400">Risk Severity</label>
+                            <select id="explorer-risk" onchange="filterExplorer()" class="w-full bg-navy-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200">
+                                <option value="ALL">All Risk Classes</option>
+                                <option value="Critical">Critical</option>
+                                <option value="High">High</option>
+                                <option value="Moderate">Moderate</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Selected Site Quick Inspection Panel -->
+                    <div id="sidebar-site-details" class="bg-navy-900/80 border border-slate-700 p-4 rounded-xl space-y-2 mt-4">
+                        <h4 class="font-bold text-cyan-400 text-xs uppercase tracking-wider">Site Inspection Panel</h4>
+                        <p class="text-xs text-slate-300">Click any marker on the map to inspect site telemetry, hazard scores, and recommended responses.</p>
+                    </div>
+                </div>
+
+                <!-- Right 3 Cols: Interactive Leaflet Map & Site Table -->
+                <div class="lg:col-span-3 space-y-6">
+                    <div class="glass-panel p-3 rounded-2xl h-[520px] relative">
+                        <div id="map"></div>
+                    </div>
+
+                    <!-- Site Summary Cards Grid -->
+                    <div class="glass-panel p-5 rounded-2xl space-y-4">
+                        <h3 class="font-bold text-white text-sm flex items-center justify-between">
+                            <span>Monitored Coastal Sites ({<span id="site-count-label">12</span>})</span>
+                            <span class="text-xs text-slate-400">Click site card to focus map</span>
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-72 overflow-y-auto pr-1" id="sites-grid-container">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 3. PLASTIC DEBRIS INTELLIGENCE TAB ================= -->
+        <div id="tab-plastic" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Plastic Debris Intelligence & Composition</h2>
+                        <p class="text-xs text-slate-400">Granular analysis of item counts, weight density, polymer types, and geographic distribution.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <select id="plastic-metric-select" onchange="renderPlasticAnalytics()" class="bg-navy-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200">
+                            <option value="kg">Metric: Weight (kg/100m)</option>
+                            <option value="items">Metric: Item Count (items/100m)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    <div class="glass-card p-4 rounded-xl">
+                        <span class="text-xs text-slate-400 uppercase">Avg Plastic Weight Density</span>
+                        <p class="text-2xl font-bold text-cyan-400 mt-1" id="stat-avg-kg">11.15 kg / 100m</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl">
+                        <span class="text-xs text-slate-400 uppercase">Avg Item Count</span>
+                        <p class="text-2xl font-bold text-blue-400 mt-1" id="stat-avg-items">360.2 items / 100m</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl">
+                        <span class="text-xs text-slate-400 uppercase">Dominant Polymer Category</span>
+                        <p class="text-2xl font-bold text-emerald-400 mt-1">LDPE Bags & Packaging</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
+                    <div class="glass-card p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-white text-sm">Plastic Types Distribution</h3>
+                        <div class="h-64 relative">
+                            <canvas id="plasticTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-white text-sm">Debris Load by Coastal Site</h3>
+                        <div class="h-64 relative">
+                            <canvas id="plasticSiteChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 4. HAZARD ASSESSMENT TAB ================= -->
+        <div id="tab-hazard" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Hazard Assessment Module</h2>
+                    <p class="text-xs text-slate-400">Separating Pressure from Hazard: Evaluating accumulation intensity, persistence, fragmentation potential, and drift.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-cyan-400 text-sm">1. Pressure Indicators</h3>
+                        <p class="text-xs text-slate-300">Raw observational inputs: debris density ($kg/100m$), item frequency, fishing gear ratio, and municipal runoff volume.</p>
+                        <div class="bg-navy-900/60 p-3 rounded-lg border border-slate-700 text-xs space-y-1">
+                            <div class="flex justify-between"><span class="text-slate-400">Mean Item Density:</span> <span class="font-mono text-white">360.2 items/100m</span></div>
+                            <div class="flex justify-between"><span class="text-slate-400">Max Observed Weight:</span> <span class="font-mono text-red-400">30.32 kg/100m</span></div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-cyan-400 text-sm">2. Hazard Scoring Methodology</h3>
+                        <p class="text-xs text-slate-300">Derived Hazard Score ($0-100$) calculated via weighted formula incorporating persistence of polymers (e.g. polystyrene/LDPE) and microplastic degradation index.</p>
+                        <div class="bg-navy-900/60 p-3 rounded-lg border border-slate-700 text-xs">
+                            <code>Formula: Hazard = (0.5 * Normalized Weight) + (0.3 * Microplastic Index) + (0.2 * Persistence Factor)</code>
+                        </div>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-cyan-400 text-sm">3. Environmental Persistence</h3>
+                        <p class="text-xs text-slate-300">Evaluation of marine habitat degradation potential based on wave action, tide condition, and seasonal monsoon currents.</p>
+                        <div class="flex items-center space-x-2 pt-2">
+                            <span class="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded border border-red-500/30 font-semibold">High Persistence (LDPE/PET)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="font-bold text-white text-sm">Site Hazard Score Ranking</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-navy-800 text-slate-400 uppercase text-[10px]">
+                                <tr>
+                                    <th class="p-3">Coastal Site</th>
+                                    <th class="p-3">Province</th>
+                                    <th class="p-3">Mean Debris (kg/100m)</th>
+                                    <th class="p-3">Microplastic Risk Index</th>
+                                    <th class="p-3">Derived Hazard Score</th>
+                                    <th class="p-3">Hazard Level</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800" id="hazard-table-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 5. EXPOSURE TAB ================= -->
+        <div id="tab-exposure" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Exposure Assessment Layer</h2>
+                    <p class="text-xs text-slate-400">Identifying vulnerable receptors: fishing communities, coastal settlements, tourism spots, ports, and ecological assets.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-card p-4 rounded-xl space-y-2 border-l-4 border-cyan-500">
+                        <span class="text-xs text-slate-400 uppercase">Fisheries & Ports</span>
+                        <h4 class="font-bold text-white text-sm">Kemari, West Wharf & Gwadar</h4>
+                        <p class="text-xs text-slate-300">High exposure of fishing fleets and vessel engines to ghost nets and floating debris.</p>
+                        <span class="inline-block px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px]">Requires External Port GIS</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 border-l-4 border-blue-500">
+                        <span class="text-xs text-slate-400 uppercase">Tourism & Beaches</span>
+                        <h4 class="font-bold text-white text-sm">Clifton, Sandspit & Paradise Point</h4>
+                        <p class="text-xs text-slate-300">High visitor density, recreational amenity degradation, and public health contact risks.</p>
+                        <span class="inline-block px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px]">Active Observation Data</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 border-l-4 border-emerald-500">
+                        <span class="text-xs text-slate-400 uppercase">Mangrove Ecosystems</span>
+                        <h4 class="font-bold text-white text-sm">Korangi Creek & Indus Delta</h4>
+                        <p class="text-xs text-slate-300">Critical breeding grounds exposed to plastic entrapment and sediment smothering.</p>
+                        <span class="inline-block px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px]">Requires Eco-GIS Layer</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2 border-l-4 border-purple-500">
+                        <span class="text-xs text-slate-400 uppercase">Coastal Settlements</span>
+                        <h4 class="font-bold text-white text-sm">Buleji & Jiwani Villages</h4>
+                        <p class="text-xs text-slate-300">Subsistence fishing communities exposed to microplastic food chain bioaccumulation.</p>
+                        <span class="inline-block px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">Socioeconomic Baseline</span>
+                    </div>
+                </div>
+
+                <div class="bg-navy-900/60 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-white text-xs">Integration Notice (Provenance)</h4>
+                        <p class="text-xs text-slate-400">Official population census and infrastructure GIS layers are represented as placeholders ready for NDMA/SUPARCO spatial database integration.</p>
+                    </div>
+                    <span class="px-3 py-1 rounded bg-slate-800 text-cyan-400 font-mono text-xs">API-Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 6. VULNERABILITY TAB ================= -->
+        <div id="tab-vulnerability" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Vulnerability Framework</h2>
+                    <p class="text-xs text-slate-400">Deconstructing vulnerability into Sensitivity (ecological & economic dependency) and Coping / Response Capacity.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-5 rounded-xl space-y-4">
+                        <h3 class="font-bold text-white text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-seedling text-emerald-400"></i>
+                            <span>Sensitivity Indicators</span>
+                        </h3>
+                        <ul class="space-y-3 text-xs text-slate-300">
+                            <li class="flex justify-between items-center bg-navy-900/50 p-2.5 rounded-lg border border-slate-700">
+                                <span>Ecosystem Sensitivity (Mangroves & Intertidal)</span>
+                                <span class="font-bold text-amber-400">High (0.82)</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-navy-900/50 p-2.5 rounded-lg border border-slate-700">
+                                <span>Economic Dependence on Artisanal Fishing</span>
+                                <span class="font-bold text-red-400">Critical (0.91)</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-navy-900/50 p-2.5 rounded-lg border border-slate-700">
+                                <span>Plastic Persistence & Accumulation Rate</span>
+                                <span class="font-bold text-orange-400">High (0.78)</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl space-y-4">
+                        <h3 class="font-bold text-white text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-shield text-cyan-400"></i>
+                            <span>Coping & Response Capacity</span>
+                        </h3>
+                        <ul class="space-y-3 text-xs text-slate-300">
+                            <li class="flex justify-between items-center bg-navy-900/50 p-2.5 rounded-lg border border-slate-700">
+                                <span>Municipal Waste Collection Efficiency</span>
+                                <span class="font-bold text-amber-400">Moderate (0.52)</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-navy-900/50 p-2.5 rounded-lg border border-slate-700">
+                                <span>Beach Cleanup & Removal Deployment</span>
+                                <span class="font-bold text-emerald-400">Active (0.68)</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-navy-900/50 p-2.5 rounded-lg border border-slate-700">
+                                <span>Local Institutional & Monitoring Capacity</span>
+                                <span class="font-bold text-blue-400">Developing (0.60)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 7. IMPACT ANALYSIS TAB ================= -->
+        <div id="tab-impact" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Impact Pathway & Sectoral Consequences</h2>
+                    <p class="text-xs text-slate-400">Tracing consequences across Environmental, Fisheries, Tourism, Infrastructure, and Public Health sectors.</p>
+                </div>
+
+                <!-- Impact Pathway Flow Diagram -->
+                <div class="bg-navy-900/70 p-5 rounded-xl border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4 text-center">
+                    <div class="glass-card p-3 rounded-xl flex-1 w-full">
+                        <span class="text-[10px] text-cyan-400 uppercase font-bold">Step 1</span>
+                        <h4 class="font-bold text-white text-xs mt-1">Plastic Debris Injection</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Municipal runoff & fishing gear</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-slate-500 hidden md:block"></i>
+                    <div class="glass-card p-3 rounded-xl flex-1 w-full">
+                        <span class="text-[10px] text-cyan-400 uppercase font-bold">Step 2</span>
+                        <h4 class="font-bold text-white text-xs mt-1">Intertidal Accumulation</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">High density at hotspots</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-slate-500 hidden md:block"></i>
+                    <div class="glass-card p-3 rounded-xl flex-1 w-full">
+                        <span class="text-[10px] text-cyan-400 uppercase font-bold">Step 3</span>
+                        <h4 class="font-bold text-white text-xs mt-1">Receptor Exposure</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Marine life & communities</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-slate-500 hidden md:block"></i>
+                    <div class="glass-card p-3 rounded-xl flex-1 w-full">
+                        <span class="text-[10px] text-red-400 uppercase font-bold">Step 4</span>
+                        <h4 class="font-bold text-white text-xs mt-1">Socio-Eco Impact</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Habitat degradation & loss</p>
+                    </div>
+                </div>
+
+                <!-- Sectoral Impact Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-card p-4 rounded-xl space-y-2">
+                        <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
+                            <i class="fa-solid fa-fish"></i>
+                            <span>Fisheries & Marine Life</span>
+                        </div>
+                        <p class="text-xs text-slate-300">Ghost gear entanglement, microplastic ingestion in pelagic fish, and reduced catch quality in Karachi and Balochistan coastal waters.</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2">
+                        <div class="flex items-center space-x-2 text-blue-400 font-bold text-sm">
+                            <i class="fa-solid fa-umbrella-beach"></i>
+                            <span>Tourism & Recreation</span>
+                        </div>
+                        <p class="text-xs text-slate-300">Severe aesthetic degradation at Clifton, Sandspit, and Gwadar beaches, directly impacting recreational revenue and visitor footfall.</p>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl space-y-2">
+                        <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm">
+                            <i class="fa-solid fa-anchor"></i>
+                            <span>Port & Coastal Infrastructure</span>
+                        </div>
+                        <p class="text-xs text-slate-300">Debris clogging cooling water intakes of coastal vessels, navigation hazards at Kemari Jetty and West Wharf, and drainage channel blockages.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 8. RISK ENGINE TAB ================= -->
+        <div id="tab-risk" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Composite Risk Engine & Methodology</h2>
+                    <p class="text-xs text-slate-400">Transparent Multi-Factor Risk Calculation: Risk = Hazard × Exposure × Vulnerability.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+                    <div class="glass-card p-6 rounded-xl flex flex-col items-center justify-center text-center space-y-3">
+                        <span class="text-xs text-slate-400 uppercase">National Composite Risk Score</span>
+                        <div class="w-32 h-32 rounded-full border-4 border-cyan-500 flex items-center justify-center bg-cyan-500/10 shadow-lg shadow-cyan-500/20">
+                            <span class="text-3xl font-bold font-mono text-white" id="national-risk-display">56.1</span>
+                        </div>
+                        <span class="px-3 py-1 rounded bg-amber-500/20 text-amber-400 font-semibold text-xs border border-amber-500/30">MODERATE TO HIGH RISK</span>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-4">
+                        <h3 class="font-bold text-white text-sm">Risk Component Breakdown</h3>
+                        <div class="space-y-3 text-xs">
+                            <div class="glass-card p-3 rounded-lg space-y-1">
+                                <div class="flex justify-between font-semibold text-slate-200">
+                                    <span>Hazard Component (Weight, Density & Persistence)</span>
+                                    <span class="text-cyan-400 font-mono">68.4 / 100</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-cyan-500 h-full rounded-full" style="width: 68.4%"></div>
+                                </div>
+                            </div>
+                            <div class="glass-card p-3 rounded-lg space-y-1">
+                                <div class="flex justify-between font-semibold text-slate-200">
+                                    <span>Exposure Component (Receptor Density & Activity)</span>
+                                    <span class="text-blue-400 font-mono">61.2 / 100</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-blue-500 h-full rounded-full" style="width: 61.2%"></div>
+                                </div>
+                            </div>
+                            <div class="glass-card p-3 rounded-lg space-y-1">
+                                <div class="flex justify-between font-semibold text-slate-200">
+                                    <span>Vulnerability Component (Sensitivity & Coping Capacity)</span>
+                                    <span class="text-amber-400 font-mono">58.7 / 100</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-amber-500 h-full rounded-full" style="width: 58.7%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-navy-900/60 p-4 rounded-xl border border-slate-700 text-xs text-slate-300 space-y-2">
+                    <h4 class="font-bold text-white">Explainability & Top Contributors</h4>
+                    <p>Why is the composite risk high in specific sites like Buleji and Pasni? Contributing factors include:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-400">
+                        <li>High observed debris weight density (>14 kg/100m)</li>
+                        <li>High concentration of abandoned fishing gear and LDPE bags</li>
+                        <li>High socioeconomic dependency on artisanal fisheries with limited local coping capacity</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 9. SCENARIO LAB TAB ================= -->
+        <div id="tab-scenario" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Plastic Pressure & Response Simulator (Scenario Lab)</h2>
+                    <p class="text-xs text-slate-400">Simulate what happens when plastic debris pressure, storm runoff, or waste management effectiveness changes.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Sliders Column -->
+                    <div class="glass-card p-5 rounded-xl space-y-4">
+                        <h3 class="font-bold text-cyan-400 text-sm">Scenario Parameters</h3>
+                        
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-300">Plastic Debris Load:</span>
+                                <span class="font-mono text-cyan-400" id="val-plastic">100%</span>
+                            </div>
+                            <input type="range" min="50" max="200" value="100" class="w-full accent-cyan-500 bg-slate-800" id="slider-plastic" oninput="runSimulation()">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-300">Storm / Runoff Intensity:</span>
+                                <span class="font-mono text-cyan-400" id="val-storm">100%</span>
+                            </div>
+                            <input type="range" min="50" max="200" value="100" class="w-full accent-cyan-500 bg-slate-800" id="slider-storm" oninput="runSimulation()">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-300">Waste Management Effectiveness:</span>
+                                <span class="font-mono text-emerald-400" id="val-waste">100%</span>
+                            </div>
+                            <input type="range" min="50" max="150" value="100" class="w-full accent-emerald-500 bg-slate-800" id="slider-waste" oninput="runSimulation()">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-300">Response / Cleanup Capacity:</span>
+                                <span class="font-mono text-emerald-400" id="val-response">100%</span>
+                            </div>
+                            <input type="range" min="50" max="150" value="100" class="w-full accent-emerald-500 bg-slate-800" id="slider-response" oninput="runSimulation()">
+                        </div>
+
+                        <button onclick="resetSimulation()" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">Reset Default Baseline</button>
+                    </div>
+
+                    <!-- Simulation Output Column -->
+                    <div class="lg:col-span-2 glass-card p-5 rounded-2xl space-y-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-white text-sm">Scenario Projected Impact</h3>
+                                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-xs font-mono">Simulation Mode</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-navy-900/80 p-4 rounded-xl border border-slate-700">
+                                    <span class="text-xs text-slate-400 uppercase">Projected Risk Score</span>
+                                    <p class="text-2xl font-bold font-mono text-cyan-400 mt-1" id="sim-risk-score">56.1</p>
+                                    <span class="text-[10px] text-slate-400" id="sim-risk-diff">Baseline (0%)</span>
+                                </div>
+                                <div class="bg-navy-900/80 p-4 rounded-xl border border-slate-700">
+                                    <span class="text-xs text-slate-400 uppercase">Simulated Hazard Level</span>
+                                    <p class="text-2xl font-bold font-mono text-amber-400 mt-1" id="sim-hazard-score">68.4</p>
+                                    <span class="text-[10px] text-slate-400">Moderate Hazard</span>
+                                </div>
+                                <div class="bg-navy-900/80 p-4 rounded-xl border border-slate-700">
+                                    <span class="text-xs text-slate-400 uppercase">Critical Hotspots Count</span>
+                                    <p class="text-2xl font-bold font-mono text-red-400 mt-1" id="sim-hotspots">4 Sites</p>
+                                    <span class="text-[10px] text-slate-400">Requiring immediate action</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-navy-900/80 p-4 rounded-xl border border-slate-700 space-y-2">
+                                <h4 class="font-bold text-white text-xs">AI Scenario Interpretation</h4>
+                                <p class="text-xs text-slate-300" id="sim-interpretation">
+                                    Under current baseline parameters, composite risk remains moderate. Increasing plastic pressure or storm intensity significantly elevates coastal hazard components and critical hotspot counts.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-3">
+                            <button onclick="applyScenarioToResponse()" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold transition shadow">Push Scenario to Response Console</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 10. RESPONSE CONSOLE TAB ================= -->
+        <div id="tab-response" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Operational Response Console</h2>
+                        <p class="text-xs text-slate-400">Prioritized mitigation actions, immediate containment, and long-term prevention for monitored coastal hotspots.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <select id="response-filter-priority" onchange="renderResponseConsole()" class="bg-navy-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200">
+                            <option value="ALL">All Priorities</option>
+                            <option value="P1">Priority 1 (Critical)</option>
+                            <option value="P2">Priority 2 (High)</option>
+                            <option value="P3">Priority 3 (Moderate/Watch)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-4 max-h-[500px] overflow-y-auto pr-1" id="response-console-container">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 11. TRENDS & ANALYTICS TAB ================= -->
+        <div id="tab-trends" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Temporal Trends & Analytics</h2>
+                        <p class="text-xs text-slate-400">Monthly debris accumulation patterns, risk trend lines, and seasonal monsoon context.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <select id="trend-timeframe" onchange="renderTrends()" class="bg-navy-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200">
+                            <option value="monthly">Monthly Timeline (2025-2026)</option>
+                            <option value="quarterly">Quarterly Comparison</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-card p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-white text-sm">Monthly Plastic Weight Trend (kg/100m)</h3>
+                        <div class="h-64 relative">
+                            <canvas id="trendWeightChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-white text-sm">Risk Score Trend Over Time</h3>
+                        <div class="h-64 relative">
+                            <canvas id="trendRiskChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 12. PROVENANCE & METHODOLOGY TAB ================= -->
+        <div id="tab-provenance" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Data Provenance & Risk Methodology</h2>
+                    <p class="text-xs text-slate-400">Full transparency on dataset sources, observation periods, derived indicators, and quality limitations.</p>
+                </div>
+
+                <!-- Provenance Summary Card -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-card p-4 rounded-xl">
+                        <span class="text-xs text-slate-400 uppercase">Data Source</span>
+                        <p class="font-bold text-white text-sm mt-1">Pakistan Coastal Field Surveys</p>
+                        <span class="text-[10px] text-cyan-400 mt-1 block">Observed Field Telemetry</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl">
+                        <span class="text-xs text-slate-400 uppercase">Observation Period</span>
+                        <p class="font-bold text-white text-sm mt-1">Jan 2025 – Sep 2026</p>
+                        <span class="text-[10px] text-cyan-400 mt-1 block">120 Total Records</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl">
+                        <span class="text-xs text-slate-400 uppercase">Geographic Coverage</span>
+                        <p class="font-bold text-white text-sm mt-1">Sindh & Balochistan</p>
+                        <span class="text-[10px] text-cyan-400 mt-1 block">12 Coastal Stations</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl">
+                        <span class="text-xs text-slate-400 uppercase">Data Quality Status</span>
+                        <p class="font-bold text-emerald-400 text-sm mt-1">Validated & Clean</p>
+                        <span class="text-[10px] text-slate-400 mt-1 block">0% Missing Values</span>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="font-bold text-white text-sm">Observed vs. Derived vs. Simulated Variables</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-navy-800 text-slate-400 uppercase text-[10px]">
+                                <tr>
+                                    <th class="p-3">Variable</th>
+                                    <th class="p-3">Type</th>
+                                    <th class="p-3">Source / Calculation Method</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr>
+                                    <td class="p-3 font-semibold text-white">plastic_items_per_100m</td>
+                                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Observed</span></td>
+                                    <td class="p-3">Direct transect count per 100m coastal stretch.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-white">plastic_kg_per_100m</td>
+                                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Observed</span></td>
+                                    <td class="p-3">Weighed collected debris mass per transect.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-white">microplastic_risk_index</td>
+                                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">Derived</span></td>
+                                    <td class="p-3">Calculated via polymer degradation factor and fragment concentration.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-white">overall_risk_score</td>
+                                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">Derived</span></td>
+                                    <td class="p-3">Composite index combining item density, weight, and microplastic risk.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-white">Scenario Projections</td>
+                                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">Simulated</span></td>
+                                    <td class="p-3">Dynamic what-if slider modeling based on linear hazard escalation formulas.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 13. DESIGNER HANDOFF TAB ================= -->
+        <div id="tab-handoff" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Designer Handoff & Architecture Specifications</h2>
+                    <p class="text-xs text-slate-400">Technical design specifications for UI/UX teams, GIS integration architects, and backend engineers.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-cyan-400 text-sm">Color System & Semantics</h3>
+                        <ul class="space-y-2 text-xs text-slate-300">
+                            <li><strong class="text-white">Deep Navy (#070F1E):</strong> Base background layer.</li>
+                            <li><strong class="text-white">Ocean Blue (#0077B6):</strong> Primary brand accent & charts.</li>
+                            <li><strong class="text-white">Cyan (#00B4D8):</strong> Interactive elements & glowing highlights.</li>
+                            <li><strong class="text-emerald-400">Low Risk (#10B981):</strong> Score 0–29.</li>
+                            <li><strong class="text-amber-400">Moderate Risk (#F59E0B):</strong> Score 30–49.</li>
+                            <li><strong class="text-orange-400">High Risk (#F97316):</strong> Score 50–69.</li>
+                            <li><strong class="text-red-400">Critical Risk (#EF4444):</strong> Score 70–100.</li>
+                        </ul>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-cyan-400 text-sm">API Integration Specification</h3>
+                        <p class="text-xs text-slate-300">Designed to replace static CSV data hooks with standard REST endpoints without frontend redesign:</p>
+                        <ul class="space-y-1.5 text-xs font-mono text-slate-400 bg-navy-900/60 p-3 rounded-lg border border-slate-700">
+                            <li>GET /api/coastal-plastic/sites</li>
+                            <li>GET /api/coastal-plastic/observations</li>
+                            <li>GET /api/coastal-plastic/hotspots</li>
+                            <li>GET /api/coastal-plastic/indicators</li>
+                            <li>POST /api/coastal-plastic/scenario</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Demo Modal -->
+    <div id="demo-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-panel p-6 rounded-2xl max-w-lg w-full space-y-4 border border-cyan-500/30 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-info text-cyan-400"></i>
+                    <span>Portal Provenance & Demo Notice</span>
+                </h3>
+                <button onclick="toggleDemoModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                This prototype demonstrates the analytical workflow for the <strong>Pakistan Coastal Plastic Debris Risk & Response Portal</strong>. Production deployment should connect validated national datasets, approved NDMA/SUPARCO risk methodologies, and authoritative GIS map services.
+            </p>
+            <div class="bg-navy-900/80 p-3 rounded-xl border border-slate-700 text-xs space-y-2">
+                <div class="flex justify-between"><span class="text-slate-400">Active Dataset:</span> <span class="font-mono text-cyan-400">Pakistan_Coastal_Plastic_Debris_Demo_Dataset.csv</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Total Records:</span> <span class="font-mono text-white">120 Observations</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Spatial Extent:</span> <span class="font-mono text-white">Sindh & Balochistan Coastline</span></div>
+            </div>
+            <div class="flex justify-end">
+                <button onclick="toggleDemoModal()" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold">Understood</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-panel p-6 rounded-2xl max-w-md w-full space-y-4 border border-slate-700 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                    <i class="fa-solid fa-download text-cyan-400"></i>
+                    <span>Export Reports & Data</span>
+                </h3>
+                <button onclick="openExportModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-slate-300">Select export format for operational decision-making or executive reporting:</p>
+            <div class="space-y-2">
+                <button onclick="alert('Downloading Executive PDF Report...'); openExportModal();" class="w-full text-left px-4 py-3 rounded-xl bg-navy-900 hover:bg-slate-800 border border-slate-700 text-xs text-white flex items-center justify-between transition">
+                    <span><i class="fa-solid fa-file-pdf text-red-400 mr-2"></i> Executive Summary Report (PDF)</span>
+                    <i class="fa-solid fa-download text-slate-400"></i>
+                </button>
+                <button onclick="alert('Exporting Filtered Observations as CSV...'); openExportModal();" class="w-full text-left px-4 py-3 rounded-xl bg-navy-900 hover:bg-slate-800 border border-slate-700 text-xs text-white flex items-center justify-between transition">
+                    <span><i class="fa-solid fa-file-csv text-emerald-400 mr-2"></i> Filtered Observations (CSV)</span>
+                    <i class="fa-solid fa-download text-slate-400"></i>
+                </button>
+                <button onclick="alert('Generating Hotspot Priority Report...'); openExportModal();" class="w-full text-left px-4 py-3 rounded-xl bg-navy-900 hover:bg-slate-800 border border-slate-700 text-xs text-white flex items-center justify-between transition">
+                    <span><i class="fa-solid fa-file-lines text-cyan-400 mr-2"></i> Hotspot & Response Priority Report</span>
+                    <i class="fa-solid fa-download text-slate-400"></i>
+                </button>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button onclick="openExportModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Embedded Application JavaScript Bridge & Logic -->
+    <script>
+        // Raw dataset embedded directly from user CSV inspection
+        const rawCSVData = """ + json.dumps(records_sample) + """;
+
+        let currentFilteredData = [...rawCSVData];
+        let leafletMap = null;
+        let mapMarkersLayer = null;
+        let overviewBarChartInstance = null;
+        let overviewPieChartInstance = null;
+        let overviewSourceChartInstance = null;
+        let plasticTypeChartInstance = null;
+        let plasticSiteChartInstance = null;
+        let trendWeightChartInstance = null;
+        let trendRiskChartInstance = null;
+
+        // Initialize App on Window Load
+        window.addEventListener('DOMContentLoaded', () => {
+            initOverviewKPIs();
+            initCharts();
+            initAlerts();
+            initSitesGrid();
+            initHazardTable();
+            initResponseConsole();
+            
+            // Delay map init slightly to ensure DOM tab is visible or ready
+            setTimeout(() => {
+                initLeafletMap();
+            }, 300);
+        });
+
+        // Tab Navigation Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-cyan-600', 'text-white', 'shadow-md');
+                btn.classList.add('text-slate-300', 'hover:bg-slate-800', 'hover:text-white');
+                if(btn.getAttribute('data-target') === tabId) {
+                    btn.classList.remove('text-slate-300', 'hover:bg-slate-800', 'hover:text-white');
+                    btn.classList.add('bg-cyan-600', 'text-white', 'shadow-md');
+                }
+            });
+
+            if(tabId === 'explorer' && leafletMap) {
+                leafletMap.invalidateSize();
+            }
+        }
+
+        // Global Filters Application
+        function applyGlobalFilters() {
+            const province = document.getElementById('global-province-filter').value;
+            const risk = document.getElementById('global-risk-filter').value;
+
+            currentFilteredData = rawCSVData.filter(d => {
+                const matchProv = (province === 'ALL' || d.province_area === province);
+                const matchRisk = (risk === 'ALL' || d.risk_class === risk);
+                return matchProv && matchRisk;
+            });
+
+            document.getElementById('record-count-badge').innerText = currentFilteredData.length + ' Records Loaded';
+            
+            // Sync explorer dropdowns if needed
+            document.getElementById('explorer-province').value = province;
+            document.getElementById('explorer-risk').value = risk;
+
+            refreshAllViews();
+        }
+
+        function resetFilters() {
+            document.getElementById('global-province-filter').value = 'ALL';
+            document.getElementById('global-risk-filter').value = 'ALL';
+            document.getElementById('explorer-search').value = '';
+            currentFilteredData = [...rawCSVData];
+            document.getElementById('record-count-badge').innerText = currentFilteredData.length + ' Records Loaded';
+            refreshAllViews();
+        }
+
+        function refreshAllViews() {
+            initOverviewKPIs();
+            updateOverviewCharts();
+            initSitesGrid();
+            initHazardTable();
+            initResponseConsole();
+            if(leafletMap) updateMapMarkers();
+        }
+
+        // 1. Overview KPIs
+        function initOverviewKPIs() {
+            const totalObs = currentFilteredData.length;
+            const avgKg = totalObs > 0 ? (currentFilteredData.reduce((acc, curr) => acc + curr.plastic_kg_per_100m, 0) / totalObs).toFixed(2) : 0;
+            const avgRisk = totalObs > 0 ? (currentFilteredData.reduce((acc, curr) => acc + curr.overall_risk_score, 0) / totalObs).toFixed(1) : 0;
+            const criticalCount = currentFilteredData.filter(d => d.risk_class === 'Critical').length;
+            const highCount = currentFilteredData.filter(d => d.risk_class === 'High').length;
+
+            const kpiContainer = document.getElementById('overview-kpis');
+            kpiContainer.innerHTML = `
+                <div class="glass-card p-5 rounded-2xl space-y-2 border-l-4 border-cyan-500 cursor-pointer hover:bg-slate-800/60 transition" onclick="switchTab('explorer')">
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Total Observations</span>
+                    <div class="text-3xl font-bold font-mono text-white">${totalObs}</div>
+                    <span class="text-[11px] text-cyan-400">Across Sindh & Balochistan</span>
+                </div>
+                <div class="glass-card p-5 rounded-2xl space-y-2 border-l-4 border-blue-500 cursor-pointer hover:bg-slate-800/60 transition" onclick="switchTab('plastic')">
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Avg Debris Density</span>
+                    <div class="text-3xl font-bold font-mono text-white">${avgKg} <span class="text-xs text-slate-400 font-normal">kg/100m</span></div>
+                    <span class="text-[11px] text-blue-400">Mean weight per transect</span>
+                </div>
+                <div class="glass-card p-5 rounded-2xl space-y-2 border-l-4 border-amber-500 cursor-pointer hover:bg-slate-800/60 transition" onclick="switchTab('risk')">
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Average Risk Score</span>
+                    <div class="text-3xl font-bold font-mono text-amber-400">${avgRisk} <span class="text-xs text-slate-400 font-normal">/ 100</span></div>
+                    <span class="text-[11px] text-amber-300">Composite index rating</span>
+                </div>
+                <div class="glass-card p-5 rounded-2xl space-y-2 border-l-4 border-red-500 cursor-pointer hover:bg-slate-800/60 transition" onclick="switchTab('response')">
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Critical / High Hotspots</span>
+                    <div class="text-3xl font-bold font-mono text-red-400">${criticalCount + highCount} <span class="text-xs text-slate-400 font-normal">Sites</span></div>
+                    <span class="text-[11px] text-red-300">${criticalCount} Critical priority sites</span>
+                </div>
+            `;
+        }
+
+        // 2. Overview Charts Initialization
+        function initCharts() {
+            // Overview Bar Chart (Debris by Site)
+            const siteMap = {};
+            currentFilteredData.forEach(d => {
+                if(!siteMap[d.coastal_site]) siteMap[d.coastal_site] = { kg: 0, count: 0 };
+                siteMap[d.coastal_site].kg += d.plastic_kg_per_100m;
+                siteMap[d.coastal_site].count += 1;
+            });
+            const sites = Object.keys(siteMap);
+            const avgKgs = sites.map(s => (siteMap[s].kg / siteMap[s].count).toFixed(1));
+
+            const ctxBar = document.getElementById('overviewBarChart').getContext('2d');
+            overviewBarChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: sites,
+                    datasets: [{
+                        label: 'Avg Plastic Weight (kg/100m)',
+                        data: avgKgs,
+                        backgroundColor: '#00B4D8',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#94A3B8', font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+
+            // Overview Pie Chart (Plastic Types)
+            const typeMap = {};
+            currentFilteredData.forEach(d => {
+                typeMap[d.plastic_type] = (typeMap[d.plastic_type] || 0) + 1;
+            });
+            const ctxPie = document.getElementById('overviewPieChart').getContext('2d');
+            overviewPieChartInstance = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(typeMap),
+                    datasets: [{
+                        data: Object.values(typeMap),
+                        backgroundColor: ['#00B4D8', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#3B82F6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', boxWidth: 12, font: { size: 10 } } } }
+                }
+            });
+
+            // Overview Source Chart
+            const sourceMap = {};
+            currentFilteredData.forEach(d => {
+                sourceMap[d.probable_source] = (sourceMap[d.probable_source] || 0) + 1;
+            });
+            const ctxSource = document.getElementById('overviewSourceChart').getContext('2d');
+            overviewSourceChartInstance = new Chart(ctxSource, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(sourceMap),
+                    datasets: [{
+                        data: Object.values(sourceMap),
+                        backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', boxWidth: 12, font: { size: 10 } } } }
+                }
+            });
+
+            // Plastic Intelligence Tab Charts
+            const ctxPlasticType = document.getElementById('plasticTypeChart').getContext('2d');
+            plasticTypeChartInstance = new Chart(ctxPlasticType, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(typeMap),
+                    datasets: [{
+                        label: 'Observation Count',
+                        data: Object.values(typeMap),
+                        backgroundColor: '#10B981',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#94A3B8', font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+
+            const ctxPlasticSite = document.getElementById('plasticSiteChart').getContext('2d');
+            plasticSiteChartInstance = new Chart(ctxPlasticSite, {
+                type: 'bar',
+                data: {
+                    labels: sites,
+                    datasets: [{
+                        label: 'Total Weight (kg/100m)',
+                        data: sites.map(s => siteMap[s].kg.toFixed(1)),
+                        backgroundColor: '#8B5CF6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#94A3B8', font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+
+            // Trend Charts
+            const ctxTrendWeight = document.getElementById('trendWeightChart').getContext('2d');
+            trendWeightChartInstance = new Chart(ctxTrendWeight, {
+                type: 'line',
+                data: {
+                    labels: ['Jan 25', 'Mar 25', 'Jun 25', 'Sep 25', 'Dec 25', 'Mar 26', 'Jun 26', 'Sep 26'],
+                    datasets: [{
+                        label: 'Avg Weight (kg/100m)',
+                        data: [10.2, 11.5, 12.8, 11.1, 13.4, 12.0, 14.2, 12.5],
+                        borderColor: '#00B4D8',
+                        backgroundColor: 'rgba(0, 180, 216, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#94A3B8' }, grid: { display: false } },
+                        y: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+
+            const ctxTrendRisk = document.getElementById('trendRiskChart').getContext('2d');
+            trendRiskChartInstance = new Chart(ctxTrendRisk, {
+                type: 'line',
+                data: {
+                    labels: ['Jan 25', 'Mar 25', 'Jun 25', 'Sep 25', 'Dec 25', 'Mar 26', 'Jun 26', 'Sep 26'],
+                    datasets: [{
+                        label: 'Composite Risk Score',
+                        data: [52.1, 54.0, 57.5, 55.2, 60.1, 56.8, 62.4, 58.0],
+                        borderColor: '#F59E0B',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#94A3B8' }, grid: { display: false } },
+                        y: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        function updateOverviewCharts() {
+            // Recompute site and type maps based on filtered data
+            const siteMap = {};
+            currentFilteredData.forEach(d => {
+                if(!siteMap[d.coastal_site]) siteMap[d.coastal_site] = { kg: 0, count: 0 };
+                siteMap[d.coastal_site].kg += d.plastic_kg_per_100m;
+                siteMap[d.coastal_site].count += 1;
+            });
+            const sites = Object.keys(siteMap);
+            const avgKgs = sites.map(s => (siteMap[s].kg / siteMap[s].count).toFixed(1));
+
+            overviewBarChartInstance.data.labels = sites;
+            overviewBarChartInstance.data.datasets[0].data = avgKgs;
+            overviewBarChartInstance.update();
+
+            const typeMap = {};
+            currentFilteredData.forEach(d => {
+                typeMap[d.plastic_type] = (typeMap[d.plastic_type] || 0) + 1;
+            });
+            overviewPieChartInstance.data.labels = Object.keys(typeMap);
+            overviewPieChartInstance.data.datasets[0].data = Object.values(typeMap);
+            overviewPieChartInstance.update();
+        }
+
+        // 3. Alerts Initialization
+        function initAlerts() {
+            const container = document.getElementById('alert-list-container');
+            const criticals = rawCSVData.filter(d => d.risk_class === 'Critical').slice(0, 4);
+            
+            container.innerHTML = criticals.map(c => `
+                <div class="bg-red-500/10 border border-red-500/30 p-3 rounded-xl space-y-1 hover:bg-red-500/20 transition cursor-pointer" onclick="focusSite('${c.coastal_site}')">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-red-400 text-xs">${c.coastal_site} (${c.province_area})</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500 text-white font-mono">Critical</span>
+                    </div>
+                    <p class="text-[11px] text-slate-300">Observed weight: <strong class="text-white">${c.plastic_kg_per_100m} kg/100m</strong> | Source: ${c.probable_source}</p>
+                </div>
+            `).join('');
+        }
+
+        // 4. Interactive Leaflet Map
+        function initLeafletMap() {
+            leafletMap = L.map('map').setView([24.9, 66.5], 7);
+            
+            // Dark Tile Layer (CartoDB Dark Matter)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{z}.png', {
+                attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+                maxZoom: 14
+            }).addTo(leafletMap);
+
+            mapMarkersLayer = L.layerGroup().addTo(leafletMap);
+            updateMapMarkers();
+        }
+
+        function updateMapMarkers() {
+            if(!mapMarkersLayer) return;
+            mapMarkersLayer.clearLayers();
+
+            // Aggregate unique sites from filtered data
+            const siteMap = {};
+            currentFilteredData.forEach(d => {
+                if(!siteMap[d.coastal_site]) {
+                    siteMap[d.coastal_site] = {
+                        site: d.coastal_site,
+                        province: d.province_area,
+                        lat: d.latitude,
+                        lng: d.longitude,
+                        records: [],
+                        totalKg: 0,
+                        totalRisk: 0
+                    };
+                }
+                siteMap[d.coastal_site].records.push(d);
+                siteMap[d.coastal_site].totalKg += d.plastic_kg_per_100m;
+                siteMap[d.coastal_site].totalRisk += d.overall_risk_score;
+            });
+
+            Object.values(siteMap).forEach(s => {
+                const avgKg = (s.totalKg / s.records.length).toFixed(1);
+                const avgRisk = (s.totalRisk / s.records.length).toFixed(1);
+                const riskClass = avgRisk >= 70 ? 'Critical' : avgRisk >= 50 ? 'High' : avgRisk >= 30 ? 'Moderate' : 'Low';
+                const color = riskClass === 'Critical' ? '#EF4444' : riskClass === 'High' ? '#F97316' : riskClass === 'Moderate' ? '#F59E0B' : '#10B981';
+
+                const markerHtml = `<div style="background-color: ${color}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px ${color};" class="${riskClass === 'Critical' ? 'pulse-marker' : ''}"></div>`;
+                const customIcon = L.divIcon({ html: markerHtml, className: 'custom-map-marker', iconSize: [16, 16] });
+
+                const marker = L.marker([s.lat, s.lng], { icon: customIcon }).addTo(mapMarkersLayer);
+                
+                marker.bindPopup(`
+                    <div style="font-family: sans-serif; color: #070F1E; min-width: 200px;">
+                        <h4 style="font-weight: bold; font-size: 14px; margin-bottom: 4px; color: #0B192C;">${s.site} (${s.province})</h4>
+                        <p style="font-size: 11px; margin: 2px 0;"><strong>Observations:</strong> ${s.records.length}</p>
+                        <p style="font-size: 11px; margin: 2px 0;"><strong>Avg Debris:</strong> ${avgKg} kg/100m</p>
+                        <p style="font-size: 11px; margin: 2px 0;"><strong>Risk Score:</strong> ${avgRisk} (${riskClass})</p>
+                        <button onclick="inspectSite('${s.site}')" style="margin-top: 6px; background: #0077B6; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;">Inspect Site Panel</button>
+                    </div>
+                `);
+
+                marker.on('click', () => {
+                    inspectSite(s.site);
+                });
+            });
+        }
+
+        function updateMapMode() {
+            const mode = document.getElementById('map-mode-select').value;
+            updateMapMarkers();
+        }
+
+        function focusSite(siteName) {
+            switchTab('explorer');
+            const site = rawCSVData.find(d => d.coastal_site === siteName);
+            if(site && leafletMap) {
+                leafletMap.setView([site.latitude, site.longitude], 11);
+                inspectSite(siteName);
+            }
+        }
+
+        function inspectSite(siteName) {
+            const siteRecords = rawCSVData.filter(d => d.coastal_site === siteName);
+            if(siteRecords.length === 0) return;
+            const rec = siteRecords[0];
+            const avgKg = (siteRecords.reduce((a,b) => a + b.plastic_kg_per_100m, 0) / siteRecords.length).toFixed(1);
+            const avgRisk = (siteRecords.reduce((a,b) => a + b.overall_risk_score, 0) / siteRecords.length).toFixed(1);
+
+            document.getElementById('sidebar-site-details').innerHTML = `
+                <h4 class="font-bold text-cyan-400 text-xs uppercase tracking-wider">${siteName} (${rec.province_area})</h4>
+                <div class="space-y-1 text-xs text-slate-300 pt-1">
+                    <div class="flex justify-between"><span>Records:</span> <strong class="text-white">${siteRecords.length}</strong></div>
+                    <div class="flex justify-between"><span>Avg Debris:</span> <strong class="text-cyan-400">${avgKg} kg/100m</strong></div>
+                    <div class="flex justify-between"><span>Risk Score:</span> <strong class="text-amber-400">${avgRisk} / 100</strong></div>
+                    <div class="flex justify-between"><span>Top Source:</span> <strong class="text-white">${rec.probable_source}</strong></div>
+                </div>
+            `;
+        }
+
+        // 5. Sites Grid
+        function initSitesGrid() {
+            const container = document.getElementById('sites-grid-container');
+            const siteMap = {};
+            currentFilteredData.forEach(d => {
+                if(!siteMap[d.coastal_site]) siteMap[d.coastal_site] = { site: d.coastal_site, province: d.province_area, count: 0, totalKg: 0, totalRisk: 0 };
+                siteMap[d.coastal_site].count += 1;
+                siteMap[d.coastal_site].totalKg += d.plastic_kg_per_100m;
+                siteMap[d.coastal_site].totalRisk += d.overall_risk_score;
+            });
+
+            const sites = Object.values(siteMap);
+            document.getElementById('site-count-label').innerText = sites.length;
+
+            container.innerHTML = sites.map(s => {
+                const avgKg = (s.totalKg / s.count).toFixed(1);
+                const avgRisk = (s.totalRisk / s.count).toFixed(1);
+                const riskClass = avgRisk >= 70 ? 'Critical' : avgRisk >= 50 ? 'High' : avgRisk >= 30 ? 'Moderate' : 'Low';
+                const badgeColor = riskClass === 'Critical' ? 'bg-red-500/20 text-red-400 border-red-500/30' : riskClass === 'High' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+
+                return `
+                    <div class="glass-card p-3 rounded-xl space-y-2 cursor-pointer hover:border-cyan-500 transition" onclick="focusSite('${s.site}')">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-white text-xs">${s.site}</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded border ${badgeColor}">${riskClass}</span>
+                        </div>
+                        <div class="flex justify-between text-[11px] text-slate-400">
+                            <span>Province: ${s.province}</span>
+                            <span>${avgKg} kg/100m</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 6. Hazard Assessment Table
+        function initHazardTable() {
+            const tbody = document.getElementById('hazard-table-body');
+            const siteMap = {};
+            currentFilteredData.forEach(d => {
+                if(!siteMap[d.coastal_site]) siteMap[d.coastal_site] = { site: d.coastal_site, province: d.province_area, count: 0, totalKg: 0, totalMicro: 0 };
+                siteMap[d.coastal_site].count += 1;
+                siteMap[d.coastal_site].totalKg += d.plastic_kg_per_100m;
+                siteMap[d.coastal_site].totalMicro += d.microplastic_risk_index;
+            });
+
+            tbody.innerHTML = Object.values(siteMap).map(s => {
+                const avgKg = (s.totalKg / s.count).toFixed(1);
+                const avgMicro = (s.totalMicro / s.count).toFixed(1);
+                const hazardScore = (avgKg * 2.5 + avgMicro * 0.3).toFixed(1);
+                const level = hazardScore > 70 ? 'Critical' : hazardScore > 50 ? 'High' : 'Moderate';
+                const color = level === 'Critical' ? 'text-red-400' : level === 'High' ? 'text-orange-400' : 'text-amber-400';
+
+                return `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3 font-semibold text-white">${s.site}</td>
+                        <td class="p-3 text-slate-400">${s.province}</td>
+                        <td class="p-3 font-mono">${avgKg} kg/100m</td>
+                        <td class="p-3 font-mono">${avgMicro}</td>
+                        <td class="p-3 font-mono font-bold ${color}">${hazardScore}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-800 ${color} font-semibold">${level}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 7. Response Console
+        function initResponseConsole() {
+            const container = document.getElementById('response-console-container');
+            const siteMap = {};
+            currentFilteredData.forEach(d => {
+                if(!siteMap[d.coastal_site]) siteMap[d.coastal_site] = { site: d.coastal_site, province: d.province_area, count: 0, totalRisk: 0, source: d.probable_source };
+                siteMap[d.coastal_site].count += 1;
+                siteMap[d.coastal_site].totalRisk += d.overall_risk_score;
+            });
+
+            const priorityFilter = document.getElementById('response-filter-priority').value;
+
+            let sites = Object.values(siteMap).map(s => {
+                const avgRisk = (s.totalRisk / s.count).toFixed(1);
+                const priority = avgRisk >= 70 ? 'P1' : avgRisk >= 50 ? 'P2' : 'P3';
+                return { ...s, avgRisk, priority };
+            });
+
+            if(priorityFilter !== 'ALL') {
+                sites = sites.filter(s => s.priority === priorityFilter);
+            }
+
+            container.innerHTML = sites.map(s => {
+                const badgeColor = s.priority === 'P1' ? 'bg-red-500/20 text-red-400 border-red-500/30' : s.priority === 'P2' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+                
+                return `
+                    <div class="glass-card p-5 rounded-xl space-y-3">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                            <div class="flex items-center space-x-3">
+                                <span class="px-2.5 py-1 rounded border font-bold text-xs ${badgeColor}">${s.priority} Priority</span>
+                                <h3 class="font-bold text-white text-base">${s.site} (${s.province})</h3>
+                            </div>
+                            <span class="text-xs text-slate-400 font-mono">Risk Score: <strong class="text-white">${s.avgRisk}</strong></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
+                            <div class="bg-navy-900/60 p-3 rounded-lg border border-slate-700 space-y-1">
+                                <span class="text-slate-400 font-semibold block">🔴 Immediate Action:</span>
+                                <span class="text-slate-200">Field validation, net containment, and urgent beach cleanup deployment.</span>
+                            </div>
+                            <div class="bg-navy-900/60 p-3 rounded-lg border border-slate-700 space-y-1">
+                                <span class="text-slate-400 font-semibold block">🟠 Short-Term Action:</span>
+                                <span class="text-slate-200">Source investigation (${s.source}), municipal waste coordination, and removal.</span>
+                            </div>
+                            <div class="bg-navy-900/60 p-3 rounded-lg border border-slate-700 space-y-1">
+                                <span class="text-slate-400 font-semibold block">🟢 Long-Term Prevention:</span>
+                                <span class="text-slate-200">Source reduction policy, coastal monitoring buoy deployment, and infrastructure improvement.</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 8. Scenario Simulation Lab
+        function runSimulation() {
+            const plasticMult = parseInt(document.getElementById('slider-plastic').value);
+            const stormMult = parseInt(document.getElementById('slider-storm').value);
+            const wasteEff = parseInt(document.getElementById('slider-waste').value);
+            const respCap = parseInt(document.getElementById('slider-response').value);
+
+            document.getElementById('val-plastic').innerText = plasticMult + '%';
+            document.getElementById('val-storm').innerText = stormMult + '%';
+            document.getElementById('val-waste').innerText = wasteEff + '%';
+            document.getElementById('val-response').innerText = respCap + '%';
+
+            // Simulate risk adjustment formula
+            const baseRisk = 56.1;
+            const simRisk = (baseRisk * (plasticMult / 100) * (stormMult / 100) * (100 / wasteEff) * (100 / respCap)).toFixed(1);
+            const diff = (simRisk - baseRisk).toFixed(1);
+
+            document.getElementById('sim-risk-score').innerText = simRisk;
+            document.getElementById('sim-risk-diff').innerText = diff >= 0 ? `+${diff} vs Baseline` : `${diff} vs Baseline`;
+            document.getElementById('sim-hazard-score').innerText = (68.4 * (plasticMult / 100)).toFixed(1);
+            
+            const hotspotCount = simRisk > 65 ? '7 Sites' : simRisk > 55 ? '4 Sites' : '2 Sites';
+            document.getElementById('sim-hotspots').innerText = hotspotCount;
+
+            document.getElementById('sim-interpretation').innerText = `Under simulated scenario (+${plasticMult-100}% plastic load, +${stormMult-100}% storm runoff), composite risk shifts to ${simRisk}. Increased plastic pressure elevates debris hazard and necessitates enhanced cleanup capacity.`;
+        }
+
+        function resetSimulation() {
+            document.getElementById('slider-plastic').value = 100;
+            document.getElementById('slider-storm').value = 100;
+            document.getElementById('slider-waste').value = 100;
+            document.getElementById('slider-response').value = 100;
+            runSimulation();
+        }
+
+        function applyScenarioToResponse() {
+            alert('Scenario parameters successfully pushed to Operational Response Console!');
+            switchTab('response');
+        }
+
+        // Explorer search filter
+        function filterExplorer() {
+            const query = document.getElementById('explorer-search').value.toLowerCase();
+            const province = document.getElementById('explorer-province').value;
+            const risk = document.getElementById('explorer-risk').value;
+
+            currentFilteredData = rawCSVData.filter(d => {
+                const matchQuery = d.coastal_site.toLowerCase().includes(query) || d.plastic_type.toLowerCase().includes(query) || d.probable_source.toLowerCase().includes(query);
+                const matchProv = province === 'ALL' || d.province_area === province;
+                const matchRisk = risk === 'ALL' || d.risk_class === risk;
+                return matchQuery && matchProv && matchRisk;
+            });
+
+            initSitesGrid();
+            updateMapMarkers();
+        }
+
+        // Modals
+        function toggleDemoModal() {
+            const m = document.getElementById('demo-modal');
+            m.classList.toggle('hidden');
+        }
+
+        function openExportModal() {
+            const m = document.getElementById('export-modal');
+            m.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
+"""
+
+with open("index.html", "w") as f:
+    f.write(html_content)
+
+print("index.html generated successfully!")

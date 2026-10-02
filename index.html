@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coastal Environmental Intelligence — Pakistan</title>
+  <meta name="description" content="Pakistan coastal environmental monitoring portal (frontend skeleton — no datasets connected)." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <link href="css/styles.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="shell">
+    <aside id="sidebar" class="sidebar" aria-label="Environmental layers"></aside>
+    <main id="map-area" class="map-area"></main>
+    <aside id="analysis" class="analysis" aria-label="Analysis"></aside>
+  </div>
+
+  <dialog id="aboutDialog">
+    <h2 class="eyebrow">About this portal</h2>
+    <h3>Coastal Environmental Intelligence</h3>
+    <p>A monitoring portal for understanding how Pakistan's coastline is changing across seven environmental layers.</p>
+    <p class="muted">This is the initial interface. No environmental datasets are connected yet, so no measurements, trends or projections are shown. Each layer is configured in <code>js/config/layers.js</code>; connecting data requires no interface redesign.</p>
+    <button id="closeAbout" class="btn">Close</button>
+  </dialog>
+
+  <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

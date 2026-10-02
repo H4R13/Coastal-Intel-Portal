@@ -1,0 +1,1951 @@
+scenario,site,metric,year,p5,p50,p95
+bau,Sandspit,plastic_items_per_100m,2026,272,365,469
+bau,Sandspit,plastic_items_per_100m,2027,281,377,484
+bau,Sandspit,plastic_items_per_100m,2028,290,389,501
+bau,Sandspit,plastic_items_per_100m,2029,299,402,519
+bau,Sandspit,plastic_items_per_100m,2030,307,415,539
+bau,Sandspit,plastic_items_per_100m,2031,315,429,560
+bau,Sandspit,plastic_items_per_100m,2032,324,443,582
+bau,Sandspit,plastic_items_per_100m,2033,332,458,607
+bau,Sandspit,plastic_items_per_100m,2034,341,472,634
+bau,Sandspit,plastic_items_per_100m,2035,350,487,663
+bau,Sandspit,plastic_items_per_100m,2036,359,503,693
+bau,Sandspit,plastic_items_per_100m,2037,368,519,726
+bau,Sandspit,plastic_items_per_100m,2038,378,534,760
+bau,Sandspit,plastic_items_per_100m,2039,387,551,798
+bau,Sandspit,plastic_items_per_100m,2040,396,567,837
+bau,Sandspit,plastic_items_per_100m,2041,405,585,878
+bau,Sandspit,plastic_items_per_100m,2042,415,603,922
+bau,Sandspit,plastic_items_per_100m,2043,424,622,968
+bau,Sandspit,plastic_items_per_100m,2044,434,641,1019
+bau,Sandspit,plastic_items_per_100m,2045,443,661,1071
+bau,Sandspit,plastic_items_per_100m,2046,454,681,1122
+bau,Sandspit,plastic_items_per_100m,2047,464,702,1178
+bau,Sandspit,plastic_items_per_100m,2048,474,723,1238
+bau,Sandspit,plastic_items_per_100m,2049,485,746,1302
+bau,Sandspit,plastic_items_per_100m,2050,495,769,1371
+bau,Sandspit,plastic_kg_per_100m,2026,8.94,11.74,14.86
+bau,Sandspit,plastic_kg_per_100m,2027,9.22,12.12,15.38
+bau,Sandspit,plastic_kg_per_100m,2028,9.5,12.53,15.96
+bau,Sandspit,plastic_kg_per_100m,2029,9.8,12.95,16.53
+bau,Sandspit,plastic_kg_per_100m,2030,10.09,13.36,17.15
+bau,Sandspit,plastic_kg_per_100m,2031,10.37,13.79,17.84
+bau,Sandspit,plastic_kg_per_100m,2032,10.64,14.26,18.59
+bau,Sandspit,plastic_kg_per_100m,2033,10.93,14.72,19.38
+bau,Sandspit,plastic_kg_per_100m,2034,11.22,15.2,20.24
+bau,Sandspit,plastic_kg_per_100m,2035,11.5,15.69,21.14
+bau,Sandspit,plastic_kg_per_100m,2036,11.77,16.2,22.11
+bau,Sandspit,plastic_kg_per_100m,2037,12.08,16.71,23.12
+bau,Sandspit,plastic_kg_per_100m,2038,12.38,17.23,24.25
+bau,Sandspit,plastic_kg_per_100m,2039,12.66,17.74,25.41
+bau,Sandspit,plastic_kg_per_100m,2040,12.95,18.28,26.68
+bau,Sandspit,plastic_kg_per_100m,2041,13.24,18.82,27.99
+bau,Sandspit,plastic_kg_per_100m,2042,13.55,19.4,29.35
+bau,Sandspit,plastic_kg_per_100m,2043,13.87,19.99,30.87
+bau,Sandspit,plastic_kg_per_100m,2044,14.17,20.62,32.43
+bau,Sandspit,plastic_kg_per_100m,2045,14.48,21.27,34.04
+bau,Sandspit,plastic_kg_per_100m,2046,14.81,21.93,35.84
+bau,Sandspit,plastic_kg_per_100m,2047,15.14,22.6,37.62
+bau,Sandspit,plastic_kg_per_100m,2048,15.46,23.27,39.55
+bau,Sandspit,plastic_kg_per_100m,2049,15.81,23.98,41.62
+bau,Sandspit,plastic_kg_per_100m,2050,16.16,24.74,43.88
+bau,Buleji,plastic_items_per_100m,2026,359,465,567
+bau,Buleji,plastic_items_per_100m,2027,371,481,585
+bau,Buleji,plastic_items_per_100m,2028,383,497,605
+bau,Buleji,plastic_items_per_100m,2029,394,513,629
+bau,Buleji,plastic_items_per_100m,2030,405,530,654
+bau,Buleji,plastic_items_per_100m,2031,417,546,681
+bau,Buleji,plastic_items_per_100m,2032,428,564,709
+bau,Buleji,plastic_items_per_100m,2033,441,582,739
+bau,Buleji,plastic_items_per_100m,2034,453,600,772
+bau,Buleji,plastic_items_per_100m,2035,465,618,809
+bau,Buleji,plastic_items_per_100m,2036,477,638,849
+bau,Buleji,plastic_items_per_100m,2037,489,658,890
+bau,Buleji,plastic_items_per_100m,2038,500,679,933
+bau,Buleji,plastic_items_per_100m,2039,513,700,978
+bau,Buleji,plastic_items_per_100m,2040,525,721,1028
+bau,Buleji,plastic_items_per_100m,2041,537,744,1081
+bau,Buleji,plastic_items_per_100m,2042,549,767,1135
+bau,Buleji,plastic_items_per_100m,2043,562,790,1191
+bau,Buleji,plastic_items_per_100m,2044,574,815,1252
+bau,Buleji,plastic_items_per_100m,2045,587,840,1317
+bau,Buleji,plastic_items_per_100m,2046,600,866,1386
+bau,Buleji,plastic_items_per_100m,2047,613,892,1457
+bau,Buleji,plastic_items_per_100m,2048,626,919,1534
+bau,Buleji,plastic_items_per_100m,2049,640,947,1615
+bau,Buleji,plastic_items_per_100m,2050,654,976,1700
+bau,Buleji,plastic_kg_per_100m,2026,10.68,14.07,17.26
+bau,Buleji,plastic_kg_per_100m,2027,11.03,14.56,17.86
+bau,Buleji,plastic_kg_per_100m,2028,11.38,15.04,18.5
+bau,Buleji,plastic_kg_per_100m,2029,11.75,15.53,19.21
+bau,Buleji,plastic_kg_per_100m,2030,12.09,16.03,19.96
+bau,Buleji,plastic_kg_per_100m,2031,12.43,16.55,20.75
+bau,Buleji,plastic_kg_per_100m,2032,12.81,17.08,21.62
+bau,Buleji,plastic_kg_per_100m,2033,13.17,17.61,22.55
+bau,Buleji,plastic_kg_per_100m,2034,13.52,18.17,23.56
+bau,Buleji,plastic_kg_per_100m,2035,13.88,18.75,24.65
+bau,Buleji,plastic_kg_per_100m,2036,14.23,19.33,25.84
+bau,Buleji,plastic_kg_per_100m,2037,14.57,19.94,27.12
+bau,Buleji,plastic_kg_per_100m,2038,14.92,20.55,28.41
+bau,Buleji,plastic_kg_per_100m,2039,15.3,21.21,29.79
+bau,Buleji,plastic_kg_per_100m,2040,15.66,21.85,31.24
+bau,Buleji,plastic_kg_per_100m,2041,16.02,22.51,32.81
+bau,Buleji,plastic_kg_per_100m,2042,16.39,23.21,34.45
+bau,Buleji,plastic_kg_per_100m,2043,16.73,23.92,36.25
+bau,Buleji,plastic_kg_per_100m,2044,17.13,24.65,38.08
+bau,Buleji,plastic_kg_per_100m,2045,17.56,25.41,40.08
+bau,Buleji,plastic_kg_per_100m,2046,17.96,26.2,42.12
+bau,Buleji,plastic_kg_per_100m,2047,18.37,27.01,44.3
+bau,Buleji,plastic_kg_per_100m,2048,18.79,27.86,46.56
+bau,Buleji,plastic_kg_per_100m,2049,19.2,28.74,49.04
+bau,Buleji,plastic_kg_per_100m,2050,19.6,29.63,51.6
+bau,Paradise Point,plastic_items_per_100m,2026,270,334,395
+bau,Paradise Point,plastic_items_per_100m,2027,278,345,408
+bau,Paradise Point,plastic_items_per_100m,2028,287,357,423
+bau,Paradise Point,plastic_items_per_100m,2029,296,369,439
+bau,Paradise Point,plastic_items_per_100m,2030,305,381,457
+bau,Paradise Point,plastic_items_per_100m,2031,313,393,476
+bau,Paradise Point,plastic_items_per_100m,2032,322,405,497
+bau,Paradise Point,plastic_items_per_100m,2033,331,418,519
+bau,Paradise Point,plastic_items_per_100m,2034,339,431,543
+bau,Paradise Point,plastic_items_per_100m,2035,348,445,570
+bau,Paradise Point,plastic_items_per_100m,2036,356,459,598
+bau,Paradise Point,plastic_items_per_100m,2037,364,473,627
+bau,Paradise Point,plastic_items_per_100m,2038,372,488,657
+bau,Paradise Point,plastic_items_per_100m,2039,381,502,690
+bau,Paradise Point,plastic_items_per_100m,2040,389,518,726
+bau,Paradise Point,plastic_items_per_100m,2041,398,533,763
+bau,Paradise Point,plastic_items_per_100m,2042,406,550,802
+bau,Paradise Point,plastic_items_per_100m,2043,415,566,844
+bau,Paradise Point,plastic_items_per_100m,2044,423,584,887
+bau,Paradise Point,plastic_items_per_100m,2045,432,602,934
+bau,Paradise Point,plastic_items_per_100m,2046,442,620,981
+bau,Paradise Point,plastic_items_per_100m,2047,451,639,1033
+bau,Paradise Point,plastic_items_per_100m,2048,461,659,1087
+bau,Paradise Point,plastic_items_per_100m,2049,471,679,1144
+bau,Paradise Point,plastic_items_per_100m,2050,480,700,1205
+bau,Paradise Point,plastic_kg_per_100m,2026,8.79,11.08,13.18
+bau,Paradise Point,plastic_kg_per_100m,2027,9.07,11.46,13.61
+bau,Paradise Point,plastic_kg_per_100m,2028,9.37,11.83,14.1
+bau,Paradise Point,plastic_kg_per_100m,2029,9.64,12.21,14.63
+bau,Paradise Point,plastic_kg_per_100m,2030,9.93,12.61,15.22
+bau,Paradise Point,plastic_kg_per_100m,2031,10.23,13,15.87
+bau,Paradise Point,plastic_kg_per_100m,2032,10.5,13.41,16.55
+bau,Paradise Point,plastic_kg_per_100m,2033,10.78,13.83,17.3
+bau,Paradise Point,plastic_kg_per_100m,2034,11.06,14.26,18.06
+bau,Paradise Point,plastic_kg_per_100m,2035,11.35,14.72,18.93
+bau,Paradise Point,plastic_kg_per_100m,2036,11.62,15.16,19.87
+bau,Paradise Point,plastic_kg_per_100m,2037,11.91,15.64,20.87
+bau,Paradise Point,plastic_kg_per_100m,2038,12.21,16.13,21.9
+bau,Paradise Point,plastic_kg_per_100m,2039,12.49,16.62,23.01
+bau,Paradise Point,plastic_kg_per_100m,2040,12.78,17.13,24.18
+bau,Paradise Point,plastic_kg_per_100m,2041,13.07,17.64,25.4
+bau,Paradise Point,plastic_kg_per_100m,2042,13.34,18.17,26.74
+bau,Paradise Point,plastic_kg_per_100m,2043,13.64,18.74,28.15
+bau,Paradise Point,plastic_kg_per_100m,2044,13.91,19.33,29.6
+bau,Paradise Point,plastic_kg_per_100m,2045,14.24,19.93,31.15
+bau,Paradise Point,plastic_kg_per_100m,2046,14.55,20.56,32.76
+bau,Paradise Point,plastic_kg_per_100m,2047,14.85,21.2,34.42
+bau,Paradise Point,plastic_kg_per_100m,2048,15.15,21.84,36.13
+bau,Paradise Point,plastic_kg_per_100m,2049,15.46,22.49,38.01
+bau,Paradise Point,plastic_kg_per_100m,2050,15.78,23.17,39.97
+bau,Korangi Creek,plastic_items_per_100m,2026,267,342,430
+bau,Korangi Creek,plastic_items_per_100m,2027,276,353,445
+bau,Korangi Creek,plastic_items_per_100m,2028,284,364,460
+bau,Korangi Creek,plastic_items_per_100m,2029,292,376,477
+bau,Korangi Creek,plastic_items_per_100m,2030,300,388,495
+bau,Korangi Creek,plastic_items_per_100m,2031,308,401,515
+bau,Korangi Creek,plastic_items_per_100m,2032,317,414,536
+bau,Korangi Creek,plastic_items_per_100m,2033,326,427,559
+bau,Korangi Creek,plastic_items_per_100m,2034,334,441,583
+bau,Korangi Creek,plastic_items_per_100m,2035,342,456,608
+bau,Korangi Creek,plastic_items_per_100m,2036,351,470,638
+bau,Korangi Creek,plastic_items_per_100m,2037,359,485,669
+bau,Korangi Creek,plastic_items_per_100m,2038,367,500,700
+bau,Korangi Creek,plastic_items_per_100m,2039,376,516,734
+bau,Korangi Creek,plastic_items_per_100m,2040,385,532,769
+bau,Korangi Creek,plastic_items_per_100m,2041,394,548,807
+bau,Korangi Creek,plastic_items_per_100m,2042,403,565,847
+bau,Korangi Creek,plastic_items_per_100m,2043,412,583,889
+bau,Korangi Creek,plastic_items_per_100m,2044,421,601,936
+bau,Korangi Creek,plastic_items_per_100m,2045,430,619,982
+bau,Korangi Creek,plastic_items_per_100m,2046,439,639,1034
+bau,Korangi Creek,plastic_items_per_100m,2047,449,659,1088
+bau,Korangi Creek,plastic_items_per_100m,2048,459,679,1146
+bau,Korangi Creek,plastic_items_per_100m,2049,469,700,1207
+bau,Korangi Creek,plastic_items_per_100m,2050,479,721,1268
+bau,Korangi Creek,plastic_kg_per_100m,2026,8.15,9.92,11.99
+bau,Korangi Creek,plastic_kg_per_100m,2027,8.42,10.26,12.4
+bau,Korangi Creek,plastic_kg_per_100m,2028,8.67,10.59,12.84
+bau,Korangi Creek,plastic_kg_per_100m,2029,8.94,10.94,13.32
+bau,Korangi Creek,plastic_kg_per_100m,2030,9.18,11.29,13.85
+bau,Korangi Creek,plastic_kg_per_100m,2031,9.43,11.66,14.42
+bau,Korangi Creek,plastic_kg_per_100m,2032,9.67,12.04,15.03
+bau,Korangi Creek,plastic_kg_per_100m,2033,9.91,12.44,15.66
+bau,Korangi Creek,plastic_kg_per_100m,2034,10.15,12.84,16.39
+bau,Korangi Creek,plastic_kg_per_100m,2035,10.39,13.25,17.18
+bau,Korangi Creek,plastic_kg_per_100m,2036,10.65,13.67,18.02
+bau,Korangi Creek,plastic_kg_per_100m,2037,10.89,14.08,18.87
+bau,Korangi Creek,plastic_kg_per_100m,2038,11.13,14.52,19.8
+bau,Korangi Creek,plastic_kg_per_100m,2039,11.39,14.97,20.79
+bau,Korangi Creek,plastic_kg_per_100m,2040,11.64,15.45,21.79
+bau,Korangi Creek,plastic_kg_per_100m,2041,11.89,15.94,22.91
+bau,Korangi Creek,plastic_kg_per_100m,2042,12.15,16.43,24.15
+bau,Korangi Creek,plastic_kg_per_100m,2043,12.4,16.93,25.37
+bau,Korangi Creek,plastic_kg_per_100m,2044,12.67,17.43,26.69
+bau,Korangi Creek,plastic_kg_per_100m,2045,12.93,17.95,28.04
+bau,Korangi Creek,plastic_kg_per_100m,2046,13.21,18.49,29.53
+bau,Korangi Creek,plastic_kg_per_100m,2047,13.48,19.06,31.02
+bau,Korangi Creek,plastic_kg_per_100m,2048,13.75,19.63,32.67
+bau,Korangi Creek,plastic_kg_per_100m,2049,14.05,20.24,34.37
+bau,Korangi Creek,plastic_kg_per_100m,2050,14.34,20.86,36.18
+bau,Manora,plastic_items_per_100m,2026,283,353,429
+bau,Manora,plastic_items_per_100m,2027,292,364,444
+bau,Manora,plastic_items_per_100m,2028,301,376,460
+bau,Manora,plastic_items_per_100m,2029,311,389,477
+bau,Manora,plastic_items_per_100m,2030,319,401,496
+bau,Manora,plastic_items_per_100m,2031,328,415,517
+bau,Manora,plastic_items_per_100m,2032,337,428,539
+bau,Manora,plastic_items_per_100m,2033,345,442,563
+bau,Manora,plastic_items_per_100m,2034,354,456,590
+bau,Manora,plastic_items_per_100m,2035,363,471,616
+bau,Manora,plastic_items_per_100m,2036,372,485,646
+bau,Manora,plastic_items_per_100m,2037,381,500,676
+bau,Manora,plastic_items_per_100m,2038,390,516,709
+bau,Manora,plastic_items_per_100m,2039,398,532,744
+bau,Manora,plastic_items_per_100m,2040,407,548,781
+bau,Manora,plastic_items_per_100m,2041,416,565,821
+bau,Manora,plastic_items_per_100m,2042,425,582,862
+bau,Manora,plastic_items_per_100m,2043,435,600,909
+bau,Manora,plastic_items_per_100m,2044,444,619,955
+bau,Manora,plastic_items_per_100m,2045,454,638,1005
+bau,Manora,plastic_items_per_100m,2046,464,658,1055
+bau,Manora,plastic_items_per_100m,2047,473,678,1111
+bau,Manora,plastic_items_per_100m,2048,483,698,1168
+bau,Manora,plastic_items_per_100m,2049,494,719,1228
+bau,Manora,plastic_items_per_100m,2050,504,740,1292
+bau,Manora,plastic_kg_per_100m,2026,9.52,11.51,13.68
+bau,Manora,plastic_kg_per_100m,2027,9.79,11.88,14.14
+bau,Manora,plastic_kg_per_100m,2028,10.11,12.27,14.66
+bau,Manora,plastic_kg_per_100m,2029,10.41,12.68,15.23
+bau,Manora,plastic_kg_per_100m,2030,10.7,13.08,15.82
+bau,Manora,plastic_kg_per_100m,2031,10.99,13.52,16.49
+bau,Manora,plastic_kg_per_100m,2032,11.28,13.96,17.22
+bau,Manora,plastic_kg_per_100m,2033,11.57,14.41,18.01
+bau,Manora,plastic_kg_per_100m,2034,11.85,14.87,18.85
+bau,Manora,plastic_kg_per_100m,2035,12.12,15.33,19.75
+bau,Manora,plastic_kg_per_100m,2036,12.41,15.8,20.67
+bau,Manora,plastic_kg_per_100m,2037,12.71,16.28,21.68
+bau,Manora,plastic_kg_per_100m,2038,12.98,16.78,22.78
+bau,Manora,plastic_kg_per_100m,2039,13.27,17.32,23.93
+bau,Manora,plastic_kg_per_100m,2040,13.55,17.85,25.18
+bau,Manora,plastic_kg_per_100m,2041,13.86,18.38,26.44
+bau,Manora,plastic_kg_per_100m,2042,14.15,18.97,27.82
+bau,Manora,plastic_kg_per_100m,2043,14.45,19.54,29.28
+bau,Manora,plastic_kg_per_100m,2044,14.75,20.13,30.78
+bau,Manora,plastic_kg_per_100m,2045,15.05,20.76,32.37
+bau,Manora,plastic_kg_per_100m,2046,15.38,21.37,34.08
+bau,Manora,plastic_kg_per_100m,2047,15.71,22,35.84
+bau,Manora,plastic_kg_per_100m,2048,16.05,22.67,37.74
+bau,Manora,plastic_kg_per_100m,2049,16.38,23.37,39.7
+bau,Manora,plastic_kg_per_100m,2050,16.7,24.08,41.78
+bau,Kemari Jetty,plastic_items_per_100m,2026,285,363,451
+bau,Kemari Jetty,plastic_items_per_100m,2027,294,374,467
+bau,Kemari Jetty,plastic_items_per_100m,2028,303,387,483
+bau,Kemari Jetty,plastic_items_per_100m,2029,311,400,502
+bau,Kemari Jetty,plastic_items_per_100m,2030,320,413,521
+bau,Kemari Jetty,plastic_items_per_100m,2031,329,426,541
+bau,Kemari Jetty,plastic_items_per_100m,2032,338,440,564
+bau,Kemari Jetty,plastic_items_per_100m,2033,347,454,588
+bau,Kemari Jetty,plastic_items_per_100m,2034,355,469,614
+bau,Kemari Jetty,plastic_items_per_100m,2035,364,483,642
+bau,Kemari Jetty,plastic_items_per_100m,2036,373,498,672
+bau,Kemari Jetty,plastic_items_per_100m,2037,382,514,704
+bau,Kemari Jetty,plastic_items_per_100m,2038,392,530,738
+bau,Kemari Jetty,plastic_items_per_100m,2039,400,547,773
+bau,Kemari Jetty,plastic_items_per_100m,2040,409,563,813
+bau,Kemari Jetty,plastic_items_per_100m,2041,419,581,853
+bau,Kemari Jetty,plastic_items_per_100m,2042,428,598,898
+bau,Kemari Jetty,plastic_items_per_100m,2043,437,617,944
+bau,Kemari Jetty,plastic_items_per_100m,2044,446,635,991
+bau,Kemari Jetty,plastic_items_per_100m,2045,457,656,1041
+bau,Kemari Jetty,plastic_items_per_100m,2046,467,676,1093
+bau,Kemari Jetty,plastic_items_per_100m,2047,476,696,1152
+bau,Kemari Jetty,plastic_items_per_100m,2048,486,717,1212
+bau,Kemari Jetty,plastic_items_per_100m,2049,497,739,1273
+bau,Kemari Jetty,plastic_items_per_100m,2050,507,761,1339
+bau,Kemari Jetty,plastic_kg_per_100m,2026,8.81,11.14,13.84
+bau,Kemari Jetty,plastic_kg_per_100m,2027,9.1,11.5,14.3
+bau,Kemari Jetty,plastic_kg_per_100m,2028,9.4,11.88,14.82
+bau,Kemari Jetty,plastic_kg_per_100m,2029,9.67,12.28,15.39
+bau,Kemari Jetty,plastic_kg_per_100m,2030,9.95,12.68,15.98
+bau,Kemari Jetty,plastic_kg_per_100m,2031,10.22,13.09,16.62
+bau,Kemari Jetty,plastic_kg_per_100m,2032,10.49,13.51,17.34
+bau,Kemari Jetty,plastic_kg_per_100m,2033,10.76,13.94,18.01
+bau,Kemari Jetty,plastic_kg_per_100m,2034,11.05,14.38,18.82
+bau,Kemari Jetty,plastic_kg_per_100m,2035,11.31,14.84,19.69
+bau,Kemari Jetty,plastic_kg_per_100m,2036,11.57,15.31,20.6
+bau,Kemari Jetty,plastic_kg_per_100m,2037,11.85,15.79,21.54
+bau,Kemari Jetty,plastic_kg_per_100m,2038,12.12,16.28,22.55
+bau,Kemari Jetty,plastic_kg_per_100m,2039,12.4,16.79,23.67
+bau,Kemari Jetty,plastic_kg_per_100m,2040,12.69,17.31,24.85
+bau,Kemari Jetty,plastic_kg_per_100m,2041,12.98,17.83,26.11
+bau,Kemari Jetty,plastic_kg_per_100m,2042,13.27,18.41,27.43
+bau,Kemari Jetty,plastic_kg_per_100m,2043,13.57,18.97,28.79
+bau,Kemari Jetty,plastic_kg_per_100m,2044,13.88,19.55,30.27
+bau,Kemari Jetty,plastic_kg_per_100m,2045,14.16,20.15,31.82
+bau,Kemari Jetty,plastic_kg_per_100m,2046,14.47,20.76,33.45
+bau,Kemari Jetty,plastic_kg_per_100m,2047,14.77,21.38,35.15
+bau,Kemari Jetty,plastic_kg_per_100m,2048,15.07,22.03,37.03
+bau,Kemari Jetty,plastic_kg_per_100m,2049,15.4,22.72,38.91
+bau,Kemari Jetty,plastic_kg_per_100m,2050,15.72,23.41,41
+bau,West Wharf,plastic_items_per_100m,2026,272,378,493
+bau,West Wharf,plastic_items_per_100m,2027,281,391,510
+bau,West Wharf,plastic_items_per_100m,2028,290,403,527
+bau,West Wharf,plastic_items_per_100m,2029,299,416,547
+bau,West Wharf,plastic_items_per_100m,2030,308,430,567
+bau,West Wharf,plastic_items_per_100m,2031,317,443,590
+bau,West Wharf,plastic_items_per_100m,2032,325,458,612
+bau,West Wharf,plastic_items_per_100m,2033,334,473,638
+bau,West Wharf,plastic_items_per_100m,2034,343,488,664
+bau,West Wharf,plastic_items_per_100m,2035,353,503,693
+bau,West Wharf,plastic_items_per_100m,2036,362,519,725
+bau,West Wharf,plastic_items_per_100m,2037,371,536,758
+bau,West Wharf,plastic_items_per_100m,2038,382,552,793
+bau,West Wharf,plastic_items_per_100m,2039,391,570,829
+bau,West Wharf,plastic_items_per_100m,2040,401,588,868
+bau,West Wharf,plastic_items_per_100m,2041,410,606,911
+bau,West Wharf,plastic_items_per_100m,2042,420,626,954
+bau,West Wharf,plastic_items_per_100m,2043,429,646,1000
+bau,West Wharf,plastic_items_per_100m,2044,440,666,1051
+bau,West Wharf,plastic_items_per_100m,2045,450,686,1104
+bau,West Wharf,plastic_items_per_100m,2046,461,707,1160
+bau,West Wharf,plastic_items_per_100m,2047,471,728,1218
+bau,West Wharf,plastic_items_per_100m,2048,481,751,1282
+bau,West Wharf,plastic_items_per_100m,2049,492,773,1348
+bau,West Wharf,plastic_items_per_100m,2050,503,797,1416
+bau,West Wharf,plastic_kg_per_100m,2026,9.67,12.24,15.37
+bau,West Wharf,plastic_kg_per_100m,2027,9.99,12.63,15.89
+bau,West Wharf,plastic_kg_per_100m,2028,10.3,13.06,16.45
+bau,West Wharf,plastic_kg_per_100m,2029,10.61,13.5,17.06
+bau,West Wharf,plastic_kg_per_100m,2030,10.9,13.94,17.74
+bau,West Wharf,plastic_kg_per_100m,2031,11.22,14.39,18.43
+bau,West Wharf,plastic_kg_per_100m,2032,11.5,14.87,19.23
+bau,West Wharf,plastic_kg_per_100m,2033,11.81,15.34,20.05
+bau,West Wharf,plastic_kg_per_100m,2034,12.1,15.83,20.91
+bau,West Wharf,plastic_kg_per_100m,2035,12.41,16.33,21.86
+bau,West Wharf,plastic_kg_per_100m,2036,12.7,16.87,22.84
+bau,West Wharf,plastic_kg_per_100m,2037,13,17.39,23.9
+bau,West Wharf,plastic_kg_per_100m,2038,13.31,17.95,25.06
+bau,West Wharf,plastic_kg_per_100m,2039,13.63,18.54,26.24
+bau,West Wharf,plastic_kg_per_100m,2040,13.95,19.12,27.52
+bau,West Wharf,plastic_kg_per_100m,2041,14.27,19.73,28.82
+bau,West Wharf,plastic_kg_per_100m,2042,14.59,20.34,30.24
+bau,West Wharf,plastic_kg_per_100m,2043,14.92,20.97,31.76
+bau,West Wharf,plastic_kg_per_100m,2044,15.25,21.62,33.38
+bau,West Wharf,plastic_kg_per_100m,2045,15.58,22.3,35.07
+bau,West Wharf,plastic_kg_per_100m,2046,15.94,22.99,36.85
+bau,West Wharf,plastic_kg_per_100m,2047,16.27,23.72,38.69
+bau,West Wharf,plastic_kg_per_100m,2048,16.62,24.44,40.72
+bau,West Wharf,plastic_kg_per_100m,2049,16.97,25.21,42.82
+bau,West Wharf,plastic_kg_per_100m,2050,17.31,25.97,44.98
+bau,Damb,plastic_items_per_100m,2026,280,335,387
+bau,Damb,plastic_items_per_100m,2027,289,346,401
+bau,Damb,plastic_items_per_100m,2028,298,357,415
+bau,Damb,plastic_items_per_100m,2029,307,369,431
+bau,Damb,plastic_items_per_100m,2030,316,381,450
+bau,Damb,plastic_items_per_100m,2031,324,393,468
+bau,Damb,plastic_items_per_100m,2032,332,405,488
+bau,Damb,plastic_items_per_100m,2033,341,418,511
+bau,Damb,plastic_items_per_100m,2034,349,430,535
+bau,Damb,plastic_items_per_100m,2035,357,444,560
+bau,Damb,plastic_items_per_100m,2036,365,458,589
+bau,Damb,plastic_items_per_100m,2037,373,471,619
+bau,Damb,plastic_items_per_100m,2038,382,485,649
+bau,Damb,plastic_items_per_100m,2039,390,500,682
+bau,Damb,plastic_items_per_100m,2040,399,516,717
+bau,Damb,plastic_items_per_100m,2041,407,531,754
+bau,Damb,plastic_items_per_100m,2042,415,548,793
+bau,Damb,plastic_items_per_100m,2043,424,565,834
+bau,Damb,plastic_items_per_100m,2044,433,583,878
+bau,Damb,plastic_items_per_100m,2045,442,601,924
+bau,Damb,plastic_items_per_100m,2046,451,619,972
+bau,Damb,plastic_items_per_100m,2047,461,639,1024
+bau,Damb,plastic_items_per_100m,2048,470,659,1080
+bau,Damb,plastic_items_per_100m,2049,480,679,1138
+bau,Damb,plastic_items_per_100m,2050,489,700,1199
+bau,Damb,plastic_kg_per_100m,2026,8.47,9.86,11.36
+bau,Damb,plastic_kg_per_100m,2027,8.73,10.19,11.76
+bau,Damb,plastic_kg_per_100m,2028,9,10.52,12.19
+bau,Damb,plastic_kg_per_100m,2029,9.25,10.86,12.67
+bau,Damb,plastic_kg_per_100m,2030,9.5,11.22,13.2
+bau,Damb,plastic_kg_per_100m,2031,9.74,11.58,13.77
+bau,Damb,plastic_kg_per_100m,2032,9.99,11.95,14.4
+bau,Damb,plastic_kg_per_100m,2033,10.24,12.34,15.08
+bau,Damb,plastic_kg_per_100m,2034,10.47,12.72,15.82
+bau,Damb,plastic_kg_per_100m,2035,10.71,13.11,16.58
+bau,Damb,plastic_kg_per_100m,2036,10.95,13.51,17.41
+bau,Damb,plastic_kg_per_100m,2037,11.18,13.93,18.28
+bau,Damb,plastic_kg_per_100m,2038,11.42,14.36,19.21
+bau,Damb,plastic_kg_per_100m,2039,11.66,14.79,20.19
+bau,Damb,plastic_kg_per_100m,2040,11.91,15.24,21.22
+bau,Damb,plastic_kg_per_100m,2041,12.16,15.72,22.3
+bau,Damb,plastic_kg_per_100m,2042,12.42,16.21,23.47
+bau,Damb,plastic_kg_per_100m,2043,12.68,16.73,24.68
+bau,Damb,plastic_kg_per_100m,2044,12.94,17.26,25.97
+bau,Damb,plastic_kg_per_100m,2045,13.21,17.78,27.36
+bau,Damb,plastic_kg_per_100m,2046,13.49,18.33,28.78
+bau,Damb,plastic_kg_per_100m,2047,13.75,18.89,30.31
+bau,Damb,plastic_kg_per_100m,2048,14.03,19.5,31.95
+bau,Damb,plastic_kg_per_100m,2049,14.31,20.1,33.67
+bau,Damb,plastic_kg_per_100m,2050,14.59,20.71,35.47
+bau,Ormara,plastic_items_per_100m,2026,216,261,309
+bau,Ormara,plastic_items_per_100m,2027,222,270,319
+bau,Ormara,plastic_items_per_100m,2028,229,279,331
+bau,Ormara,plastic_items_per_100m,2029,236,288,343
+bau,Ormara,plastic_items_per_100m,2030,242,297,357
+bau,Ormara,plastic_items_per_100m,2031,249,306,372
+bau,Ormara,plastic_items_per_100m,2032,256,316,387
+bau,Ormara,plastic_items_per_100m,2033,262,326,405
+bau,Ormara,plastic_items_per_100m,2034,269,337,423
+bau,Ormara,plastic_items_per_100m,2035,275,347,444
+bau,Ormara,plastic_items_per_100m,2036,282,358,466
+bau,Ormara,plastic_items_per_100m,2037,289,369,489
+bau,Ormara,plastic_items_per_100m,2038,295,381,514
+bau,Ormara,plastic_items_per_100m,2039,301,393,539
+bau,Ormara,plastic_items_per_100m,2040,308,405,567
+bau,Ormara,plastic_items_per_100m,2041,315,417,596
+bau,Ormara,plastic_items_per_100m,2042,322,430,627
+bau,Ormara,plastic_items_per_100m,2043,329,444,658
+bau,Ormara,plastic_items_per_100m,2044,336,457,693
+bau,Ormara,plastic_items_per_100m,2045,343,471,728
+bau,Ormara,plastic_items_per_100m,2046,350,486,766
+bau,Ormara,plastic_items_per_100m,2047,358,500,806
+bau,Ormara,plastic_items_per_100m,2048,365,516,848
+bau,Ormara,plastic_items_per_100m,2049,373,531,894
+bau,Ormara,plastic_items_per_100m,2050,380,547,941
+bau,Ormara,plastic_kg_per_100m,2026,6.88,8.38,10.06
+bau,Ormara,plastic_kg_per_100m,2027,7.11,8.65,10.4
+bau,Ormara,plastic_kg_per_100m,2028,7.32,8.93,10.77
+bau,Ormara,plastic_kg_per_100m,2029,7.53,9.22,11.14
+bau,Ormara,plastic_kg_per_100m,2030,7.73,9.52,11.57
+bau,Ormara,plastic_kg_per_100m,2031,7.96,9.84,12.06
+bau,Ormara,plastic_kg_per_100m,2032,8.17,10.15,12.57
+bau,Ormara,plastic_kg_per_100m,2033,8.38,10.48,13.14
+bau,Ormara,plastic_kg_per_100m,2034,8.59,10.82,13.75
+bau,Ormara,plastic_kg_per_100m,2035,8.79,11.16,14.4
+bau,Ormara,plastic_kg_per_100m,2036,9,11.5,15.1
+bau,Ormara,plastic_kg_per_100m,2037,9.21,11.86,15.81
+bau,Ormara,plastic_kg_per_100m,2038,9.41,12.24,16.59
+bau,Ormara,plastic_kg_per_100m,2039,9.62,12.61,17.42
+bau,Ormara,plastic_kg_per_100m,2040,9.84,13,18.3
+bau,Ormara,plastic_kg_per_100m,2041,10.06,13.41,19.21
+bau,Ormara,plastic_kg_per_100m,2042,10.28,13.84,20.18
+bau,Ormara,plastic_kg_per_100m,2043,10.5,14.27,21.2
+bau,Ormara,plastic_kg_per_100m,2044,10.73,14.7,22.29
+bau,Ormara,plastic_kg_per_100m,2045,10.96,15.16,23.42
+bau,Ormara,plastic_kg_per_100m,2046,11.2,15.63,24.67
+bau,Ormara,plastic_kg_per_100m,2047,11.44,16.11,25.96
+bau,Ormara,plastic_kg_per_100m,2048,11.67,16.61,27.35
+bau,Ormara,plastic_kg_per_100m,2049,11.9,17.12,28.81
+bau,Ormara,plastic_kg_per_100m,2050,12.15,17.64,30.36
+bau,Pasni,plastic_items_per_100m,2026,369,493,624
+bau,Pasni,plastic_items_per_100m,2027,382,509,645
+bau,Pasni,plastic_items_per_100m,2028,394,527,668
+bau,Pasni,plastic_items_per_100m,2029,405,544,692
+bau,Pasni,plastic_items_per_100m,2030,418,561,719
+bau,Pasni,plastic_items_per_100m,2031,429,579,747
+bau,Pasni,plastic_items_per_100m,2032,441,598,778
+bau,Pasni,plastic_items_per_100m,2033,454,617,810
+bau,Pasni,plastic_items_per_100m,2034,466,636,847
+bau,Pasni,plastic_items_per_100m,2035,479,656,885
+bau,Pasni,plastic_items_per_100m,2036,492,677,925
+bau,Pasni,plastic_items_per_100m,2037,505,698,967
+bau,Pasni,plastic_items_per_100m,2038,516,720,1015
+bau,Pasni,plastic_items_per_100m,2039,529,741,1064
+bau,Pasni,plastic_items_per_100m,2040,542,764,1115
+bau,Pasni,plastic_items_per_100m,2041,555,788,1169
+bau,Pasni,plastic_items_per_100m,2042,569,812,1225
+bau,Pasni,plastic_items_per_100m,2043,581,837,1286
+bau,Pasni,plastic_items_per_100m,2044,594,862,1350
+bau,Pasni,plastic_items_per_100m,2045,608,888,1419
+bau,Pasni,plastic_items_per_100m,2046,621,914,1491
+bau,Pasni,plastic_items_per_100m,2047,635,943,1565
+bau,Pasni,plastic_items_per_100m,2048,650,972,1644
+bau,Pasni,plastic_items_per_100m,2049,665,1003,1731
+bau,Pasni,plastic_items_per_100m,2050,680,1034,1823
+bau,Pasni,plastic_kg_per_100m,2026,11.05,14.91,18.98
+bau,Pasni,plastic_kg_per_100m,2027,11.41,15.41,19.63
+bau,Pasni,plastic_kg_per_100m,2028,11.8,15.92,20.33
+bau,Pasni,plastic_kg_per_100m,2029,12.14,16.45,21.1
+bau,Pasni,plastic_kg_per_100m,2030,12.5,16.98,21.9
+bau,Pasni,plastic_kg_per_100m,2031,12.86,17.53,22.78
+bau,Pasni,plastic_kg_per_100m,2032,13.23,18.09,23.69
+bau,Pasni,plastic_kg_per_100m,2033,13.59,18.67,24.75
+bau,Pasni,plastic_kg_per_100m,2034,13.96,19.24,25.81
+bau,Pasni,plastic_kg_per_100m,2035,14.33,19.85,26.93
+bau,Pasni,plastic_kg_per_100m,2036,14.72,20.45,28.14
+bau,Pasni,plastic_kg_per_100m,2037,15.1,21.11,29.45
+bau,Pasni,plastic_kg_per_100m,2038,15.51,21.79,30.88
+bau,Pasni,plastic_kg_per_100m,2039,15.89,22.45,32.3
+bau,Pasni,plastic_kg_per_100m,2040,16.28,23.15,33.85
+bau,Pasni,plastic_kg_per_100m,2041,16.65,23.88,35.46
+bau,Pasni,plastic_kg_per_100m,2042,17.06,24.62,37.24
+bau,Pasni,plastic_kg_per_100m,2043,17.46,25.38,39.14
+bau,Pasni,plastic_kg_per_100m,2044,17.84,26.18,41.08
+bau,Pasni,plastic_kg_per_100m,2045,18.26,26.95,43.16
+bau,Pasni,plastic_kg_per_100m,2046,18.7,27.79,45.34
+bau,Pasni,plastic_kg_per_100m,2047,19.1,28.61,47.76
+bau,Pasni,plastic_kg_per_100m,2048,19.54,29.49,50.19
+bau,Pasni,plastic_kg_per_100m,2049,19.95,30.39,52.7
+bau,Pasni,plastic_kg_per_100m,2050,20.37,31.33,55.46
+bau,Gwadar,plastic_items_per_100m,2026,189,264,340
+bau,Gwadar,plastic_items_per_100m,2027,196,273,351
+bau,Gwadar,plastic_items_per_100m,2028,202,282,363
+bau,Gwadar,plastic_items_per_100m,2029,208,291,376
+bau,Gwadar,plastic_items_per_100m,2030,215,300,390
+bau,Gwadar,plastic_items_per_100m,2031,221,310,405
+bau,Gwadar,plastic_items_per_100m,2032,228,320,422
+bau,Gwadar,plastic_items_per_100m,2033,235,330,439
+bau,Gwadar,plastic_items_per_100m,2034,241,341,458
+bau,Gwadar,plastic_items_per_100m,2035,247,352,478
+bau,Gwadar,plastic_items_per_100m,2036,254,363,500
+bau,Gwadar,plastic_items_per_100m,2037,260,374,522
+bau,Gwadar,plastic_items_per_100m,2038,267,386,546
+bau,Gwadar,plastic_items_per_100m,2039,273,398,572
+bau,Gwadar,plastic_items_per_100m,2040,280,410,599
+bau,Gwadar,plastic_items_per_100m,2041,286,423,628
+bau,Gwadar,plastic_items_per_100m,2042,293,436,659
+bau,Gwadar,plastic_items_per_100m,2043,300,450,691
+bau,Gwadar,plastic_items_per_100m,2044,307,463,726
+bau,Gwadar,plastic_items_per_100m,2045,314,478,763
+bau,Gwadar,plastic_items_per_100m,2046,321,493,803
+bau,Gwadar,plastic_items_per_100m,2047,329,508,844
+bau,Gwadar,plastic_items_per_100m,2048,336,524,887
+bau,Gwadar,plastic_items_per_100m,2049,344,539,934
+bau,Gwadar,plastic_items_per_100m,2050,351,557,981
+bau,Gwadar,plastic_kg_per_100m,2026,6.07,8.06,9.97
+bau,Gwadar,plastic_kg_per_100m,2027,6.27,8.33,10.29
+bau,Gwadar,plastic_kg_per_100m,2028,6.45,8.61,10.65
+bau,Gwadar,plastic_kg_per_100m,2029,6.64,8.89,11.04
+bau,Gwadar,plastic_kg_per_100m,2030,6.84,9.17,11.47
+bau,Gwadar,plastic_kg_per_100m,2031,7.03,9.47,11.94
+bau,Gwadar,plastic_kg_per_100m,2032,7.26,9.77,12.42
+bau,Gwadar,plastic_kg_per_100m,2033,7.45,10.07,12.96
+bau,Gwadar,plastic_kg_per_100m,2034,7.65,10.39,13.55
+bau,Gwadar,plastic_kg_per_100m,2035,7.86,10.72,14.18
+bau,Gwadar,plastic_kg_per_100m,2036,8.07,11.06,14.85
+bau,Gwadar,plastic_kg_per_100m,2037,8.26,11.4,15.55
+bau,Gwadar,plastic_kg_per_100m,2038,8.45,11.75,16.33
+bau,Gwadar,plastic_kg_per_100m,2039,8.66,12.12,17.11
+bau,Gwadar,plastic_kg_per_100m,2040,8.88,12.49,17.94
+bau,Gwadar,plastic_kg_per_100m,2041,9.08,12.86,18.83
+bau,Gwadar,plastic_kg_per_100m,2042,9.29,13.25,19.78
+bau,Gwadar,plastic_kg_per_100m,2043,9.5,13.66,20.77
+bau,Gwadar,plastic_kg_per_100m,2044,9.72,14.09,21.83
+bau,Gwadar,plastic_kg_per_100m,2045,9.94,14.51,22.92
+bau,Gwadar,plastic_kg_per_100m,2046,10.17,14.98,24.16
+bau,Gwadar,plastic_kg_per_100m,2047,10.4,15.42,25.39
+bau,Gwadar,plastic_kg_per_100m,2048,10.63,15.88,26.72
+bau,Gwadar,plastic_kg_per_100m,2049,10.88,16.37,28.1
+bau,Gwadar,plastic_kg_per_100m,2050,11.12,16.88,29.57
+bau,Jiwani,plastic_items_per_100m,2026,302,368,418
+bau,Jiwani,plastic_items_per_100m,2027,312,380,432
+bau,Jiwani,plastic_items_per_100m,2028,322,393,448
+bau,Jiwani,plastic_items_per_100m,2029,332,405,466
+bau,Jiwani,plastic_items_per_100m,2030,341,418,487
+bau,Jiwani,plastic_items_per_100m,2031,350,431,509
+bau,Jiwani,plastic_items_per_100m,2032,359,445,533
+bau,Jiwani,plastic_items_per_100m,2033,368,458,559
+bau,Jiwani,plastic_items_per_100m,2034,377,472,586
+bau,Jiwani,plastic_items_per_100m,2035,386,487,615
+bau,Jiwani,plastic_items_per_100m,2036,395,501,646
+bau,Jiwani,plastic_items_per_100m,2037,404,517,678
+bau,Jiwani,plastic_items_per_100m,2038,413,533,713
+bau,Jiwani,plastic_items_per_100m,2039,423,549,750
+bau,Jiwani,plastic_items_per_100m,2040,432,565,788
+bau,Jiwani,plastic_items_per_100m,2041,442,582,830
+bau,Jiwani,plastic_items_per_100m,2042,452,600,873
+bau,Jiwani,plastic_items_per_100m,2043,461,618,918
+bau,Jiwani,plastic_items_per_100m,2044,471,637,966
+bau,Jiwani,plastic_items_per_100m,2045,481,656,1018
+bau,Jiwani,plastic_items_per_100m,2046,491,676,1073
+bau,Jiwani,plastic_items_per_100m,2047,501,697,1130
+bau,Jiwani,plastic_items_per_100m,2048,512,719,1190
+bau,Jiwani,plastic_items_per_100m,2049,523,741,1254
+bau,Jiwani,plastic_items_per_100m,2050,534,764,1321
+bau,Jiwani,plastic_kg_per_100m,2026,8.84,10.71,12.2
+bau,Jiwani,plastic_kg_per_100m,2027,9.11,11.07,12.62
+bau,Jiwani,plastic_kg_per_100m,2028,9.41,11.42,13.1
+bau,Jiwani,plastic_kg_per_100m,2029,9.68,11.79,13.64
+bau,Jiwani,plastic_kg_per_100m,2030,9.95,12.17,14.22
+bau,Jiwani,plastic_kg_per_100m,2031,10.21,12.54,14.85
+bau,Jiwani,plastic_kg_per_100m,2032,10.47,12.94,15.55
+bau,Jiwani,plastic_kg_per_100m,2033,10.73,13.35,16.31
+bau,Jiwani,plastic_kg_per_100m,2034,10.99,13.76,17.11
+bau,Jiwani,plastic_kg_per_100m,2035,11.25,14.18,17.97
+bau,Jiwani,plastic_kg_per_100m,2036,11.52,14.61,18.86
+bau,Jiwani,plastic_kg_per_100m,2037,11.8,15.06,19.82
+bau,Jiwani,plastic_kg_per_100m,2038,12.07,15.52,20.83
+bau,Jiwani,plastic_kg_per_100m,2039,12.36,15.98,21.91
+bau,Jiwani,plastic_kg_per_100m,2040,12.63,16.47,23.05
+bau,Jiwani,plastic_kg_per_100m,2041,12.89,16.96,24.24
+bau,Jiwani,plastic_kg_per_100m,2042,13.18,17.47,25.48
+bau,Jiwani,plastic_kg_per_100m,2043,13.46,18.01,26.83
+bau,Jiwani,plastic_kg_per_100m,2044,13.75,18.56,28.24
+bau,Jiwani,plastic_kg_per_100m,2045,14.04,19.13,29.69
+bau,Jiwani,plastic_kg_per_100m,2046,14.33,19.71,31.25
+bau,Jiwani,plastic_kg_per_100m,2047,14.62,20.3,32.88
+bau,Jiwani,plastic_kg_per_100m,2048,14.92,20.91,34.61
+bau,Jiwani,plastic_kg_per_100m,2049,15.22,21.56,36.45
+bau,Jiwani,plastic_kg_per_100m,2050,15.55,22.21,38.37
+bau,All sites,plastic_items_per_100m,2026,336,361,385
+bau,All sites,plastic_items_per_100m,2027,346,372,399
+bau,All sites,plastic_items_per_100m,2028,356,385,415
+bau,All sites,plastic_items_per_100m,2029,365,397,433
+bau,All sites,plastic_items_per_100m,2030,373,409,454
+bau,All sites,plastic_items_per_100m,2031,382,422,476
+bau,All sites,plastic_items_per_100m,2032,390,435,501
+bau,All sites,plastic_items_per_100m,2033,398,449,526
+bau,All sites,plastic_items_per_100m,2034,407,462,554
+bau,All sites,plastic_items_per_100m,2035,415,476,583
+bau,All sites,plastic_items_per_100m,2036,423,491,614
+bau,All sites,plastic_items_per_100m,2037,432,506,647
+bau,All sites,plastic_items_per_100m,2038,440,522,682
+bau,All sites,plastic_items_per_100m,2039,449,538,718
+bau,All sites,plastic_items_per_100m,2040,457,554,757
+bau,All sites,plastic_items_per_100m,2041,466,571,797
+bau,All sites,plastic_items_per_100m,2042,475,589,840
+bau,All sites,plastic_items_per_100m,2043,484,607,885
+bau,All sites,plastic_items_per_100m,2044,493,627,933
+bau,All sites,plastic_items_per_100m,2045,503,646,983
+bau,All sites,plastic_items_per_100m,2046,512,666,1036
+bau,All sites,plastic_items_per_100m,2047,522,687,1091
+bau,All sites,plastic_items_per_100m,2048,532,708,1150
+bau,All sites,plastic_items_per_100m,2049,542,730,1213
+bau,All sites,plastic_items_per_100m,2050,552,753,1278
+bau,All sites,plastic_kg_per_100m,2026,10.44,11.16,11.87
+bau,All sites,plastic_kg_per_100m,2027,10.76,11.53,12.3
+bau,All sites,plastic_kg_per_100m,2028,11.06,11.9,12.81
+bau,All sites,plastic_kg_per_100m,2029,11.33,12.28,13.39
+bau,All sites,plastic_kg_per_100m,2030,11.6,12.67,14.03
+bau,All sites,plastic_kg_per_100m,2031,11.85,13.07,14.74
+bau,All sites,plastic_kg_per_100m,2032,12.11,13.47,15.48
+bau,All sites,plastic_kg_per_100m,2033,12.36,13.88,16.29
+bau,All sites,plastic_kg_per_100m,2034,12.62,14.3,17.15
+bau,All sites,plastic_kg_per_100m,2035,12.87,14.74,18.05
+bau,All sites,plastic_kg_per_100m,2036,13.13,15.2,19.01
+bau,All sites,plastic_kg_per_100m,2037,13.38,15.66,20.01
+bau,All sites,plastic_kg_per_100m,2038,13.63,16.14,21.08
+bau,All sites,plastic_kg_per_100m,2039,13.9,16.64,22.2
+bau,All sites,plastic_kg_per_100m,2040,14.17,17.16,23.4
+bau,All sites,plastic_kg_per_100m,2041,14.44,17.69,24.65
+bau,All sites,plastic_kg_per_100m,2042,14.72,18.24,25.97
+bau,All sites,plastic_kg_per_100m,2043,14.99,18.81,27.36
+bau,All sites,plastic_kg_per_100m,2044,15.28,19.4,28.83
+bau,All sites,plastic_kg_per_100m,2045,15.58,20.01,30.39
+bau,All sites,plastic_kg_per_100m,2046,15.88,20.63,32.03
+bau,All sites,plastic_kg_per_100m,2047,16.18,21.28,33.74
+bau,All sites,plastic_kg_per_100m,2048,16.49,21.94,35.6
+bau,All sites,plastic_kg_per_100m,2049,16.8,22.62,37.54
+bau,All sites,plastic_kg_per_100m,2050,17.11,23.32,39.57
+improved,Sandspit,plastic_items_per_100m,2026,272,365,469
+improved,Sandspit,plastic_items_per_100m,2027,275,369,474
+improved,Sandspit,plastic_items_per_100m,2028,278,373,480
+improved,Sandspit,plastic_items_per_100m,2029,280,377,486
+improved,Sandspit,plastic_items_per_100m,2030,281,381,494
+improved,Sandspit,plastic_items_per_100m,2031,283,384,501
+improved,Sandspit,plastic_items_per_100m,2032,284,388,510
+improved,Sandspit,plastic_items_per_100m,2033,284,391,520
+improved,Sandspit,plastic_items_per_100m,2034,284,393,529
+improved,Sandspit,plastic_items_per_100m,2035,284,395,539
+improved,Sandspit,plastic_items_per_100m,2036,283,397,549
+improved,Sandspit,plastic_items_per_100m,2037,282,399,560
+improved,Sandspit,plastic_items_per_100m,2038,281,400,570
+improved,Sandspit,plastic_items_per_100m,2039,279,401,580
+improved,Sandspit,plastic_items_per_100m,2040,277,402,592
+improved,Sandspit,plastic_items_per_100m,2041,275,403,603
+improved,Sandspit,plastic_items_per_100m,2042,272,403,615
+improved,Sandspit,plastic_items_per_100m,2043,269,402,626
+improved,Sandspit,plastic_items_per_100m,2044,265,401,636
+improved,Sandspit,plastic_items_per_100m,2045,261,400,646
+improved,Sandspit,plastic_items_per_100m,2046,257,398,657
+improved,Sandspit,plastic_items_per_100m,2047,252,395,667
+improved,Sandspit,plastic_items_per_100m,2048,247,393,676
+improved,Sandspit,plastic_items_per_100m,2049,241,389,685
+improved,Sandspit,plastic_items_per_100m,2050,235,385,694
+improved,Sandspit,plastic_kg_per_100m,2026,8.94,11.74,14.86
+improved,Sandspit,plastic_kg_per_100m,2027,9.03,11.87,15.05
+improved,Sandspit,plastic_kg_per_100m,2028,9.09,12,15.28
+improved,Sandspit,plastic_kg_per_100m,2029,9.19,12.13,15.5
+improved,Sandspit,plastic_kg_per_100m,2030,9.23,12.24,15.74
+improved,Sandspit,plastic_kg_per_100m,2031,9.28,12.36,15.98
+improved,Sandspit,plastic_kg_per_100m,2032,9.31,12.47,16.24
+improved,Sandspit,plastic_kg_per_100m,2033,9.33,12.56,16.53
+improved,Sandspit,plastic_kg_per_100m,2034,9.32,12.66,16.84
+improved,Sandspit,plastic_kg_per_100m,2035,9.3,12.74,17.17
+improved,Sandspit,plastic_kg_per_100m,2036,9.28,12.8,17.49
+improved,Sandspit,plastic_kg_per_100m,2037,9.24,12.86,17.8
+improved,Sandspit,plastic_kg_per_100m,2038,9.2,12.9,18.18
+improved,Sandspit,plastic_kg_per_100m,2039,9.16,12.93,18.54
+improved,Sandspit,plastic_kg_per_100m,2040,9.09,12.95,18.91
+improved,Sandspit,plastic_kg_per_100m,2041,9.01,12.95,19.26
+improved,Sandspit,plastic_kg_per_100m,2042,8.92,12.95,19.63
+improved,Sandspit,plastic_kg_per_100m,2043,8.81,12.94,19.98
+improved,Sandspit,plastic_kg_per_100m,2044,8.68,12.9,20.33
+improved,Sandspit,plastic_kg_per_100m,2045,8.54,12.87,20.64
+improved,Sandspit,plastic_kg_per_100m,2046,8.39,12.8,20.95
+improved,Sandspit,plastic_kg_per_100m,2047,8.21,12.74,21.33
+improved,Sandspit,plastic_kg_per_100m,2048,8.04,12.64,21.61
+improved,Sandspit,plastic_kg_per_100m,2049,7.86,12.52,21.89
+improved,Sandspit,plastic_kg_per_100m,2050,7.64,12.39,22.19
+improved,Buleji,plastic_items_per_100m,2026,359,465,567
+improved,Buleji,plastic_items_per_100m,2027,363,471,572
+improved,Buleji,plastic_items_per_100m,2028,367,476,580
+improved,Buleji,plastic_items_per_100m,2029,370,481,589
+improved,Buleji,plastic_items_per_100m,2030,372,486,599
+improved,Buleji,plastic_items_per_100m,2031,374,490,609
+improved,Buleji,plastic_items_per_100m,2032,375,494,621
+improved,Buleji,plastic_items_per_100m,2033,375,497,634
+improved,Buleji,plastic_items_per_100m,2034,376,500,648
+improved,Buleji,plastic_items_per_100m,2035,376,503,661
+improved,Buleji,plastic_items_per_100m,2036,376,505,674
+improved,Buleji,plastic_items_per_100m,2037,375,507,688
+improved,Buleji,plastic_items_per_100m,2038,373,509,701
+improved,Buleji,plastic_items_per_100m,2039,371,510,714
+improved,Buleji,plastic_items_per_100m,2040,368,511,729
+improved,Buleji,plastic_items_per_100m,2041,364,511,743
+improved,Buleji,plastic_items_per_100m,2042,360,510,758
+improved,Buleji,plastic_items_per_100m,2043,356,510,772
+improved,Buleji,plastic_items_per_100m,2044,350,508,785
+improved,Buleji,plastic_items_per_100m,2045,345,506,799
+improved,Buleji,plastic_items_per_100m,2046,339,503,814
+improved,Buleji,plastic_items_per_100m,2047,333,501,826
+improved,Buleji,plastic_items_per_100m,2048,325,498,838
+improved,Buleji,plastic_items_per_100m,2049,318,494,849
+improved,Buleji,plastic_items_per_100m,2050,309,488,859
+improved,Buleji,plastic_kg_per_100m,2026,10.68,14.07,17.26
+improved,Buleji,plastic_kg_per_100m,2027,10.8,14.25,17.49
+improved,Buleji,plastic_kg_per_100m,2028,10.92,14.41,17.75
+improved,Buleji,plastic_kg_per_100m,2029,11.02,14.57,18.02
+improved,Buleji,plastic_kg_per_100m,2030,11.09,14.69,18.32
+improved,Buleji,plastic_kg_per_100m,2031,11.15,14.82,18.6
+improved,Buleji,plastic_kg_per_100m,2032,11.21,14.93,18.92
+improved,Buleji,plastic_kg_per_100m,2033,11.23,15.04,19.28
+improved,Buleji,plastic_kg_per_100m,2034,11.24,15.15,19.69
+improved,Buleji,plastic_kg_per_100m,2035,11.24,15.23,20.1
+improved,Buleji,plastic_kg_per_100m,2036,11.22,15.3,20.52
+improved,Buleji,plastic_kg_per_100m,2037,11.17,15.35,20.93
+improved,Buleji,plastic_kg_per_100m,2038,11.13,15.39,21.35
+improved,Buleji,plastic_kg_per_100m,2039,11.08,15.42,21.76
+improved,Buleji,plastic_kg_per_100m,2040,10.99,15.42,22.21
+improved,Buleji,plastic_kg_per_100m,2041,10.89,15.43,22.65
+improved,Buleji,plastic_kg_per_100m,2042,10.76,15.44,23.11
+improved,Buleji,plastic_kg_per_100m,2043,10.64,15.43,23.51
+improved,Buleji,plastic_kg_per_100m,2044,10.49,15.39,23.92
+improved,Buleji,plastic_kg_per_100m,2045,10.32,15.32,24.29
+improved,Buleji,plastic_kg_per_100m,2046,10.14,15.24,24.72
+improved,Buleji,plastic_kg_per_100m,2047,9.97,15.15,25.09
+improved,Buleji,plastic_kg_per_100m,2048,9.73,15.04,25.45
+improved,Buleji,plastic_kg_per_100m,2049,9.51,14.9,25.83
+improved,Buleji,plastic_kg_per_100m,2050,9.27,14.74,26.13
+improved,Paradise Point,plastic_items_per_100m,2026,270,334,395
+improved,Paradise Point,plastic_items_per_100m,2027,273,338,400
+improved,Paradise Point,plastic_items_per_100m,2028,275,342,405
+improved,Paradise Point,plastic_items_per_100m,2029,277,345,412
+improved,Paradise Point,plastic_items_per_100m,2030,280,349,418
+improved,Paradise Point,plastic_items_per_100m,2031,281,352,427
+improved,Paradise Point,plastic_items_per_100m,2032,281,354,435
+improved,Paradise Point,plastic_items_per_100m,2033,282,357,445
+improved,Paradise Point,plastic_items_per_100m,2034,281,359,454
+improved,Paradise Point,plastic_items_per_100m,2035,280,361,464
+improved,Paradise Point,plastic_items_per_100m,2036,279,363,474
+improved,Paradise Point,plastic_items_per_100m,2037,277,364,485
+improved,Paradise Point,plastic_items_per_100m,2038,275,365,497
+improved,Paradise Point,plastic_items_per_100m,2039,273,366,507
+improved,Paradise Point,plastic_items_per_100m,2040,271,367,517
+improved,Paradise Point,plastic_items_per_100m,2041,268,367,529
+improved,Paradise Point,plastic_items_per_100m,2042,265,367,540
+improved,Paradise Point,plastic_items_per_100m,2043,261,366,551
+improved,Paradise Point,plastic_items_per_100m,2044,258,365,560
+improved,Paradise Point,plastic_items_per_100m,2045,253,364,571
+improved,Paradise Point,plastic_items_per_100m,2046,248,363,581
+improved,Paradise Point,plastic_items_per_100m,2047,243,361,590
+improved,Paradise Point,plastic_items_per_100m,2048,237,358,601
+improved,Paradise Point,plastic_items_per_100m,2049,231,355,609
+improved,Paradise Point,plastic_items_per_100m,2050,224,352,617
+improved,Paradise Point,plastic_kg_per_100m,2026,8.79,11.08,13.18
+improved,Paradise Point,plastic_kg_per_100m,2027,8.89,11.22,13.33
+improved,Paradise Point,plastic_kg_per_100m,2028,8.97,11.34,13.52
+improved,Paradise Point,plastic_kg_per_100m,2029,9.06,11.45,13.72
+improved,Paradise Point,plastic_kg_per_100m,2030,9.12,11.55,13.96
+improved,Paradise Point,plastic_kg_per_100m,2031,9.17,11.65,14.21
+improved,Paradise Point,plastic_kg_per_100m,2032,9.17,11.73,14.48
+improved,Paradise Point,plastic_kg_per_100m,2033,9.18,11.81,14.78
+improved,Paradise Point,plastic_kg_per_100m,2034,9.18,11.88,15.09
+improved,Paradise Point,plastic_kg_per_100m,2035,9.15,11.95,15.43
+improved,Paradise Point,plastic_kg_per_100m,2036,9.13,12,15.77
+improved,Paradise Point,plastic_kg_per_100m,2037,9.1,12.05,16.13
+improved,Paradise Point,plastic_kg_per_100m,2038,9.05,12.1,16.5
+improved,Paradise Point,plastic_kg_per_100m,2039,8.98,12.12,16.84
+improved,Paradise Point,plastic_kg_per_100m,2040,8.9,12.15,17.21
+improved,Paradise Point,plastic_kg_per_100m,2041,8.8,12.15,17.59
+improved,Paradise Point,plastic_kg_per_100m,2042,8.7,12.14,17.92
+improved,Paradise Point,plastic_kg_per_100m,2043,8.59,12.12,18.3
+improved,Paradise Point,plastic_kg_per_100m,2044,8.46,12.1,18.65
+improved,Paradise Point,plastic_kg_per_100m,2045,8.32,12.06,18.98
+improved,Paradise Point,plastic_kg_per_100m,2046,8.16,12.01,19.32
+improved,Paradise Point,plastic_kg_per_100m,2047,8,11.94,19.61
+improved,Paradise Point,plastic_kg_per_100m,2048,7.81,11.86,19.92
+improved,Paradise Point,plastic_kg_per_100m,2049,7.61,11.75,20.19
+improved,Paradise Point,plastic_kg_per_100m,2050,7.4,11.64,20.45
+improved,Korangi Creek,plastic_items_per_100m,2026,267,342,430
+improved,Korangi Creek,plastic_items_per_100m,2027,270,345,435
+improved,Korangi Creek,plastic_items_per_100m,2028,272,349,441
+improved,Korangi Creek,plastic_items_per_100m,2029,273,352,448
+improved,Korangi Creek,plastic_items_per_100m,2030,275,356,455
+improved,Korangi Creek,plastic_items_per_100m,2031,276,359,461
+improved,Korangi Creek,plastic_items_per_100m,2032,277,362,469
+improved,Korangi Creek,plastic_items_per_100m,2033,277,365,477
+improved,Korangi Creek,plastic_items_per_100m,2034,277,367,486
+improved,Korangi Creek,plastic_items_per_100m,2035,277,370,495
+improved,Korangi Creek,plastic_items_per_100m,2036,276,372,505
+improved,Korangi Creek,plastic_items_per_100m,2037,275,374,515
+improved,Korangi Creek,plastic_items_per_100m,2038,273,375,526
+improved,Korangi Creek,plastic_items_per_100m,2039,272,376,536
+improved,Korangi Creek,plastic_items_per_100m,2040,270,377,547
+improved,Korangi Creek,plastic_items_per_100m,2041,267,377,558
+improved,Korangi Creek,plastic_items_per_100m,2042,264,377,568
+improved,Korangi Creek,plastic_items_per_100m,2043,261,376,579
+improved,Korangi Creek,plastic_items_per_100m,2044,258,375,589
+improved,Korangi Creek,plastic_items_per_100m,2045,254,374,598
+improved,Korangi Creek,plastic_items_per_100m,2046,249,372,608
+improved,Korangi Creek,plastic_items_per_100m,2047,245,371,617
+improved,Korangi Creek,plastic_items_per_100m,2048,239,368,626
+improved,Korangi Creek,plastic_items_per_100m,2049,233,365,635
+improved,Korangi Creek,plastic_items_per_100m,2050,227,361,644
+improved,Korangi Creek,plastic_kg_per_100m,2026,8.15,9.92,11.99
+improved,Korangi Creek,plastic_kg_per_100m,2027,8.24,10.05,12.14
+improved,Korangi Creek,plastic_kg_per_100m,2028,8.3,10.15,12.32
+improved,Korangi Creek,plastic_kg_per_100m,2029,8.36,10.25,12.5
+improved,Korangi Creek,plastic_kg_per_100m,2030,8.41,10.35,12.71
+improved,Korangi Creek,plastic_kg_per_100m,2031,8.42,10.45,12.9
+improved,Korangi Creek,plastic_kg_per_100m,2032,8.43,10.53,13.15
+improved,Korangi Creek,plastic_kg_per_100m,2033,8.43,10.62,13.41
+improved,Korangi Creek,plastic_kg_per_100m,2034,8.43,10.69,13.69
+improved,Korangi Creek,plastic_kg_per_100m,2035,8.41,10.75,13.99
+improved,Korangi Creek,plastic_kg_per_100m,2036,8.39,10.81,14.28
+improved,Korangi Creek,plastic_kg_per_100m,2037,8.34,10.86,14.57
+improved,Korangi Creek,plastic_kg_per_100m,2038,8.28,10.9,14.88
+improved,Korangi Creek,plastic_kg_per_100m,2039,8.21,10.92,15.22
+improved,Korangi Creek,plastic_kg_per_100m,2040,8.14,10.93,15.54
+improved,Korangi Creek,plastic_kg_per_100m,2041,8.05,10.93,15.86
+improved,Korangi Creek,plastic_kg_per_100m,2042,7.96,10.94,16.15
+improved,Korangi Creek,plastic_kg_per_100m,2043,7.86,10.93,16.47
+improved,Korangi Creek,plastic_kg_per_100m,2044,7.74,10.9,16.77
+improved,Korangi Creek,plastic_kg_per_100m,2045,7.6,10.87,17.09
+improved,Korangi Creek,plastic_kg_per_100m,2046,7.46,10.82,17.4
+improved,Korangi Creek,plastic_kg_per_100m,2047,7.31,10.77,17.7
+improved,Korangi Creek,plastic_kg_per_100m,2048,7.14,10.69,17.97
+improved,Korangi Creek,plastic_kg_per_100m,2049,6.96,10.6,18.23
+improved,Korangi Creek,plastic_kg_per_100m,2050,6.76,10.5,18.5
+improved,Manora,plastic_items_per_100m,2026,283,353,429
+improved,Manora,plastic_items_per_100m,2027,286,357,434
+improved,Manora,plastic_items_per_100m,2028,289,360,441
+improved,Manora,plastic_items_per_100m,2029,291,364,448
+improved,Manora,plastic_items_per_100m,2030,293,368,455
+improved,Manora,plastic_items_per_100m,2031,294,371,463
+improved,Manora,plastic_items_per_100m,2032,294,375,472
+improved,Manora,plastic_items_per_100m,2033,295,377,482
+improved,Manora,plastic_items_per_100m,2034,294,380,492
+improved,Manora,plastic_items_per_100m,2035,294,382,502
+improved,Manora,plastic_items_per_100m,2036,292,384,511
+improved,Manora,plastic_items_per_100m,2037,291,386,523
+improved,Manora,plastic_items_per_100m,2038,289,387,534
+improved,Manora,plastic_items_per_100m,2039,287,388,545
+improved,Manora,plastic_items_per_100m,2040,284,388,557
+improved,Manora,plastic_items_per_100m,2041,281,388,568
+improved,Manora,plastic_items_per_100m,2042,278,388,579
+improved,Manora,plastic_items_per_100m,2043,274,388,591
+improved,Manora,plastic_items_per_100m,2044,270,387,601
+improved,Manora,plastic_items_per_100m,2045,265,386,612
+improved,Manora,plastic_items_per_100m,2046,260,384,622
+improved,Manora,plastic_items_per_100m,2047,254,381,632
+improved,Manora,plastic_items_per_100m,2048,248,379,641
+improved,Manora,plastic_items_per_100m,2049,242,376,652
+improved,Manora,plastic_items_per_100m,2050,235,372,660
+improved,Manora,plastic_kg_per_100m,2026,9.52,11.51,13.68
+improved,Manora,plastic_kg_per_100m,2027,9.59,11.64,13.85
+improved,Manora,plastic_kg_per_100m,2028,9.69,11.76,14.05
+improved,Manora,plastic_kg_per_100m,2029,9.76,11.87,14.28
+improved,Manora,plastic_kg_per_100m,2030,9.8,12,14.52
+improved,Manora,plastic_kg_per_100m,2031,9.84,12.11,14.78
+improved,Manora,plastic_kg_per_100m,2032,9.84,12.21,15.08
+improved,Manora,plastic_kg_per_100m,2033,9.84,12.3,15.42
+improved,Manora,plastic_kg_per_100m,2034,9.83,12.38,15.73
+improved,Manora,plastic_kg_per_100m,2035,9.8,12.45,16.06
+improved,Manora,plastic_kg_per_100m,2036,9.75,12.52,16.43
+improved,Manora,plastic_kg_per_100m,2037,9.7,12.56,16.77
+improved,Manora,plastic_kg_per_100m,2038,9.63,12.59,17.14
+improved,Manora,plastic_kg_per_100m,2039,9.55,12.62,17.49
+improved,Manora,plastic_kg_per_100m,2040,9.45,12.64,17.88
+improved,Manora,plastic_kg_per_100m,2041,9.35,12.65,18.24
+improved,Manora,plastic_kg_per_100m,2042,9.23,12.64,18.65
+improved,Manora,plastic_kg_per_100m,2043,9.11,12.63,19.03
+improved,Manora,plastic_kg_per_100m,2044,8.98,12.6,19.38
+improved,Manora,plastic_kg_per_100m,2045,8.82,12.56,19.75
+improved,Manora,plastic_kg_per_100m,2046,8.64,12.52,20.1
+improved,Manora,plastic_kg_per_100m,2047,8.45,12.45,20.42
+improved,Manora,plastic_kg_per_100m,2048,8.24,12.35,20.72
+improved,Manora,plastic_kg_per_100m,2049,8.03,12.25,21.01
+improved,Manora,plastic_kg_per_100m,2050,7.78,12.12,21.3
+improved,Kemari Jetty,plastic_items_per_100m,2026,285,363,451
+improved,Kemari Jetty,plastic_items_per_100m,2027,287,367,457
+improved,Kemari Jetty,plastic_items_per_100m,2028,289,371,463
+improved,Kemari Jetty,plastic_items_per_100m,2029,291,375,470
+improved,Kemari Jetty,plastic_items_per_100m,2030,294,378,478
+improved,Kemari Jetty,plastic_items_per_100m,2031,295,382,485
+improved,Kemari Jetty,plastic_items_per_100m,2032,296,385,494
+improved,Kemari Jetty,plastic_items_per_100m,2033,297,388,504
+improved,Kemari Jetty,plastic_items_per_100m,2034,296,390,513
+improved,Kemari Jetty,plastic_items_per_100m,2035,295,392,523
+improved,Kemari Jetty,plastic_items_per_100m,2036,294,394,533
+improved,Kemari Jetty,plastic_items_per_100m,2037,293,396,544
+improved,Kemari Jetty,plastic_items_per_100m,2038,291,397,555
+improved,Kemari Jetty,plastic_items_per_100m,2039,289,398,566
+improved,Kemari Jetty,plastic_items_per_100m,2040,286,399,577
+improved,Kemari Jetty,plastic_items_per_100m,2041,284,399,590
+improved,Kemari Jetty,plastic_items_per_100m,2042,281,399,601
+improved,Kemari Jetty,plastic_items_per_100m,2043,278,399,613
+improved,Kemari Jetty,plastic_items_per_100m,2044,274,398,624
+improved,Kemari Jetty,plastic_items_per_100m,2045,270,397,635
+improved,Kemari Jetty,plastic_items_per_100m,2046,265,395,645
+improved,Kemari Jetty,plastic_items_per_100m,2047,259,393,655
+improved,Kemari Jetty,plastic_items_per_100m,2048,254,390,666
+improved,Kemari Jetty,plastic_items_per_100m,2049,248,387,674
+improved,Kemari Jetty,plastic_items_per_100m,2050,241,383,683
+improved,Kemari Jetty,plastic_kg_per_100m,2026,8.81,11.14,13.84
+improved,Kemari Jetty,plastic_kg_per_100m,2027,8.91,11.26,14.01
+improved,Kemari Jetty,plastic_kg_per_100m,2028,9,11.39,14.2
+improved,Kemari Jetty,plastic_kg_per_100m,2029,9.06,11.51,14.42
+improved,Kemari Jetty,plastic_kg_per_100m,2030,9.11,11.62,14.66
+improved,Kemari Jetty,plastic_kg_per_100m,2031,9.15,11.72,14.91
+improved,Kemari Jetty,plastic_kg_per_100m,2032,9.17,11.81,15.13
+improved,Kemari Jetty,plastic_kg_per_100m,2033,9.18,11.89,15.4
+improved,Kemari Jetty,plastic_kg_per_100m,2034,9.17,11.97,15.69
+improved,Kemari Jetty,plastic_kg_per_100m,2035,9.15,12.05,16.01
+improved,Kemari Jetty,plastic_kg_per_100m,2036,9.14,12.11,16.33
+improved,Kemari Jetty,plastic_kg_per_100m,2037,9.1,12.16,16.65
+improved,Kemari Jetty,plastic_kg_per_100m,2038,9.05,12.2,17.03
+improved,Kemari Jetty,plastic_kg_per_100m,2039,8.98,12.24,17.35
+improved,Kemari Jetty,plastic_kg_per_100m,2040,8.92,12.26,17.72
+improved,Kemari Jetty,plastic_kg_per_100m,2041,8.83,12.29,18.1
+improved,Kemari Jetty,plastic_kg_per_100m,2042,8.73,12.28,18.45
+improved,Kemari Jetty,plastic_kg_per_100m,2043,8.61,12.26,18.82
+improved,Kemari Jetty,plastic_kg_per_100m,2044,8.48,12.23,19.19
+improved,Kemari Jetty,plastic_kg_per_100m,2045,8.34,12.2,19.52
+improved,Kemari Jetty,plastic_kg_per_100m,2046,8.19,12.14,19.85
+improved,Kemari Jetty,plastic_kg_per_100m,2047,8.02,12.09,20.14
+improved,Kemari Jetty,plastic_kg_per_100m,2048,7.84,12,20.42
+improved,Kemari Jetty,plastic_kg_per_100m,2049,7.63,11.9,20.69
+improved,Kemari Jetty,plastic_kg_per_100m,2050,7.41,11.78,21.01
+improved,West Wharf,plastic_items_per_100m,2026,272,378,493
+improved,West Wharf,plastic_items_per_100m,2027,275,382,499
+improved,West Wharf,plastic_items_per_100m,2028,278,386,505
+improved,West Wharf,plastic_items_per_100m,2029,280,390,513
+improved,West Wharf,plastic_items_per_100m,2030,282,394,520
+improved,West Wharf,plastic_items_per_100m,2031,283,397,528
+improved,West Wharf,plastic_items_per_100m,2032,284,401,536
+improved,West Wharf,plastic_items_per_100m,2033,285,404,546
+improved,West Wharf,plastic_items_per_100m,2034,285,407,554
+improved,West Wharf,plastic_items_per_100m,2035,286,409,563
+improved,West Wharf,plastic_items_per_100m,2036,286,412,574
+improved,West Wharf,plastic_items_per_100m,2037,285,413,583
+improved,West Wharf,plastic_items_per_100m,2038,285,415,594
+improved,West Wharf,plastic_items_per_100m,2039,283,416,605
+improved,West Wharf,plastic_items_per_100m,2040,282,417,615
+improved,West Wharf,plastic_items_per_100m,2041,280,417,626
+improved,West Wharf,plastic_items_per_100m,2042,277,417,638
+improved,West Wharf,plastic_items_per_100m,2043,274,416,649
+improved,West Wharf,plastic_items_per_100m,2044,271,415,661
+improved,West Wharf,plastic_items_per_100m,2045,267,414,672
+improved,West Wharf,plastic_items_per_100m,2046,262,412,682
+improved,West Wharf,plastic_items_per_100m,2047,257,409,691
+improved,West Wharf,plastic_items_per_100m,2048,252,406,700
+improved,West Wharf,plastic_items_per_100m,2049,246,402,710
+improved,West Wharf,plastic_items_per_100m,2050,240,399,718
+improved,West Wharf,plastic_kg_per_100m,2026,9.67,12.24,15.37
+improved,West Wharf,plastic_kg_per_100m,2027,9.78,12.37,15.56
+improved,West Wharf,plastic_kg_per_100m,2028,9.87,12.52,15.77
+improved,West Wharf,plastic_kg_per_100m,2029,9.94,12.65,16.02
+improved,West Wharf,plastic_kg_per_100m,2030,10,12.77,16.27
+improved,West Wharf,plastic_kg_per_100m,2031,10.03,12.89,16.53
+improved,West Wharf,plastic_kg_per_100m,2032,10.06,13,16.84
+improved,West Wharf,plastic_kg_per_100m,2033,10.08,13.1,17.1
+improved,West Wharf,plastic_kg_per_100m,2034,10.06,13.19,17.45
+improved,West Wharf,plastic_kg_per_100m,2035,10.04,13.28,17.76
+improved,West Wharf,plastic_kg_per_100m,2036,10,13.37,18.06
+improved,West Wharf,plastic_kg_per_100m,2037,9.98,13.43,18.41
+improved,West Wharf,plastic_kg_per_100m,2038,9.93,13.48,18.81
+improved,West Wharf,plastic_kg_per_100m,2039,9.87,13.52,19.19
+improved,West Wharf,plastic_kg_per_100m,2040,9.8,13.55,19.58
+improved,West Wharf,plastic_kg_per_100m,2041,9.7,13.58,19.94
+improved,West Wharf,plastic_kg_per_100m,2042,9.59,13.57,20.31
+improved,West Wharf,plastic_kg_per_100m,2043,9.46,13.56,20.69
+improved,West Wharf,plastic_kg_per_100m,2044,9.34,13.53,21.07
+improved,West Wharf,plastic_kg_per_100m,2045,9.18,13.49,21.41
+improved,West Wharf,plastic_kg_per_100m,2046,9.02,13.43,21.76
+improved,West Wharf,plastic_kg_per_100m,2047,8.82,13.37,22.04
+improved,West Wharf,plastic_kg_per_100m,2048,8.63,13.27,22.36
+improved,West Wharf,plastic_kg_per_100m,2049,8.42,13.14,22.64
+improved,West Wharf,plastic_kg_per_100m,2050,8.16,13.01,22.96
+improved,Damb,plastic_items_per_100m,2026,280,335,387
+improved,Damb,plastic_items_per_100m,2027,283,338,392
+improved,Damb,plastic_items_per_100m,2028,286,342,398
+improved,Damb,plastic_items_per_100m,2029,288,346,405
+improved,Damb,plastic_items_per_100m,2030,289,349,412
+improved,Damb,plastic_items_per_100m,2031,290,352,420
+improved,Damb,plastic_items_per_100m,2032,290,354,428
+improved,Damb,plastic_items_per_100m,2033,290,356,438
+improved,Damb,plastic_items_per_100m,2034,290,359,448
+improved,Damb,plastic_items_per_100m,2035,289,360,458
+improved,Damb,plastic_items_per_100m,2036,287,362,469
+improved,Damb,plastic_items_per_100m,2037,286,363,480
+improved,Damb,plastic_items_per_100m,2038,284,365,491
+improved,Damb,plastic_items_per_100m,2039,281,366,502
+improved,Damb,plastic_items_per_100m,2040,279,367,514
+improved,Damb,plastic_items_per_100m,2041,275,367,524
+improved,Damb,plastic_items_per_100m,2042,272,367,536
+improved,Damb,plastic_items_per_100m,2043,267,367,547
+improved,Damb,plastic_items_per_100m,2044,263,366,558
+improved,Damb,plastic_items_per_100m,2045,258,365,567
+improved,Damb,plastic_items_per_100m,2046,253,363,578
+improved,Damb,plastic_items_per_100m,2047,247,361,587
+improved,Damb,plastic_items_per_100m,2048,241,358,597
+improved,Damb,plastic_items_per_100m,2049,235,355,606
+improved,Damb,plastic_items_per_100m,2050,228,351,614
+improved,Damb,plastic_kg_per_100m,2026,8.47,9.86,11.36
+improved,Damb,plastic_kg_per_100m,2027,8.55,9.97,11.52
+improved,Damb,plastic_kg_per_100m,2028,8.62,10.08,11.7
+improved,Damb,plastic_kg_per_100m,2029,8.68,10.18,11.88
+improved,Damb,plastic_kg_per_100m,2030,8.7,10.29,12.13
+improved,Damb,plastic_kg_per_100m,2031,8.72,10.38,12.38
+improved,Damb,plastic_kg_per_100m,2032,8.73,10.46,12.64
+improved,Damb,plastic_kg_per_100m,2033,8.71,10.54,12.93
+improved,Damb,plastic_kg_per_100m,2034,8.67,10.59,13.22
+improved,Damb,plastic_kg_per_100m,2035,8.64,10.63,13.53
+improved,Damb,plastic_kg_per_100m,2036,8.59,10.68,13.83
+improved,Damb,plastic_kg_per_100m,2037,8.53,10.72,14.15
+improved,Damb,plastic_kg_per_100m,2038,8.47,10.76,14.47
+improved,Damb,plastic_kg_per_100m,2039,8.4,10.8,14.8
+improved,Damb,plastic_kg_per_100m,2040,8.3,10.81,15.16
+improved,Damb,plastic_kg_per_100m,2041,8.2,10.82,15.47
+improved,Damb,plastic_kg_per_100m,2042,8.09,10.82,15.79
+improved,Damb,plastic_kg_per_100m,2043,7.96,10.81,16.11
+improved,Damb,plastic_kg_per_100m,2044,7.83,10.78,16.43
+improved,Damb,plastic_kg_per_100m,2045,7.69,10.75,16.75
+improved,Damb,plastic_kg_per_100m,2046,7.54,10.71,17.06
+improved,Damb,plastic_kg_per_100m,2047,7.37,10.65,17.34
+improved,Damb,plastic_kg_per_100m,2048,7.19,10.57,17.64
+improved,Damb,plastic_kg_per_100m,2049,7.01,10.48,17.94
+improved,Damb,plastic_kg_per_100m,2050,6.8,10.37,18.17
+improved,Ormara,plastic_items_per_100m,2026,216,261,309
+improved,Ormara,plastic_items_per_100m,2027,218,264,312
+improved,Ormara,plastic_items_per_100m,2028,220,267,317
+improved,Ormara,plastic_items_per_100m,2029,221,270,322
+improved,Ormara,plastic_items_per_100m,2030,222,272,327
+improved,Ormara,plastic_items_per_100m,2031,223,274,333
+improved,Ormara,plastic_items_per_100m,2032,223,276,339
+improved,Ormara,plastic_items_per_100m,2033,223,278,346
+improved,Ormara,plastic_items_per_100m,2034,223,280,354
+improved,Ormara,plastic_items_per_100m,2035,223,282,361
+improved,Ormara,plastic_items_per_100m,2036,222,283,369
+improved,Ormara,plastic_items_per_100m,2037,221,284,378
+improved,Ormara,plastic_items_per_100m,2038,220,286,386
+improved,Ormara,plastic_items_per_100m,2039,218,286,396
+improved,Ormara,plastic_items_per_100m,2040,216,287,405
+improved,Ormara,plastic_items_per_100m,2041,214,287,414
+improved,Ormara,plastic_items_per_100m,2042,211,287,422
+improved,Ormara,plastic_items_per_100m,2043,208,287,430
+improved,Ormara,plastic_items_per_100m,2044,205,286,438
+improved,Ormara,plastic_items_per_100m,2045,201,285,446
+improved,Ormara,plastic_items_per_100m,2046,197,284,454
+improved,Ormara,plastic_items_per_100m,2047,193,282,462
+improved,Ormara,plastic_items_per_100m,2048,188,280,470
+improved,Ormara,plastic_items_per_100m,2049,183,278,476
+improved,Ormara,plastic_items_per_100m,2050,178,275,482
+improved,Ormara,plastic_kg_per_100m,2026,6.88,8.38,10.06
+improved,Ormara,plastic_kg_per_100m,2027,6.96,8.47,10.18
+improved,Ormara,plastic_kg_per_100m,2028,7.01,8.56,10.31
+improved,Ormara,plastic_kg_per_100m,2029,7.05,8.64,10.45
+improved,Ormara,plastic_kg_per_100m,2030,7.09,8.73,10.63
+improved,Ormara,plastic_kg_per_100m,2031,7.12,8.81,10.8
+improved,Ormara,plastic_kg_per_100m,2032,7.14,8.88,11.01
+improved,Ormara,plastic_kg_per_100m,2033,7.13,8.95,11.23
+improved,Ormara,plastic_kg_per_100m,2034,7.14,9.01,11.46
+improved,Ormara,plastic_kg_per_100m,2035,7.11,9.06,11.73
+improved,Ormara,plastic_kg_per_100m,2036,7.09,9.1,11.98
+improved,Ormara,plastic_kg_per_100m,2037,7.05,9.15,12.25
+improved,Ormara,plastic_kg_per_100m,2038,7,9.18,12.5
+improved,Ormara,plastic_kg_per_100m,2039,6.94,9.2,12.78
+improved,Ormara,plastic_kg_per_100m,2040,6.88,9.23,13.06
+improved,Ormara,plastic_kg_per_100m,2041,6.82,9.23,13.34
+improved,Ormara,plastic_kg_per_100m,2042,6.73,9.23,13.61
+improved,Ormara,plastic_kg_per_100m,2043,6.63,9.22,13.89
+improved,Ormara,plastic_kg_per_100m,2044,6.52,9.2,14.15
+improved,Ormara,plastic_kg_per_100m,2045,6.41,9.17,14.39
+improved,Ormara,plastic_kg_per_100m,2046,6.28,9.13,14.66
+improved,Ormara,plastic_kg_per_100m,2047,6.16,9.08,14.9
+improved,Ormara,plastic_kg_per_100m,2048,6.02,9.02,15.11
+improved,Ormara,plastic_kg_per_100m,2049,5.86,8.94,15.36
+improved,Ormara,plastic_kg_per_100m,2050,5.68,8.85,15.53
+improved,Pasni,plastic_items_per_100m,2026,369,493,624
+improved,Pasni,plastic_items_per_100m,2027,374,499,631
+improved,Pasni,plastic_items_per_100m,2028,377,505,640
+improved,Pasni,plastic_items_per_100m,2029,380,510,649
+improved,Pasni,plastic_items_per_100m,2030,382,514,659
+improved,Pasni,plastic_items_per_100m,2031,384,519,670
+improved,Pasni,plastic_items_per_100m,2032,386,523,682
+improved,Pasni,plastic_items_per_100m,2033,387,527,695
+improved,Pasni,plastic_items_per_100m,2034,387,530,707
+improved,Pasni,plastic_items_per_100m,2035,387,533,721
+improved,Pasni,plastic_items_per_100m,2036,386,535,734
+improved,Pasni,plastic_items_per_100m,2037,385,538,749
+improved,Pasni,plastic_items_per_100m,2038,383,540,763
+improved,Pasni,plastic_items_per_100m,2039,381,541,778
+improved,Pasni,plastic_items_per_100m,2040,378,541,793
+improved,Pasni,plastic_items_per_100m,2041,375,542,810
+improved,Pasni,plastic_items_per_100m,2042,372,542,823
+improved,Pasni,plastic_items_per_100m,2043,367,541,839
+improved,Pasni,plastic_items_per_100m,2044,362,541,854
+improved,Pasni,plastic_items_per_100m,2045,357,539,869
+improved,Pasni,plastic_items_per_100m,2046,351,536,881
+improved,Pasni,plastic_items_per_100m,2047,343,532,894
+improved,Pasni,plastic_items_per_100m,2048,335,528,906
+improved,Pasni,plastic_items_per_100m,2049,328,523,917
+improved,Pasni,plastic_items_per_100m,2050,319,518,928
+improved,Pasni,plastic_kg_per_100m,2026,11.05,14.91,18.98
+improved,Pasni,plastic_kg_per_100m,2027,11.16,15.1,19.24
+improved,Pasni,plastic_kg_per_100m,2028,11.29,15.26,19.51
+improved,Pasni,plastic_kg_per_100m,2029,11.37,15.41,19.79
+improved,Pasni,plastic_kg_per_100m,2030,11.43,15.56,20.08
+improved,Pasni,plastic_kg_per_100m,2031,11.52,15.7,20.43
+improved,Pasni,plastic_kg_per_100m,2032,11.57,15.84,20.83
+improved,Pasni,plastic_kg_per_100m,2033,11.59,15.94,21.18
+improved,Pasni,plastic_kg_per_100m,2034,11.59,16.04,21.56
+improved,Pasni,plastic_kg_per_100m,2035,11.6,16.14,21.96
+improved,Pasni,plastic_kg_per_100m,2036,11.58,16.2,22.38
+improved,Pasni,plastic_kg_per_100m,2037,11.56,16.27,22.78
+improved,Pasni,plastic_kg_per_100m,2038,11.52,16.32,23.2
+improved,Pasni,plastic_kg_per_100m,2039,11.45,16.36,23.7
+improved,Pasni,plastic_kg_per_100m,2040,11.35,16.38,24.18
+improved,Pasni,plastic_kg_per_100m,2041,11.29,16.38,24.64
+improved,Pasni,plastic_kg_per_100m,2042,11.19,16.38,25.13
+improved,Pasni,plastic_kg_per_100m,2043,11.04,16.37,25.56
+improved,Pasni,plastic_kg_per_100m,2044,10.88,16.34,25.97
+improved,Pasni,plastic_kg_per_100m,2045,10.73,16.28,26.4
+improved,Pasni,plastic_kg_per_100m,2046,10.55,16.19,26.82
+improved,Pasni,plastic_kg_per_100m,2047,10.33,16.1,27.16
+improved,Pasni,plastic_kg_per_100m,2048,10.09,15.98,27.6
+improved,Pasni,plastic_kg_per_100m,2049,9.84,15.85,27.98
+improved,Pasni,plastic_kg_per_100m,2050,9.55,15.68,28.29
+improved,Gwadar,plastic_items_per_100m,2026,189,264,340
+improved,Gwadar,plastic_items_per_100m,2027,191,267,344
+improved,Gwadar,plastic_items_per_100m,2028,193,270,347
+improved,Gwadar,plastic_items_per_100m,2029,195,273,352
+improved,Gwadar,plastic_items_per_100m,2030,197,275,357
+improved,Gwadar,plastic_items_per_100m,2031,198,278,363
+improved,Gwadar,plastic_items_per_100m,2032,199,280,369
+improved,Gwadar,plastic_items_per_100m,2033,200,282,375
+improved,Gwadar,plastic_items_per_100m,2034,200,284,382
+improved,Gwadar,plastic_items_per_100m,2035,200,286,389
+improved,Gwadar,plastic_items_per_100m,2036,200,287,396
+improved,Gwadar,plastic_items_per_100m,2037,199,288,404
+improved,Gwadar,plastic_items_per_100m,2038,198,290,412
+improved,Gwadar,plastic_items_per_100m,2039,197,290,420
+improved,Gwadar,plastic_items_per_100m,2040,196,290,428
+improved,Gwadar,plastic_items_per_100m,2041,194,291,437
+improved,Gwadar,plastic_items_per_100m,2042,192,291,445
+improved,Gwadar,plastic_items_per_100m,2043,190,290,451
+improved,Gwadar,plastic_items_per_100m,2044,188,289,459
+improved,Gwadar,plastic_items_per_100m,2045,185,288,467
+improved,Gwadar,plastic_items_per_100m,2046,182,287,473
+improved,Gwadar,plastic_items_per_100m,2047,179,285,480
+improved,Gwadar,plastic_items_per_100m,2048,176,283,486
+improved,Gwadar,plastic_items_per_100m,2049,171,280,492
+improved,Gwadar,plastic_items_per_100m,2050,167,278,498
+improved,Gwadar,plastic_kg_per_100m,2026,6.07,8.06,9.97
+improved,Gwadar,plastic_kg_per_100m,2027,6.15,8.15,10.08
+improved,Gwadar,plastic_kg_per_100m,2028,6.19,8.24,10.21
+improved,Gwadar,plastic_kg_per_100m,2029,6.22,8.33,10.35
+improved,Gwadar,plastic_kg_per_100m,2030,6.26,8.41,10.52
+improved,Gwadar,plastic_kg_per_100m,2031,6.31,8.48,10.7
+improved,Gwadar,plastic_kg_per_100m,2032,6.34,8.54,10.91
+improved,Gwadar,plastic_kg_per_100m,2033,6.37,8.6,11.1
+improved,Gwadar,plastic_kg_per_100m,2034,6.38,8.65,11.31
+improved,Gwadar,plastic_kg_per_100m,2035,6.38,8.71,11.56
+improved,Gwadar,plastic_kg_per_100m,2036,6.37,8.74,11.79
+improved,Gwadar,plastic_kg_per_100m,2037,6.34,8.78,12.02
+improved,Gwadar,plastic_kg_per_100m,2038,6.31,8.81,12.27
+improved,Gwadar,plastic_kg_per_100m,2039,6.27,8.82,12.52
+improved,Gwadar,plastic_kg_per_100m,2040,6.23,8.84,12.76
+improved,Gwadar,plastic_kg_per_100m,2041,6.18,8.85,13
+improved,Gwadar,plastic_kg_per_100m,2042,6.12,8.84,13.25
+improved,Gwadar,plastic_kg_per_100m,2043,6.04,8.82,13.48
+improved,Gwadar,plastic_kg_per_100m,2044,5.96,8.8,13.73
+improved,Gwadar,plastic_kg_per_100m,2045,5.86,8.76,13.97
+improved,Gwadar,plastic_kg_per_100m,2046,5.76,8.72,14.2
+improved,Gwadar,plastic_kg_per_100m,2047,5.64,8.67,14.43
+improved,Gwadar,plastic_kg_per_100m,2048,5.52,8.61,14.63
+improved,Gwadar,plastic_kg_per_100m,2049,5.4,8.53,14.83
+improved,Gwadar,plastic_kg_per_100m,2050,5.27,8.44,15.02
+improved,Jiwani,plastic_items_per_100m,2026,302,368,418
+improved,Jiwani,plastic_items_per_100m,2027,306,372,423
+improved,Jiwani,plastic_items_per_100m,2028,308,376,430
+improved,Jiwani,plastic_items_per_100m,2029,311,380,437
+improved,Jiwani,plastic_items_per_100m,2030,312,383,446
+improved,Jiwani,plastic_items_per_100m,2031,313,386,456
+improved,Jiwani,plastic_items_per_100m,2032,314,389,467
+improved,Jiwani,plastic_items_per_100m,2033,313,391,477
+improved,Jiwani,plastic_items_per_100m,2034,313,393,489
+improved,Jiwani,plastic_items_per_100m,2035,312,395,501
+improved,Jiwani,plastic_items_per_100m,2036,311,397,513
+improved,Jiwani,plastic_items_per_100m,2037,310,398,526
+improved,Jiwani,plastic_items_per_100m,2038,308,400,539
+improved,Jiwani,plastic_items_per_100m,2039,305,400,551
+improved,Jiwani,plastic_items_per_100m,2040,302,401,564
+improved,Jiwani,plastic_items_per_100m,2041,300,402,576
+improved,Jiwani,plastic_items_per_100m,2042,296,402,589
+improved,Jiwani,plastic_items_per_100m,2043,292,401,600
+improved,Jiwani,plastic_items_per_100m,2044,287,400,612
+improved,Jiwani,plastic_items_per_100m,2045,282,399,624
+improved,Jiwani,plastic_items_per_100m,2046,277,398,635
+improved,Jiwani,plastic_items_per_100m,2047,270,395,645
+improved,Jiwani,plastic_items_per_100m,2048,263,392,655
+improved,Jiwani,plastic_items_per_100m,2049,256,389,664
+improved,Jiwani,plastic_items_per_100m,2050,249,385,672
+improved,Jiwani,plastic_kg_per_100m,2026,8.84,10.71,12.2
+improved,Jiwani,plastic_kg_per_100m,2027,8.93,10.84,12.35
+improved,Jiwani,plastic_kg_per_100m,2028,9.01,10.94,12.55
+improved,Jiwani,plastic_kg_per_100m,2029,9.07,11.05,12.78
+improved,Jiwani,plastic_kg_per_100m,2030,9.12,11.14,13.03
+improved,Jiwani,plastic_kg_per_100m,2031,9.15,11.23,13.3
+improved,Jiwani,plastic_kg_per_100m,2032,9.16,11.32,13.6
+improved,Jiwani,plastic_kg_per_100m,2033,9.17,11.4,13.94
+improved,Jiwani,plastic_kg_per_100m,2034,9.16,11.47,14.29
+improved,Jiwani,plastic_kg_per_100m,2035,9.15,11.53,14.63
+improved,Jiwani,plastic_kg_per_100m,2036,9.1,11.58,15
+improved,Jiwani,plastic_kg_per_100m,2037,9.04,11.62,15.36
+improved,Jiwani,plastic_kg_per_100m,2038,8.98,11.65,15.72
+improved,Jiwani,plastic_kg_per_100m,2039,8.91,11.68,16.08
+improved,Jiwani,plastic_kg_per_100m,2040,8.83,11.69,16.43
+improved,Jiwani,plastic_kg_per_100m,2041,8.74,11.69,16.8
+improved,Jiwani,plastic_kg_per_100m,2042,8.64,11.7,17.17
+improved,Jiwani,plastic_kg_per_100m,2043,8.51,11.69,17.51
+improved,Jiwani,plastic_kg_per_100m,2044,8.37,11.66,17.83
+improved,Jiwani,plastic_kg_per_100m,2045,8.23,11.63,18.15
+improved,Jiwani,plastic_kg_per_100m,2046,8.06,11.57,18.48
+improved,Jiwani,plastic_kg_per_100m,2047,7.89,11.5,18.8
+improved,Jiwani,plastic_kg_per_100m,2048,7.68,11.42,19.03
+improved,Jiwani,plastic_kg_per_100m,2049,7.47,11.33,19.29
+improved,Jiwani,plastic_kg_per_100m,2050,7.25,11.21,19.58
+improved,All sites,plastic_items_per_100m,2026,336,361,385
+improved,All sites,plastic_items_per_100m,2027,339,365,390
+improved,All sites,plastic_items_per_100m,2028,341,368,397
+improved,All sites,plastic_items_per_100m,2029,341,372,406
+improved,All sites,plastic_items_per_100m,2030,341,375,417
+improved,All sites,plastic_items_per_100m,2031,341,378,428
+improved,All sites,plastic_items_per_100m,2032,340,381,439
+improved,All sites,plastic_items_per_100m,2033,338,383,451
+improved,All sites,plastic_items_per_100m,2034,337,386,463
+improved,All sites,plastic_items_per_100m,2035,334,388,476
+improved,All sites,plastic_items_per_100m,2036,332,389,489
+improved,All sites,plastic_items_per_100m,2037,329,391,501
+improved,All sites,plastic_items_per_100m,2038,325,392,514
+improved,All sites,plastic_items_per_100m,2039,322,393,527
+improved,All sites,plastic_items_per_100m,2040,318,394,540
+improved,All sites,plastic_items_per_100m,2041,314,394,552
+improved,All sites,plastic_items_per_100m,2042,309,394,565
+improved,All sites,plastic_items_per_100m,2043,304,394,577
+improved,All sites,plastic_items_per_100m,2044,298,393,589
+improved,All sites,plastic_items_per_100m,2045,292,392,602
+improved,All sites,plastic_items_per_100m,2046,286,390,613
+improved,All sites,plastic_items_per_100m,2047,279,388,624
+improved,All sites,plastic_items_per_100m,2048,271,385,634
+improved,All sites,plastic_items_per_100m,2049,264,382,643
+improved,All sites,plastic_items_per_100m,2050,255,378,653
+improved,All sites,plastic_kg_per_100m,2026,10.44,11.16,11.87
+improved,All sites,plastic_kg_per_100m,2027,10.53,11.29,12.05
+improved,All sites,plastic_kg_per_100m,2028,10.59,11.41,12.28
+improved,All sites,plastic_kg_per_100m,2029,10.61,11.52,12.56
+improved,All sites,plastic_kg_per_100m,2030,10.6,11.62,12.87
+improved,All sites,plastic_kg_per_100m,2031,10.58,11.71,13.21
+improved,All sites,plastic_kg_per_100m,2032,10.54,11.79,13.57
+improved,All sites,plastic_kg_per_100m,2033,10.49,11.87,13.95
+improved,All sites,plastic_kg_per_100m,2034,10.43,11.94,14.34
+improved,All sites,plastic_kg_per_100m,2035,10.36,12,14.73
+improved,All sites,plastic_kg_per_100m,2036,10.29,12.05,15.13
+improved,All sites,plastic_kg_per_100m,2037,10.19,12.1,15.52
+improved,All sites,plastic_kg_per_100m,2038,10.09,12.14,15.92
+improved,All sites,plastic_kg_per_100m,2039,9.97,12.18,16.31
+improved,All sites,plastic_kg_per_100m,2040,9.84,12.2,16.69
+improved,All sites,plastic_kg_per_100m,2041,9.71,12.21,17.08
+improved,All sites,plastic_kg_per_100m,2042,9.56,12.21,17.47
+improved,All sites,plastic_kg_per_100m,2043,9.41,12.2,17.87
+improved,All sites,plastic_kg_per_100m,2044,9.23,12.18,18.25
+improved,All sites,plastic_kg_per_100m,2045,9.04,12.14,18.61
+improved,All sites,plastic_kg_per_100m,2046,8.86,12.09,18.99
+improved,All sites,plastic_kg_per_100m,2047,8.64,12.03,19.32
+improved,All sites,plastic_kg_per_100m,2048,8.41,11.95,19.65
+improved,All sites,plastic_kg_per_100m,2049,8.16,11.84,19.93
+improved,All sites,plastic_kg_per_100m,2050,7.92,11.72,20.21
+strong,Sandspit,plastic_items_per_100m,2026,272,365,469
+strong,Sandspit,plastic_items_per_100m,2027,264,354,454
+strong,Sandspit,plastic_items_per_100m,2028,255,342,439
+strong,Sandspit,plastic_items_per_100m,2029,246,331,425
+strong,Sandspit,plastic_items_per_100m,2030,238,319,410
+strong,Sandspit,plastic_items_per_100m,2031,229,308,396
+strong,Sandspit,plastic_items_per_100m,2032,221,296,381
+strong,Sandspit,plastic_items_per_100m,2033,212,285,366
+strong,Sandspit,plastic_items_per_100m,2034,203,274,352
+strong,Sandspit,plastic_items_per_100m,2035,195,262,338
+strong,Sandspit,plastic_items_per_100m,2036,186,251,324
+strong,Sandspit,plastic_items_per_100m,2037,177,239,310
+strong,Sandspit,plastic_items_per_100m,2038,168,228,296
+strong,Sandspit,plastic_items_per_100m,2039,159,216,282
+strong,Sandspit,plastic_items_per_100m,2040,150,205,268
+strong,Sandspit,plastic_items_per_100m,2041,141,193,254
+strong,Sandspit,plastic_items_per_100m,2042,132,182,241
+strong,Sandspit,plastic_items_per_100m,2043,123,170,227
+strong,Sandspit,plastic_items_per_100m,2044,113,159,214
+strong,Sandspit,plastic_items_per_100m,2045,104,147,201
+strong,Sandspit,plastic_items_per_100m,2046,94,136,188
+strong,Sandspit,plastic_items_per_100m,2047,84,124,175
+strong,Sandspit,plastic_items_per_100m,2048,74,113,163
+strong,Sandspit,plastic_items_per_100m,2049,64,101,150
+strong,Sandspit,plastic_items_per_100m,2050,53,90,138
+strong,Sandspit,plastic_kg_per_100m,2026,8.94,11.74,14.86
+strong,Sandspit,plastic_kg_per_100m,2027,8.66,11.37,14.4
+strong,Sandspit,plastic_kg_per_100m,2028,8.39,11.01,13.94
+strong,Sandspit,plastic_kg_per_100m,2029,8.11,10.64,13.48
+strong,Sandspit,plastic_kg_per_100m,2030,7.82,10.27,13.01
+strong,Sandspit,plastic_kg_per_100m,2031,7.54,9.9,12.55
+strong,Sandspit,plastic_kg_per_100m,2032,7.26,9.53,12.1
+strong,Sandspit,plastic_kg_per_100m,2033,6.97,9.17,11.65
+strong,Sandspit,plastic_kg_per_100m,2034,6.69,8.8,11.19
+strong,Sandspit,plastic_kg_per_100m,2035,6.4,8.43,10.73
+strong,Sandspit,plastic_kg_per_100m,2036,6.11,8.06,10.28
+strong,Sandspit,plastic_kg_per_100m,2037,5.82,7.7,9.82
+strong,Sandspit,plastic_kg_per_100m,2038,5.52,7.34,9.39
+strong,Sandspit,plastic_kg_per_100m,2039,5.24,6.97,8.95
+strong,Sandspit,plastic_kg_per_100m,2040,4.94,6.6,8.52
+strong,Sandspit,plastic_kg_per_100m,2041,4.64,6.23,8.1
+strong,Sandspit,plastic_kg_per_100m,2042,4.34,5.86,7.68
+strong,Sandspit,plastic_kg_per_100m,2043,4.03,5.48,7.26
+strong,Sandspit,plastic_kg_per_100m,2044,3.71,5.1,6.83
+strong,Sandspit,plastic_kg_per_100m,2045,3.41,4.74,6.42
+strong,Sandspit,plastic_kg_per_100m,2046,3.08,4.36,6.01
+strong,Sandspit,plastic_kg_per_100m,2047,2.75,4,5.6
+strong,Sandspit,plastic_kg_per_100m,2048,2.42,3.63,5.2
+strong,Sandspit,plastic_kg_per_100m,2049,2.08,3.25,4.81
+strong,Sandspit,plastic_kg_per_100m,2050,1.73,2.88,4.4
+strong,Buleji,plastic_items_per_100m,2026,359,465,567
+strong,Buleji,plastic_items_per_100m,2027,347,451,549
+strong,Buleji,plastic_items_per_100m,2028,336,436,531
+strong,Buleji,plastic_items_per_100m,2029,325,422,514
+strong,Buleji,plastic_items_per_100m,2030,314,407,496
+strong,Buleji,plastic_items_per_100m,2031,302,393,479
+strong,Buleji,plastic_items_per_100m,2032,291,378,462
+strong,Buleji,plastic_items_per_100m,2033,280,363,445
+strong,Buleji,plastic_items_per_100m,2034,269,349,428
+strong,Buleji,plastic_items_per_100m,2035,257,334,410
+strong,Buleji,plastic_items_per_100m,2036,245,320,393
+strong,Buleji,plastic_items_per_100m,2037,233,305,376
+strong,Buleji,plastic_items_per_100m,2038,222,290,359
+strong,Buleji,plastic_items_per_100m,2039,210,276,343
+strong,Buleji,plastic_items_per_100m,2040,198,261,326
+strong,Buleji,plastic_items_per_100m,2041,186,246,310
+strong,Buleji,plastic_items_per_100m,2042,174,231,294
+strong,Buleji,plastic_items_per_100m,2043,161,217,278
+strong,Buleji,plastic_items_per_100m,2044,149,202,262
+strong,Buleji,plastic_items_per_100m,2045,137,187,246
+strong,Buleji,plastic_items_per_100m,2046,124,172,230
+strong,Buleji,plastic_items_per_100m,2047,111,158,215
+strong,Buleji,plastic_items_per_100m,2048,98,143,200
+strong,Buleji,plastic_items_per_100m,2049,84,129,184
+strong,Buleji,plastic_items_per_100m,2050,70,114,170
+strong,Buleji,plastic_kg_per_100m,2026,10.68,14.07,17.26
+strong,Buleji,plastic_kg_per_100m,2027,10.36,13.64,16.73
+strong,Buleji,plastic_kg_per_100m,2028,10.02,13.2,16.2
+strong,Buleji,plastic_kg_per_100m,2029,9.68,12.76,15.66
+strong,Buleji,plastic_kg_per_100m,2030,9.34,12.32,15.13
+strong,Buleji,plastic_kg_per_100m,2031,9.01,11.88,14.61
+strong,Buleji,plastic_kg_per_100m,2032,8.67,11.43,14.09
+strong,Buleji,plastic_kg_per_100m,2033,8.33,10.99,13.55
+strong,Buleji,plastic_kg_per_100m,2034,7.99,10.56,13.02
+strong,Buleji,plastic_kg_per_100m,2035,7.64,10.12,12.5
+strong,Buleji,plastic_kg_per_100m,2036,7.3,9.68,12
+strong,Buleji,plastic_kg_per_100m,2037,6.95,9.24,11.48
+strong,Buleji,plastic_kg_per_100m,2038,6.6,8.8,10.96
+strong,Buleji,plastic_kg_per_100m,2039,6.26,8.35,10.45
+strong,Buleji,plastic_kg_per_100m,2040,5.91,7.91,9.94
+strong,Buleji,plastic_kg_per_100m,2041,5.55,7.46,9.44
+strong,Buleji,plastic_kg_per_100m,2042,5.19,7.01,8.95
+strong,Buleji,plastic_kg_per_100m,2043,4.82,6.56,8.46
+strong,Buleji,plastic_kg_per_100m,2044,4.46,6.11,7.97
+strong,Buleji,plastic_kg_per_100m,2045,4.08,5.67,7.49
+strong,Buleji,plastic_kg_per_100m,2046,3.7,5.22,7.02
+strong,Buleji,plastic_kg_per_100m,2047,3.31,4.77,6.54
+strong,Buleji,plastic_kg_per_100m,2048,2.92,4.33,6.08
+strong,Buleji,plastic_kg_per_100m,2049,2.52,3.89,5.62
+strong,Buleji,plastic_kg_per_100m,2050,2.1,3.45,5.17
+strong,Paradise Point,plastic_items_per_100m,2026,270,334,395
+strong,Paradise Point,plastic_items_per_100m,2027,262,323,383
+strong,Paradise Point,plastic_items_per_100m,2028,253,313,370
+strong,Paradise Point,plastic_items_per_100m,2029,245,303,358
+strong,Paradise Point,plastic_items_per_100m,2030,236,292,345
+strong,Paradise Point,plastic_items_per_100m,2031,228,282,333
+strong,Paradise Point,plastic_items_per_100m,2032,219,271,321
+strong,Paradise Point,plastic_items_per_100m,2033,210,261,309
+strong,Paradise Point,plastic_items_per_100m,2034,202,250,297
+strong,Paradise Point,plastic_items_per_100m,2035,193,240,285
+strong,Paradise Point,plastic_items_per_100m,2036,184,230,273
+strong,Paradise Point,plastic_items_per_100m,2037,175,219,262
+strong,Paradise Point,plastic_items_per_100m,2038,167,208,250
+strong,Paradise Point,plastic_items_per_100m,2039,158,198,239
+strong,Paradise Point,plastic_items_per_100m,2040,149,187,228
+strong,Paradise Point,plastic_items_per_100m,2041,140,177,217
+strong,Paradise Point,plastic_items_per_100m,2042,130,166,206
+strong,Paradise Point,plastic_items_per_100m,2043,121,156,195
+strong,Paradise Point,plastic_items_per_100m,2044,111,145,184
+strong,Paradise Point,plastic_items_per_100m,2045,102,135,173
+strong,Paradise Point,plastic_items_per_100m,2046,92,124,163
+strong,Paradise Point,plastic_items_per_100m,2047,82,114,152
+strong,Paradise Point,plastic_items_per_100m,2048,72,103,141
+strong,Paradise Point,plastic_items_per_100m,2049,62,93,131
+strong,Paradise Point,plastic_items_per_100m,2050,51,82,120
+strong,Paradise Point,plastic_kg_per_100m,2026,8.79,11.08,13.18
+strong,Paradise Point,plastic_kg_per_100m,2027,8.51,10.74,12.77
+strong,Paradise Point,plastic_kg_per_100m,2028,8.24,10.39,12.35
+strong,Paradise Point,plastic_kg_per_100m,2029,7.96,10.04,11.94
+strong,Paradise Point,plastic_kg_per_100m,2030,7.68,9.7,11.53
+strong,Paradise Point,plastic_kg_per_100m,2031,7.4,9.35,11.12
+strong,Paradise Point,plastic_kg_per_100m,2032,7.12,9.01,10.72
+strong,Paradise Point,plastic_kg_per_100m,2033,6.84,8.66,10.32
+strong,Paradise Point,plastic_kg_per_100m,2034,6.56,8.31,9.92
+strong,Paradise Point,plastic_kg_per_100m,2035,6.27,7.97,9.52
+strong,Paradise Point,plastic_kg_per_100m,2036,5.99,7.62,9.13
+strong,Paradise Point,plastic_kg_per_100m,2037,5.71,7.27,8.74
+strong,Paradise Point,plastic_kg_per_100m,2038,5.42,6.92,8.37
+strong,Paradise Point,plastic_kg_per_100m,2039,5.12,6.57,7.98
+strong,Paradise Point,plastic_kg_per_100m,2040,4.83,6.22,7.61
+strong,Paradise Point,plastic_kg_per_100m,2041,4.54,5.87,7.23
+strong,Paradise Point,plastic_kg_per_100m,2042,4.24,5.51,6.86
+strong,Paradise Point,plastic_kg_per_100m,2043,3.94,5.16,6.49
+strong,Paradise Point,plastic_kg_per_100m,2044,3.64,4.81,6.13
+strong,Paradise Point,plastic_kg_per_100m,2045,3.32,4.45,5.77
+strong,Paradise Point,plastic_kg_per_100m,2046,3.01,4.1,5.41
+strong,Paradise Point,plastic_kg_per_100m,2047,2.69,3.76,5.05
+strong,Paradise Point,plastic_kg_per_100m,2048,2.36,3.41,4.7
+strong,Paradise Point,plastic_kg_per_100m,2049,2.02,3.07,4.35
+strong,Paradise Point,plastic_kg_per_100m,2050,1.69,2.72,4
+strong,Korangi Creek,plastic_items_per_100m,2026,267,342,430
+strong,Korangi Creek,plastic_items_per_100m,2027,259,331,416
+strong,Korangi Creek,plastic_items_per_100m,2028,250,320,402
+strong,Korangi Creek,plastic_items_per_100m,2029,242,309,389
+strong,Korangi Creek,plastic_items_per_100m,2030,233,299,376
+strong,Korangi Creek,plastic_items_per_100m,2031,225,288,363
+strong,Korangi Creek,plastic_items_per_100m,2032,216,278,350
+strong,Korangi Creek,plastic_items_per_100m,2033,208,267,336
+strong,Korangi Creek,plastic_items_per_100m,2034,199,256,323
+strong,Korangi Creek,plastic_items_per_100m,2035,191,246,310
+strong,Korangi Creek,plastic_items_per_100m,2036,182,235,297
+strong,Korangi Creek,plastic_items_per_100m,2037,173,224,284
+strong,Korangi Creek,plastic_items_per_100m,2038,164,213,272
+strong,Korangi Creek,plastic_items_per_100m,2039,156,202,259
+strong,Korangi Creek,plastic_items_per_100m,2040,147,192,246
+strong,Korangi Creek,plastic_items_per_100m,2041,138,181,234
+strong,Korangi Creek,plastic_items_per_100m,2042,129,170,222
+strong,Korangi Creek,plastic_items_per_100m,2043,120,160,210
+strong,Korangi Creek,plastic_items_per_100m,2044,110,149,198
+strong,Korangi Creek,plastic_items_per_100m,2045,101,138,186
+strong,Korangi Creek,plastic_items_per_100m,2046,91,127,174
+strong,Korangi Creek,plastic_items_per_100m,2047,82,116,162
+strong,Korangi Creek,plastic_items_per_100m,2048,72,106,150
+strong,Korangi Creek,plastic_items_per_100m,2049,62,95,139
+strong,Korangi Creek,plastic_items_per_100m,2050,51,84,127
+strong,Korangi Creek,plastic_kg_per_100m,2026,8.15,9.92,11.99
+strong,Korangi Creek,plastic_kg_per_100m,2027,7.89,9.62,11.62
+strong,Korangi Creek,plastic_kg_per_100m,2028,7.63,9.31,11.24
+strong,Korangi Creek,plastic_kg_per_100m,2029,7.37,9,10.87
+strong,Korangi Creek,plastic_kg_per_100m,2030,7.12,8.69,10.5
+strong,Korangi Creek,plastic_kg_per_100m,2031,6.87,8.38,10.12
+strong,Korangi Creek,plastic_kg_per_100m,2032,6.61,8.07,9.75
+strong,Korangi Creek,plastic_kg_per_100m,2033,6.35,7.75,9.38
+strong,Korangi Creek,plastic_kg_per_100m,2034,6.09,7.44,9.02
+strong,Korangi Creek,plastic_kg_per_100m,2035,5.83,7.13,8.67
+strong,Korangi Creek,plastic_kg_per_100m,2036,5.56,6.83,8.32
+strong,Korangi Creek,plastic_kg_per_100m,2037,5.29,6.52,7.96
+strong,Korangi Creek,plastic_kg_per_100m,2038,5.02,6.2,7.61
+strong,Korangi Creek,plastic_kg_per_100m,2039,4.75,5.89,7.25
+strong,Korangi Creek,plastic_kg_per_100m,2040,4.48,5.58,6.91
+strong,Korangi Creek,plastic_kg_per_100m,2041,4.2,5.27,6.57
+strong,Korangi Creek,plastic_kg_per_100m,2042,3.92,4.96,6.23
+strong,Korangi Creek,plastic_kg_per_100m,2043,3.64,4.64,5.89
+strong,Korangi Creek,plastic_kg_per_100m,2044,3.34,4.33,5.55
+strong,Korangi Creek,plastic_kg_per_100m,2045,3.05,4.01,5.22
+strong,Korangi Creek,plastic_kg_per_100m,2046,2.75,3.7,4.89
+strong,Korangi Creek,plastic_kg_per_100m,2047,2.45,3.39,4.56
+strong,Korangi Creek,plastic_kg_per_100m,2048,2.15,3.08,4.24
+strong,Korangi Creek,plastic_kg_per_100m,2049,1.84,2.77,3.92
+strong,Korangi Creek,plastic_kg_per_100m,2050,1.53,2.46,3.6
+strong,Manora,plastic_items_per_100m,2026,283,353,429
+strong,Manora,plastic_items_per_100m,2027,274,342,416
+strong,Manora,plastic_items_per_100m,2028,266,330,403
+strong,Manora,plastic_items_per_100m,2029,256,319,389
+strong,Manora,plastic_items_per_100m,2030,248,308,376
+strong,Manora,plastic_items_per_100m,2031,239,297,363
+strong,Manora,plastic_items_per_100m,2032,230,286,350
+strong,Manora,plastic_items_per_100m,2033,221,275,337
+strong,Manora,plastic_items_per_100m,2034,212,264,324
+strong,Manora,plastic_items_per_100m,2035,203,253,311
+strong,Manora,plastic_items_per_100m,2036,194,242,298
+strong,Manora,plastic_items_per_100m,2037,184,231,285
+strong,Manora,plastic_items_per_100m,2038,175,220,273
+strong,Manora,plastic_items_per_100m,2039,166,209,260
+strong,Manora,plastic_items_per_100m,2040,156,198,247
+strong,Manora,plastic_items_per_100m,2041,146,187,235
+strong,Manora,plastic_items_per_100m,2042,137,176,223
+strong,Manora,plastic_items_per_100m,2043,127,165,211
+strong,Manora,plastic_items_per_100m,2044,117,153,199
+strong,Manora,plastic_items_per_100m,2045,107,142,187
+strong,Manora,plastic_items_per_100m,2046,97,131,176
+strong,Manora,plastic_items_per_100m,2047,86,120,164
+strong,Manora,plastic_items_per_100m,2048,76,109,152
+strong,Manora,plastic_items_per_100m,2049,65,98,141
+strong,Manora,plastic_items_per_100m,2050,54,87,129
+strong,Manora,plastic_kg_per_100m,2026,9.52,11.51,13.68
+strong,Manora,plastic_kg_per_100m,2027,9.22,11.15,13.26
+strong,Manora,plastic_kg_per_100m,2028,8.91,10.78,12.83
+strong,Manora,plastic_kg_per_100m,2029,8.61,10.42,12.4
+strong,Manora,plastic_kg_per_100m,2030,8.32,10.06,11.98
+strong,Manora,plastic_kg_per_100m,2031,8.03,9.7,11.54
+strong,Manora,plastic_kg_per_100m,2032,7.73,9.33,11.13
+strong,Manora,plastic_kg_per_100m,2033,7.43,8.97,10.73
+strong,Manora,plastic_kg_per_100m,2034,7.12,8.61,10.31
+strong,Manora,plastic_kg_per_100m,2035,6.81,8.25,9.9
+strong,Manora,plastic_kg_per_100m,2036,6.49,7.88,9.5
+strong,Manora,plastic_kg_per_100m,2037,6.18,7.53,9.1
+strong,Manora,plastic_kg_per_100m,2038,5.86,7.16,8.7
+strong,Manora,plastic_kg_per_100m,2039,5.55,6.8,8.29
+strong,Manora,plastic_kg_per_100m,2040,5.23,6.44,7.89
+strong,Manora,plastic_kg_per_100m,2041,4.91,6.08,7.5
+strong,Manora,plastic_kg_per_100m,2042,4.57,5.73,7.12
+strong,Manora,plastic_kg_per_100m,2043,4.24,5.36,6.74
+strong,Manora,plastic_kg_per_100m,2044,3.91,5,6.36
+strong,Manora,plastic_kg_per_100m,2045,3.56,4.64,5.99
+strong,Manora,plastic_kg_per_100m,2046,3.22,4.28,5.62
+strong,Manora,plastic_kg_per_100m,2047,2.87,3.92,5.24
+strong,Manora,plastic_kg_per_100m,2048,2.52,3.56,4.88
+strong,Manora,plastic_kg_per_100m,2049,2.16,3.21,4.51
+strong,Manora,plastic_kg_per_100m,2050,1.79,2.85,4.15
+strong,Kemari Jetty,plastic_items_per_100m,2026,285,363,451
+strong,Kemari Jetty,plastic_items_per_100m,2027,276,351,437
+strong,Kemari Jetty,plastic_items_per_100m,2028,266,340,423
+strong,Kemari Jetty,plastic_items_per_100m,2029,257,328,408
+strong,Kemari Jetty,plastic_items_per_100m,2030,248,317,394
+strong,Kemari Jetty,plastic_items_per_100m,2031,239,306,381
+strong,Kemari Jetty,plastic_items_per_100m,2032,230,295,367
+strong,Kemari Jetty,plastic_items_per_100m,2033,221,283,354
+strong,Kemari Jetty,plastic_items_per_100m,2034,212,272,340
+strong,Kemari Jetty,plastic_items_per_100m,2035,203,261,326
+strong,Kemari Jetty,plastic_items_per_100m,2036,194,249,313
+strong,Kemari Jetty,plastic_items_per_100m,2037,185,238,299
+strong,Kemari Jetty,plastic_items_per_100m,2038,175,227,286
+strong,Kemari Jetty,plastic_items_per_100m,2039,166,215,272
+strong,Kemari Jetty,plastic_items_per_100m,2040,156,204,259
+strong,Kemari Jetty,plastic_items_per_100m,2041,147,192,246
+strong,Kemari Jetty,plastic_items_per_100m,2042,137,181,233
+strong,Kemari Jetty,plastic_items_per_100m,2043,127,170,220
+strong,Kemari Jetty,plastic_items_per_100m,2044,117,158,208
+strong,Kemari Jetty,plastic_items_per_100m,2045,107,147,195
+strong,Kemari Jetty,plastic_items_per_100m,2046,97,135,182
+strong,Kemari Jetty,plastic_items_per_100m,2047,86,124,170
+strong,Kemari Jetty,plastic_items_per_100m,2048,76,112,158
+strong,Kemari Jetty,plastic_items_per_100m,2049,65,101,146
+strong,Kemari Jetty,plastic_items_per_100m,2050,54,90,134
+strong,Kemari Jetty,plastic_kg_per_100m,2026,8.81,11.14,13.84
+strong,Kemari Jetty,plastic_kg_per_100m,2027,8.53,10.79,13.4
+strong,Kemari Jetty,plastic_kg_per_100m,2028,8.26,10.44,12.97
+strong,Kemari Jetty,plastic_kg_per_100m,2029,7.99,10.1,12.55
+strong,Kemari Jetty,plastic_kg_per_100m,2030,7.71,9.75,12.12
+strong,Kemari Jetty,plastic_kg_per_100m,2031,7.43,9.4,11.69
+strong,Kemari Jetty,plastic_kg_per_100m,2032,7.15,9.05,11.27
+strong,Kemari Jetty,plastic_kg_per_100m,2033,6.87,8.71,10.85
+strong,Kemari Jetty,plastic_kg_per_100m,2034,6.6,8.36,10.43
+strong,Kemari Jetty,plastic_kg_per_100m,2035,6.31,8.01,10.02
+strong,Kemari Jetty,plastic_kg_per_100m,2036,6.03,7.66,9.59
+strong,Kemari Jetty,plastic_kg_per_100m,2037,5.74,7.31,9.17
+strong,Kemari Jetty,plastic_kg_per_100m,2038,5.45,6.96,8.76
+strong,Kemari Jetty,plastic_kg_per_100m,2039,5.16,6.61,8.36
+strong,Kemari Jetty,plastic_kg_per_100m,2040,4.86,6.26,7.95
+strong,Kemari Jetty,plastic_kg_per_100m,2041,4.56,5.91,7.55
+strong,Kemari Jetty,plastic_kg_per_100m,2042,4.25,5.56,7.15
+strong,Kemari Jetty,plastic_kg_per_100m,2043,3.94,5.21,6.75
+strong,Kemari Jetty,plastic_kg_per_100m,2044,3.63,4.86,6.36
+strong,Kemari Jetty,plastic_kg_per_100m,2045,3.31,4.51,5.98
+strong,Kemari Jetty,plastic_kg_per_100m,2046,3,4.15,5.59
+strong,Kemari Jetty,plastic_kg_per_100m,2047,2.67,3.8,5.21
+strong,Kemari Jetty,plastic_kg_per_100m,2048,2.35,3.45,4.84
+strong,Kemari Jetty,plastic_kg_per_100m,2049,2.01,3.11,4.48
+strong,Kemari Jetty,plastic_kg_per_100m,2050,1.67,2.76,4.12
+strong,West Wharf,plastic_items_per_100m,2026,272,378,493
+strong,West Wharf,plastic_items_per_100m,2027,264,366,478
+strong,West Wharf,plastic_items_per_100m,2028,255,354,463
+strong,West Wharf,plastic_items_per_100m,2029,247,343,447
+strong,West Wharf,plastic_items_per_100m,2030,238,331,432
+strong,West Wharf,plastic_items_per_100m,2031,229,319,417
+strong,West Wharf,plastic_items_per_100m,2032,221,307,402
+strong,West Wharf,plastic_items_per_100m,2033,212,295,387
+strong,West Wharf,plastic_items_per_100m,2034,203,283,372
+strong,West Wharf,plastic_items_per_100m,2035,195,271,357
+strong,West Wharf,plastic_items_per_100m,2036,186,259,342
+strong,West Wharf,plastic_items_per_100m,2037,177,247,327
+strong,West Wharf,plastic_items_per_100m,2038,168,235,312
+strong,West Wharf,plastic_items_per_100m,2039,160,224,298
+strong,West Wharf,plastic_items_per_100m,2040,151,212,283
+strong,West Wharf,plastic_items_per_100m,2041,142,200,268
+strong,West Wharf,plastic_items_per_100m,2042,133,188,253
+strong,West Wharf,plastic_items_per_100m,2043,123,176,239
+strong,West Wharf,plastic_items_per_100m,2044,114,164,225
+strong,West Wharf,plastic_items_per_100m,2045,105,152,211
+strong,West Wharf,plastic_items_per_100m,2046,95,140,198
+strong,West Wharf,plastic_items_per_100m,2047,86,128,184
+strong,West Wharf,plastic_items_per_100m,2048,76,116,171
+strong,West Wharf,plastic_items_per_100m,2049,66,104,158
+strong,West Wharf,plastic_items_per_100m,2050,55,92,145
+strong,West Wharf,plastic_kg_per_100m,2026,9.67,12.24,15.37
+strong,West Wharf,plastic_kg_per_100m,2027,9.36,11.86,14.89
+strong,West Wharf,plastic_kg_per_100m,2028,9.06,11.48,14.41
+strong,West Wharf,plastic_kg_per_100m,2029,8.76,11.11,13.93
+strong,West Wharf,plastic_kg_per_100m,2030,8.45,10.72,13.47
+strong,West Wharf,plastic_kg_per_100m,2031,8.15,10.34,13
+strong,West Wharf,plastic_kg_per_100m,2032,7.84,9.95,12.53
+strong,West Wharf,plastic_kg_per_100m,2033,7.53,9.57,12.05
+strong,West Wharf,plastic_kg_per_100m,2034,7.22,9.18,11.58
+strong,West Wharf,plastic_kg_per_100m,2035,6.92,8.79,11.12
+strong,West Wharf,plastic_kg_per_100m,2036,6.6,8.42,10.65
+strong,West Wharf,plastic_kg_per_100m,2037,6.28,8.03,10.19
+strong,West Wharf,plastic_kg_per_100m,2038,5.96,7.65,9.72
+strong,West Wharf,plastic_kg_per_100m,2039,5.65,7.27,9.27
+strong,West Wharf,plastic_kg_per_100m,2040,5.33,6.88,8.82
+strong,West Wharf,plastic_kg_per_100m,2041,5,6.49,8.36
+strong,West Wharf,plastic_kg_per_100m,2042,4.67,6.11,7.92
+strong,West Wharf,plastic_kg_per_100m,2043,4.34,5.72,7.48
+strong,West Wharf,plastic_kg_per_100m,2044,4.01,5.33,7.05
+strong,West Wharf,plastic_kg_per_100m,2045,3.66,4.94,6.62
+strong,West Wharf,plastic_kg_per_100m,2046,3.32,4.56,6.2
+strong,West Wharf,plastic_kg_per_100m,2047,2.96,4.17,5.79
+strong,West Wharf,plastic_kg_per_100m,2048,2.61,3.79,5.37
+strong,West Wharf,plastic_kg_per_100m,2049,2.24,3.4,4.96
+strong,West Wharf,plastic_kg_per_100m,2050,1.86,3.03,4.56
+strong,Damb,plastic_items_per_100m,2026,280,335,387
+strong,Damb,plastic_items_per_100m,2027,271,324,375
+strong,Damb,plastic_items_per_100m,2028,262,314,363
+strong,Damb,plastic_items_per_100m,2029,254,303,351
+strong,Damb,plastic_items_per_100m,2030,245,293,339
+strong,Damb,plastic_items_per_100m,2031,236,282,328
+strong,Damb,plastic_items_per_100m,2032,227,272,316
+strong,Damb,plastic_items_per_100m,2033,218,261,304
+strong,Damb,plastic_items_per_100m,2034,209,250,292
+strong,Damb,plastic_items_per_100m,2035,199,240,281
+strong,Damb,plastic_items_per_100m,2036,190,230,269
+strong,Damb,plastic_items_per_100m,2037,181,219,258
+strong,Damb,plastic_items_per_100m,2038,172,209,247
+strong,Damb,plastic_items_per_100m,2039,162,198,236
+strong,Damb,plastic_items_per_100m,2040,153,187,224
+strong,Damb,plastic_items_per_100m,2041,144,177,213
+strong,Damb,plastic_items_per_100m,2042,134,166,202
+strong,Damb,plastic_items_per_100m,2043,124,156,192
+strong,Damb,plastic_items_per_100m,2044,114,145,181
+strong,Damb,plastic_items_per_100m,2045,104,135,171
+strong,Damb,plastic_items_per_100m,2046,94,124,160
+strong,Damb,plastic_items_per_100m,2047,84,114,149
+strong,Damb,plastic_items_per_100m,2048,73,104,139
+strong,Damb,plastic_items_per_100m,2049,63,93,129
+strong,Damb,plastic_items_per_100m,2050,52,83,119
+strong,Damb,plastic_kg_per_100m,2026,8.47,9.86,11.36
+strong,Damb,plastic_kg_per_100m,2027,8.21,9.55,11.01
+strong,Damb,plastic_kg_per_100m,2028,7.95,9.24,10.66
+strong,Damb,plastic_kg_per_100m,2029,7.68,8.94,10.31
+strong,Damb,plastic_kg_per_100m,2030,7.4,8.63,9.97
+strong,Damb,plastic_kg_per_100m,2031,7.13,8.32,9.62
+strong,Damb,plastic_kg_per_100m,2032,6.86,8.01,9.27
+strong,Damb,plastic_kg_per_100m,2033,6.58,7.7,8.92
+strong,Damb,plastic_kg_per_100m,2034,6.3,7.39,8.58
+strong,Damb,plastic_kg_per_100m,2035,6.03,7.08,8.24
+strong,Damb,plastic_kg_per_100m,2036,5.75,6.77,7.9
+strong,Damb,plastic_kg_per_100m,2037,5.47,6.46,7.56
+strong,Damb,plastic_kg_per_100m,2038,5.18,6.15,7.23
+strong,Damb,plastic_kg_per_100m,2039,4.9,5.84,6.91
+strong,Damb,plastic_kg_per_100m,2040,4.61,5.53,6.58
+strong,Damb,plastic_kg_per_100m,2041,4.33,5.22,6.26
+strong,Damb,plastic_kg_per_100m,2042,4.03,4.91,5.94
+strong,Damb,plastic_kg_per_100m,2043,3.73,4.6,5.62
+strong,Damb,plastic_kg_per_100m,2044,3.43,4.3,5.31
+strong,Damb,plastic_kg_per_100m,2045,3.12,3.99,4.99
+strong,Damb,plastic_kg_per_100m,2046,2.82,3.68,4.69
+strong,Damb,plastic_kg_per_100m,2047,2.51,3.37,4.38
+strong,Damb,plastic_kg_per_100m,2048,2.19,3.07,4.08
+strong,Damb,plastic_kg_per_100m,2049,1.87,2.76,3.78
+strong,Damb,plastic_kg_per_100m,2050,1.55,2.46,3.48
+strong,Ormara,plastic_items_per_100m,2026,216,261,309
+strong,Ormara,plastic_items_per_100m,2027,209,253,299
+strong,Ormara,plastic_items_per_100m,2028,202,245,289
+strong,Ormara,plastic_items_per_100m,2029,195,237,280
+strong,Ormara,plastic_items_per_100m,2030,189,228,270
+strong,Ormara,plastic_items_per_100m,2031,182,220,261
+strong,Ormara,plastic_items_per_100m,2032,175,212,251
+strong,Ormara,plastic_items_per_100m,2033,168,204,242
+strong,Ormara,plastic_items_per_100m,2034,161,196,232
+strong,Ormara,plastic_items_per_100m,2035,155,187,223
+strong,Ormara,plastic_items_per_100m,2036,147,179,214
+strong,Ormara,plastic_items_per_100m,2037,140,171,205
+strong,Ormara,plastic_items_per_100m,2038,133,163,196
+strong,Ormara,plastic_items_per_100m,2039,126,155,187
+strong,Ormara,plastic_items_per_100m,2040,119,146,178
+strong,Ormara,plastic_items_per_100m,2041,111,138,169
+strong,Ormara,plastic_items_per_100m,2042,104,130,161
+strong,Ormara,plastic_items_per_100m,2043,96,122,152
+strong,Ormara,plastic_items_per_100m,2044,89,113,143
+strong,Ormara,plastic_items_per_100m,2045,81,105,135
+strong,Ormara,plastic_items_per_100m,2046,73,97,126
+strong,Ormara,plastic_items_per_100m,2047,65,89,118
+strong,Ormara,plastic_items_per_100m,2048,57,81,110
+strong,Ormara,plastic_items_per_100m,2049,49,73,102
+strong,Ormara,plastic_items_per_100m,2050,40,65,93
+strong,Ormara,plastic_kg_per_100m,2026,6.88,8.38,10.06
+strong,Ormara,plastic_kg_per_100m,2027,6.66,8.12,9.75
+strong,Ormara,plastic_kg_per_100m,2028,6.45,7.86,9.44
+strong,Ormara,plastic_kg_per_100m,2029,6.23,7.59,9.12
+strong,Ormara,plastic_kg_per_100m,2030,6.01,7.33,8.81
+strong,Ormara,plastic_kg_per_100m,2031,5.8,7.06,8.5
+strong,Ormara,plastic_kg_per_100m,2032,5.58,6.8,8.18
+strong,Ormara,plastic_kg_per_100m,2033,5.36,6.54,7.88
+strong,Ormara,plastic_kg_per_100m,2034,5.15,6.28,7.57
+strong,Ormara,plastic_kg_per_100m,2035,4.92,6.02,7.27
+strong,Ormara,plastic_kg_per_100m,2036,4.69,5.76,6.97
+strong,Ormara,plastic_kg_per_100m,2037,4.47,5.5,6.67
+strong,Ormara,plastic_kg_per_100m,2038,4.24,5.23,6.38
+strong,Ormara,plastic_kg_per_100m,2039,4.01,4.96,6.08
+strong,Ormara,plastic_kg_per_100m,2040,3.78,4.7,5.79
+strong,Ormara,plastic_kg_per_100m,2041,3.56,4.43,5.49
+strong,Ormara,plastic_kg_per_100m,2042,3.32,4.17,5.21
+strong,Ormara,plastic_kg_per_100m,2043,3.08,3.91,4.93
+strong,Ormara,plastic_kg_per_100m,2044,2.83,3.64,4.64
+strong,Ormara,plastic_kg_per_100m,2045,2.59,3.38,4.36
+strong,Ormara,plastic_kg_per_100m,2046,2.33,3.12,4.09
+strong,Ormara,plastic_kg_per_100m,2047,2.08,2.85,3.82
+strong,Ormara,plastic_kg_per_100m,2048,1.82,2.59,3.56
+strong,Ormara,plastic_kg_per_100m,2049,1.56,2.34,3.29
+strong,Ormara,plastic_kg_per_100m,2050,1.29,2.07,3.03
+strong,Pasni,plastic_items_per_100m,2026,369,493,624
+strong,Pasni,plastic_items_per_100m,2027,358,477,604
+strong,Pasni,plastic_items_per_100m,2028,347,461,584
+strong,Pasni,plastic_items_per_100m,2029,335,446,564
+strong,Pasni,plastic_items_per_100m,2030,324,431,545
+strong,Pasni,plastic_items_per_100m,2031,312,416,525
+strong,Pasni,plastic_items_per_100m,2032,301,400,506
+strong,Pasni,plastic_items_per_100m,2033,289,385,487
+strong,Pasni,plastic_items_per_100m,2034,277,370,468
+strong,Pasni,plastic_items_per_100m,2035,266,354,449
+strong,Pasni,plastic_items_per_100m,2036,254,339,430
+strong,Pasni,plastic_items_per_100m,2037,242,323,411
+strong,Pasni,plastic_items_per_100m,2038,230,308,392
+strong,Pasni,plastic_items_per_100m,2039,218,292,374
+strong,Pasni,plastic_items_per_100m,2040,205,277,355
+strong,Pasni,plastic_items_per_100m,2041,193,261,337
+strong,Pasni,plastic_items_per_100m,2042,181,245,319
+strong,Pasni,plastic_items_per_100m,2043,168,230,301
+strong,Pasni,plastic_items_per_100m,2044,155,214,283
+strong,Pasni,plastic_items_per_100m,2045,142,198,266
+strong,Pasni,plastic_items_per_100m,2046,129,183,249
+strong,Pasni,plastic_items_per_100m,2047,116,167,232
+strong,Pasni,plastic_items_per_100m,2048,102,152,216
+strong,Pasni,plastic_items_per_100m,2049,88,136,200
+strong,Pasni,plastic_items_per_100m,2050,73,121,184
+strong,Pasni,plastic_kg_per_100m,2026,11.05,14.91,18.98
+strong,Pasni,plastic_kg_per_100m,2027,10.7,14.44,18.39
+strong,Pasni,plastic_kg_per_100m,2028,10.35,13.97,17.81
+strong,Pasni,plastic_kg_per_100m,2029,10.01,13.5,17.21
+strong,Pasni,plastic_kg_per_100m,2030,9.67,13.05,16.61
+strong,Pasni,plastic_kg_per_100m,2031,9.33,12.57,16.02
+strong,Pasni,plastic_kg_per_100m,2032,8.99,12.1,15.45
+strong,Pasni,plastic_kg_per_100m,2033,8.63,11.64,14.85
+strong,Pasni,plastic_kg_per_100m,2034,8.28,11.17,14.27
+strong,Pasni,plastic_kg_per_100m,2035,7.92,10.71,13.67
+strong,Pasni,plastic_kg_per_100m,2036,7.56,10.24,13.09
+strong,Pasni,plastic_kg_per_100m,2037,7.21,9.78,12.51
+strong,Pasni,plastic_kg_per_100m,2038,6.86,9.31,11.95
+strong,Pasni,plastic_kg_per_100m,2039,6.51,8.84,11.39
+strong,Pasni,plastic_kg_per_100m,2040,6.14,8.37,10.84
+strong,Pasni,plastic_kg_per_100m,2041,5.77,7.91,10.28
+strong,Pasni,plastic_kg_per_100m,2042,5.4,7.44,9.73
+strong,Pasni,plastic_kg_per_100m,2043,5.02,6.96,9.18
+strong,Pasni,plastic_kg_per_100m,2044,4.65,6.48,8.64
+strong,Pasni,plastic_kg_per_100m,2045,4.26,6.01,8.12
+strong,Pasni,plastic_kg_per_100m,2046,3.86,5.53,7.61
+strong,Pasni,plastic_kg_per_100m,2047,3.46,5.06,7.1
+strong,Pasni,plastic_kg_per_100m,2048,3.06,4.59,6.6
+strong,Pasni,plastic_kg_per_100m,2049,2.64,4.12,6.09
+strong,Pasni,plastic_kg_per_100m,2050,2.21,3.65,5.58
+strong,Gwadar,plastic_items_per_100m,2026,189,264,340
+strong,Gwadar,plastic_items_per_100m,2027,183,256,329
+strong,Gwadar,plastic_items_per_100m,2028,177,248,318
+strong,Gwadar,plastic_items_per_100m,2029,171,239,308
+strong,Gwadar,plastic_items_per_100m,2030,165,231,297
+strong,Gwadar,plastic_items_per_100m,2031,160,223,287
+strong,Gwadar,plastic_items_per_100m,2032,154,215,276
+strong,Gwadar,plastic_items_per_100m,2033,148,206,266
+strong,Gwadar,plastic_items_per_100m,2034,142,198,255
+strong,Gwadar,plastic_items_per_100m,2035,136,190,245
+strong,Gwadar,plastic_items_per_100m,2036,130,181,234
+strong,Gwadar,plastic_items_per_100m,2037,123,173,224
+strong,Gwadar,plastic_items_per_100m,2038,117,165,214
+strong,Gwadar,plastic_items_per_100m,2039,111,157,205
+strong,Gwadar,plastic_items_per_100m,2040,105,148,195
+strong,Gwadar,plastic_items_per_100m,2041,99,140,185
+strong,Gwadar,plastic_items_per_100m,2042,92,131,175
+strong,Gwadar,plastic_items_per_100m,2043,86,123,165
+strong,Gwadar,plastic_items_per_100m,2044,80,115,156
+strong,Gwadar,plastic_items_per_100m,2045,73,106,146
+strong,Gwadar,plastic_items_per_100m,2046,66,98,137
+strong,Gwadar,plastic_items_per_100m,2047,60,89,128
+strong,Gwadar,plastic_items_per_100m,2048,53,81,119
+strong,Gwadar,plastic_items_per_100m,2049,45,73,109
+strong,Gwadar,plastic_items_per_100m,2050,38,64,100
+strong,Gwadar,plastic_kg_per_100m,2026,6.07,8.06,9.97
+strong,Gwadar,plastic_kg_per_100m,2027,5.89,7.81,9.67
+strong,Gwadar,plastic_kg_per_100m,2028,5.69,7.55,9.36
+strong,Gwadar,plastic_kg_per_100m,2029,5.5,7.3,9.04
+strong,Gwadar,plastic_kg_per_100m,2030,5.31,7.04,8.73
+strong,Gwadar,plastic_kg_per_100m,2031,5.12,6.79,8.43
+strong,Gwadar,plastic_kg_per_100m,2032,4.92,6.54,8.11
+strong,Gwadar,plastic_kg_per_100m,2033,4.73,6.29,7.81
+strong,Gwadar,plastic_kg_per_100m,2034,4.54,6.03,7.5
+strong,Gwadar,plastic_kg_per_100m,2035,4.35,5.78,7.2
+strong,Gwadar,plastic_kg_per_100m,2036,4.15,5.53,6.9
+strong,Gwadar,plastic_kg_per_100m,2037,3.95,5.28,6.6
+strong,Gwadar,plastic_kg_per_100m,2038,3.75,5.02,6.31
+strong,Gwadar,plastic_kg_per_100m,2039,3.55,4.77,6.01
+strong,Gwadar,plastic_kg_per_100m,2040,3.35,4.52,5.72
+strong,Gwadar,plastic_kg_per_100m,2041,3.15,4.26,5.44
+strong,Gwadar,plastic_kg_per_100m,2042,2.94,4,5.16
+strong,Gwadar,plastic_kg_per_100m,2043,2.73,3.74,4.88
+strong,Gwadar,plastic_kg_per_100m,2044,2.53,3.48,4.59
+strong,Gwadar,plastic_kg_per_100m,2045,2.32,3.23,4.32
+strong,Gwadar,plastic_kg_per_100m,2046,2.1,2.97,4.05
+strong,Gwadar,plastic_kg_per_100m,2047,1.89,2.72,3.78
+strong,Gwadar,plastic_kg_per_100m,2048,1.66,2.47,3.52
+strong,Gwadar,plastic_kg_per_100m,2049,1.43,2.22,3.25
+strong,Gwadar,plastic_kg_per_100m,2050,1.19,1.97,2.99
+strong,Jiwani,plastic_items_per_100m,2026,302,368,418
+strong,Jiwani,plastic_items_per_100m,2027,292,356,405
+strong,Jiwani,plastic_items_per_100m,2028,283,345,392
+strong,Jiwani,plastic_items_per_100m,2029,274,334,379
+strong,Jiwani,plastic_items_per_100m,2030,264,322,366
+strong,Jiwani,plastic_items_per_100m,2031,255,311,353
+strong,Jiwani,plastic_items_per_100m,2032,245,299,341
+strong,Jiwani,plastic_items_per_100m,2033,236,287,328
+strong,Jiwani,plastic_items_per_100m,2034,226,276,316
+strong,Jiwani,plastic_items_per_100m,2035,217,264,303
+strong,Jiwani,plastic_items_per_100m,2036,206,252,291
+strong,Jiwani,plastic_items_per_100m,2037,196,241,279
+strong,Jiwani,plastic_items_per_100m,2038,186,229,267
+strong,Jiwani,plastic_items_per_100m,2039,176,217,256
+strong,Jiwani,plastic_items_per_100m,2040,166,206,244
+strong,Jiwani,plastic_items_per_100m,2041,156,194,232
+strong,Jiwani,plastic_items_per_100m,2042,145,182,220
+strong,Jiwani,plastic_items_per_100m,2043,135,171,209
+strong,Jiwani,plastic_items_per_100m,2044,124,159,198
+strong,Jiwani,plastic_items_per_100m,2045,113,147,186
+strong,Jiwani,plastic_items_per_100m,2046,102,136,175
+strong,Jiwani,plastic_items_per_100m,2047,91,125,163
+strong,Jiwani,plastic_items_per_100m,2048,80,113,152
+strong,Jiwani,plastic_items_per_100m,2049,68,102,141
+strong,Jiwani,plastic_items_per_100m,2050,57,90,130
+strong,Jiwani,plastic_kg_per_100m,2026,8.84,10.71,12.2
+strong,Jiwani,plastic_kg_per_100m,2027,8.56,10.38,11.82
+strong,Jiwani,plastic_kg_per_100m,2028,8.3,10.05,11.44
+strong,Jiwani,plastic_kg_per_100m,2029,8.01,9.71,11.06
+strong,Jiwani,plastic_kg_per_100m,2030,7.73,9.37,10.69
+strong,Jiwani,plastic_kg_per_100m,2031,7.45,9.03,10.31
+strong,Jiwani,plastic_kg_per_100m,2032,7.17,8.69,9.94
+strong,Jiwani,plastic_kg_per_100m,2033,6.89,8.36,9.57
+strong,Jiwani,plastic_kg_per_100m,2034,6.6,8.02,9.21
+strong,Jiwani,plastic_kg_per_100m,2035,6.31,7.68,8.86
+strong,Jiwani,plastic_kg_per_100m,2036,6.02,7.34,8.5
+strong,Jiwani,plastic_kg_per_100m,2037,5.73,7,8.15
+strong,Jiwani,plastic_kg_per_100m,2038,5.43,6.66,7.8
+strong,Jiwani,plastic_kg_per_100m,2039,5.14,6.33,7.44
+strong,Jiwani,plastic_kg_per_100m,2040,4.84,5.99,7.1
+strong,Jiwani,plastic_kg_per_100m,2041,4.54,5.65,6.76
+strong,Jiwani,plastic_kg_per_100m,2042,4.24,5.31,6.42
+strong,Jiwani,plastic_kg_per_100m,2043,3.93,4.97,6.09
+strong,Jiwani,plastic_kg_per_100m,2044,3.62,4.63,5.76
+strong,Jiwani,plastic_kg_per_100m,2045,3.31,4.29,5.43
+strong,Jiwani,plastic_kg_per_100m,2046,2.98,3.96,5.1
+strong,Jiwani,plastic_kg_per_100m,2047,2.66,3.63,4.76
+strong,Jiwani,plastic_kg_per_100m,2048,2.33,3.29,4.44
+strong,Jiwani,plastic_kg_per_100m,2049,2,2.96,4.11
+strong,Jiwani,plastic_kg_per_100m,2050,1.65,2.63,3.79
+strong,All sites,plastic_items_per_100m,2026,336,361,385
+strong,All sites,plastic_items_per_100m,2027,325,349,373
+strong,All sites,plastic_items_per_100m,2028,315,338,361
+strong,All sites,plastic_items_per_100m,2029,304,327,349
+strong,All sites,plastic_items_per_100m,2030,293,315,338
+strong,All sites,plastic_items_per_100m,2031,282,304,326
+strong,All sites,plastic_items_per_100m,2032,271,293,315
+strong,All sites,plastic_items_per_100m,2033,260,282,303
+strong,All sites,plastic_items_per_100m,2034,249,270,292
+strong,All sites,plastic_items_per_100m,2035,238,259,281
+strong,All sites,plastic_items_per_100m,2036,226,248,270
+strong,All sites,plastic_items_per_100m,2037,214,236,259
+strong,All sites,plastic_items_per_100m,2038,203,225,248
+strong,All sites,plastic_items_per_100m,2039,191,214,238
+strong,All sites,plastic_items_per_100m,2040,179,203,227
+strong,All sites,plastic_items_per_100m,2041,168,191,216
+strong,All sites,plastic_items_per_100m,2042,156,180,206
+strong,All sites,plastic_items_per_100m,2043,144,169,195
+strong,All sites,plastic_items_per_100m,2044,131,157,185
+strong,All sites,plastic_items_per_100m,2045,119,146,175
+strong,All sites,plastic_items_per_100m,2046,107,135,164
+strong,All sites,plastic_items_per_100m,2047,95,124,154
+strong,All sites,plastic_items_per_100m,2048,83,112,144
+strong,All sites,plastic_items_per_100m,2049,70,101,134
+strong,All sites,plastic_items_per_100m,2050,58,90,123
+strong,All sites,plastic_kg_per_100m,2026,10.44,11.16,11.87
+strong,All sites,plastic_kg_per_100m,2027,10.11,10.81,11.51
+strong,All sites,plastic_kg_per_100m,2028,9.78,10.46,11.14
+strong,All sites,plastic_kg_per_100m,2029,9.44,10.11,10.78
+strong,All sites,plastic_kg_per_100m,2030,9.11,9.76,10.42
+strong,All sites,plastic_kg_per_100m,2031,8.77,9.42,10.07
+strong,All sites,plastic_kg_per_100m,2032,8.43,9.07,9.72
+strong,All sites,plastic_kg_per_100m,2033,8.08,8.72,9.37
+strong,All sites,plastic_kg_per_100m,2034,7.74,8.36,9.03
+strong,All sites,plastic_kg_per_100m,2035,7.38,8.02,8.68
+strong,All sites,plastic_kg_per_100m,2036,7.02,7.66,8.34
+strong,All sites,plastic_kg_per_100m,2037,6.66,7.32,8.01
+strong,All sites,plastic_kg_per_100m,2038,6.3,6.97,7.67
+strong,All sites,plastic_kg_per_100m,2039,5.94,6.62,7.34
+strong,All sites,plastic_kg_per_100m,2040,5.57,6.27,7.01
+strong,All sites,plastic_kg_per_100m,2041,5.2,5.92,6.69
+strong,All sites,plastic_kg_per_100m,2042,4.83,5.57,6.37
+strong,All sites,plastic_kg_per_100m,2043,4.46,5.22,6.05
+strong,All sites,plastic_kg_per_100m,2044,4.09,4.87,5.73
+strong,All sites,plastic_kg_per_100m,2045,3.71,4.53,5.41
+strong,All sites,plastic_kg_per_100m,2046,3.33,4.17,5.08
+strong,All sites,plastic_kg_per_100m,2047,2.94,3.83,4.76
+strong,All sites,plastic_kg_per_100m,2048,2.56,3.48,4.45
+strong,All sites,plastic_kg_per_100m,2049,2.17,3.13,4.13
+strong,All sites,plastic_kg_per_100m,2050,1.79,2.78,3.81

@@ -1,0 +1,121 @@
+record_id,survey_date,province_area,coastal_site,latitude,longitude,debris_category,plastic_type,probable_source,plastic_items_per_100m,plastic_kg_per_100m,item_density_per_m,microplastic_risk_index,overall_risk_score,risk_class,tide_condition,weather_context
+PK-PL-0001,2025-01-01,Karachi,Sandspit,24.84864,66.89656,Plastic debris,LDPE bags,Tourism,439,13.97,4.39,50.1,60.2,High,Normal tide,Post-rain
+PK-PL-0002,2025-02-01,Karachi,Buleji,24.85192,66.79508,Plastic debris,LDPE bags,River/drainage,579,17.71,5.79,79.0,79.5,Critical,Low tide,Dry
+PK-PL-0003,2025-03-01,Karachi,Paradise Point,24.88818,66.73814,Plastic debris,Food packaging,Municipal runoff,435,16.22,4.35,57.9,66.9,High,Low tide,Post-storm
+PK-PL-0004,2025-04-01,Karachi,Korangi Creek,24.78895,67.14124,Plastic debris,LDPE bags,River/drainage,119,4.63,1.19,87.8,43.8,Moderate,High tide,Dry
+PK-PL-0005,2025-05-01,Karachi,Manora,24.80675,66.97613,Plastic debris,LDPE bags,Fishing activity,186,7.16,1.86,78.2,47.7,Moderate,High tide,Post-rain
+PK-PL-0006,2025-06-01,Karachi,Kemari Jetty,24.8134,66.98266,Plastic debris,Polystyrene,Port/harbour,209,7.35,2.09,59.4,42.4,Moderate,Normal tide,Post-storm
+PK-PL-0007,2025-07-01,Karachi,West Wharf,24.82992,66.97974,Plastic debris,PET bottles,Fishing activity,311,10.25,3.11,77.4,58.0,High,Normal tide,Dry
+PK-PL-0008,2025-08-01,Balochistan,Damb,25.32759,65.49275,Plastic debris,Fishing gear,Municipal runoff,308,8.65,3.08,76.5,54.7,High,Low tide,Post-storm
+PK-PL-0009,2025-09-01,Balochistan,Ormara,25.20975,64.63692,Plastic debris,Fishing gear,Port/harbour,300,7.38,3.0,84.7,54.9,High,Normal tide,Dry
+PK-PL-0010,2025-10-01,Balochistan,Pasni,25.2637,63.47007,Plastic debris,LDPE bags,Fishing activity,116,2.85,1.16,63.4,32.0,Moderate,Normal tide,Post-storm
+PK-PL-0011,2025-11-01,Balochistan,Gwadar,25.12685,62.32525,Plastic debris,Food packaging,Port/harbour,303,7.82,3.03,45.0,41.9,Moderate,High tide,Post-rain
+PK-PL-0012,2025-12-01,Balochistan,Jiwani,25.04919,61.74694,Plastic debris,Polystyrene,Fishing activity,436,12.06,4.36,72.6,64.6,High,High tide,Post-storm
+PK-PL-0013,2026-01-01,Karachi,Sandspit,24.84507,66.89601,Plastic debris,Polystyrene,River/drainage,332,9.22,3.32,54.5,49.0,Moderate,Low tide,Post-rain
+PK-PL-0014,2026-02-01,Karachi,Buleji,24.85277,66.79235,Plastic debris,Plastic fragments,Fishing activity,288,9.61,2.88,47.9,45.6,Moderate,Low tide,Post-rain
+PK-PL-0015,2026-03-01,Karachi,Paradise Point,24.89593,66.73762,Plastic debris,LDPE bags,Fishing activity,252,10.78,2.52,65.5,52.4,High,High tide,Dry
+PK-PL-0016,2026-04-01,Karachi,Korangi Creek,24.79581,67.1362,Plastic debris,LDPE bags,Municipal runoff,469,12.7,4.69,81.4,70.1,Critical,High tide,Post-rain
+PK-PL-0017,2026-05-01,Karachi,Manora,24.80487,66.9719,Plastic debris,LDPE bags,Port/harbour,215,6.61,2.15,39.1,34.2,Moderate,Normal tide,Dry
+PK-PL-0018,2026-06-01,Karachi,Kemari Jetty,24.81129,66.98411,Plastic debris,LDPE bags,Fishing activity,395,11.28,3.95,62.4,57.9,High,High tide,Dry
+PK-PL-0019,2026-07-01,Karachi,West Wharf,24.83263,66.98294,Plastic debris,LDPE bags,Fishing activity,425,11.58,4.25,68.6,61.9,High,High tide,Dry
+PK-PL-0020,2026-08-01,Balochistan,Damb,25.32969,65.49435,Plastic debris,LDPE bags,Tourism,189,5.53,1.89,59.0,38.2,Moderate,High tide,Post-storm
+PK-PL-0021,2026-09-01,Balochistan,Ormara,25.21354,64.63854,Plastic debris,LDPE bags,Fishing activity,166,3.95,1.66,34.9,26.0,Low,Normal tide,Post-storm
+PK-PL-0022,2025-01-01,Balochistan,Pasni,25.26246,63.47376,Plastic debris,LDPE bags,River/drainage,489,12.05,4.89,42.0,56.0,High,Normal tide,Post-storm
+PK-PL-0023,2025-02-01,Balochistan,Gwadar,25.12407,62.32395,Plastic debris,Food packaging,Fishing activity,377,7.1,3.77,59.5,48.7,Moderate,Normal tide,Dry
+PK-PL-0024,2025-03-01,Balochistan,Jiwani,25.04511,61.74457,Plastic debris,Food packaging,River/drainage,71,2.65,0.71,60.7,28.9,Low,Normal tide,Dry
+PK-PL-0025,2025-04-01,Karachi,Sandspit,24.84623,66.89631,Plastic debris,Plastic fragments,Municipal runoff,280,8.4,2.8,37.7,39.5,Moderate,Normal tide,Post-rain
+PK-PL-0026,2025-05-01,Karachi,Buleji,24.8481,66.7884,Plastic debris,LDPE bags,Municipal runoff,119,5.02,1.19,69.9,38.3,Moderate,High tide,Post-storm
+PK-PL-0027,2025-06-01,Karachi,Paradise Point,24.88989,66.73774,Plastic debris,LDPE bags,Municipal runoff,400,13.77,4.0,73.3,66.4,High,Normal tide,Post-storm
+PK-PL-0028,2025-07-01,Karachi,Korangi Creek,24.7954,67.1393,Plastic debris,LDPE bags,River/drainage,338,11.28,3.38,43.7,49.1,Moderate,Low tide,Post-rain
+PK-PL-0029,2025-08-01,Karachi,Manora,24.8071,66.97246,Plastic debris,Food packaging,Municipal runoff,325,11.71,3.25,60.1,55.1,High,High tide,Dry
+PK-PL-0030,2025-09-01,Karachi,Kemari Jetty,24.81103,66.98153,Plastic debris,PET bottles,Municipal runoff,213,8.9,2.13,59.1,45.2,Moderate,High tide,Post-storm
+PK-PL-0031,2025-10-01,Karachi,West Wharf,24.83036,66.98159,Plastic debris,Bottle caps,Port/harbour,233,7.92,2.33,62.1,45.3,Moderate,Low tide,Dry
+PK-PL-0032,2025-11-01,Balochistan,Damb,25.32703,65.49489,Plastic debris,PET bottles,Municipal runoff,403,9.76,4.03,35.2,46.0,Moderate,High tide,Post-rain
+PK-PL-0033,2025-12-01,Balochistan,Ormara,25.21509,64.63865,Plastic debris,PET bottles,Fishing activity,306,11.79,3.06,64.3,56.0,High,High tide,Post-storm
+PK-PL-0034,2026-01-01,Balochistan,Pasni,25.2643,63.47434,Plastic debris,Plastic fragments,River/drainage,974,30.32,9.74,100.0,100.0,Critical,High tide,Post-storm
+PK-PL-0035,2026-02-01,Balochistan,Gwadar,25.12656,62.32075,Plastic debris,Plastic fragments,Fishing activity,453,10.52,4.53,28.8,47.1,Moderate,Low tide,Post-rain
+PK-PL-0036,2026-03-01,Balochistan,Jiwani,25.0507,61.7468,Plastic debris,LDPE bags,Municipal runoff,371,12.4,3.71,56.7,57.0,High,Low tide,Dry
+PK-PL-0037,2026-04-01,Karachi,Sandspit,24.84677,66.89677,Plastic debris,Food packaging,Port/harbour,285,12.73,2.85,92.9,66.8,High,Low tide,Post-storm
+PK-PL-0038,2026-05-01,Karachi,Buleji,24.84678,66.79327,Plastic debris,Fishing gear,Fishing activity,587,17.97,5.87,91.1,84.2,Critical,Low tide,Post-rain
+PK-PL-0039,2026-06-01,Karachi,Paradise Point,24.88929,66.73797,Plastic debris,Fishing gear,Port/harbour,99,2.44,0.99,47.2,24.9,Low,Low tide,Post-storm
+PK-PL-0040,2026-07-01,Karachi,Korangi Creek,24.79381,67.13918,Plastic debris,Plastic fragments,Municipal runoff,713,18.61,7.13,100.0,88.5,Critical,High tide,Post-storm
+PK-PL-0041,2026-08-01,Karachi,Manora,24.80284,66.97516,Plastic debris,Bottle caps,Tourism,336,11.37,3.36,41.0,48.3,Moderate,Low tide,Dry
+PK-PL-0042,2026-09-01,Karachi,Kemari Jetty,24.81414,66.98596,Plastic debris,Fishing gear,Port/harbour,318,9.18,3.18,30.1,39.8,Moderate,High tide,Post-rain
+PK-PL-0043,2025-01-01,Karachi,West Wharf,24.8327,66.98354,Plastic debris,PET bottles,Port/harbour,124,6.62,1.24,49.3,34.1,Moderate,Normal tide,Dry
+PK-PL-0044,2025-02-01,Balochistan,Damb,25.32308,65.49672,Plastic debris,LDPE bags,Port/harbour,451,12.15,4.51,57.0,59.9,High,Low tide,Dry
+PK-PL-0045,2025-03-01,Balochistan,Ormara,25.21295,64.63611,Plastic debris,Plastic fragments,Tourism,225,6.92,2.25,75.2,47.8,Moderate,High tide,Post-storm
+PK-PL-0046,2025-04-01,Balochistan,Pasni,25.26763,63.47178,Plastic debris,Bottle caps,Tourism,559,15.85,5.59,95.1,81.8,Critical,Low tide,Post-rain
+PK-PL-0047,2025-05-01,Balochistan,Gwadar,25.12668,62.32575,Plastic debris,Food packaging,Tourism,296,12.92,2.96,58.8,55.7,High,Low tide,Dry
+PK-PL-0048,2025-06-01,Balochistan,Jiwani,25.05266,61.74736,Plastic debris,Plastic fragments,River/drainage,396,10.72,3.96,40.5,49.3,Moderate,Normal tide,Dry
+PK-PL-0049,2025-07-01,Karachi,Sandspit,24.84844,66.89503,Plastic debris,Polystyrene,Port/harbour,235,8.43,2.35,86.0,54.7,High,Low tide,Post-storm
+PK-PL-0050,2025-08-01,Karachi,Buleji,24.85063,66.79069,Plastic debris,PET bottles,Fishing activity,420,12.81,4.2,84.7,69.5,High,Low tide,Dry
+PK-PL-0051,2025-09-01,Karachi,Paradise Point,24.891,66.73715,Plastic debris,LDPE bags,Fishing activity,243,7.03,2.43,66.6,45.7,Moderate,High tide,Post-rain
+PK-PL-0052,2025-10-01,Karachi,Korangi Creek,24.79568,67.14019,Plastic debris,Food packaging,Port/harbour,311,8.2,3.11,67.2,50.7,High,Normal tide,Post-storm
+PK-PL-0053,2025-11-01,Karachi,Manora,24.80426,66.97523,Plastic debris,Food packaging,Municipal runoff,630,19.35,6.3,80.7,83.1,Critical,High tide,Dry
+PK-PL-0054,2025-12-01,Karachi,Kemari Jetty,24.81266,66.98297,Plastic debris,Plastic fragments,Tourism,703,21.86,7.03,100.0,94.3,Critical,Low tide,Post-rain
+PK-PL-0055,2026-01-01,Karachi,West Wharf,24.82665,66.98606,Plastic debris,Food packaging,Fishing activity,451,16.08,4.51,63.1,69.1,High,Normal tide,Post-storm
+PK-PL-0056,2026-02-01,Balochistan,Damb,25.32742,65.49311,Plastic debris,Food packaging,Municipal runoff,259,9.71,2.59,75.9,54.4,High,Normal tide,Dry
+PK-PL-0057,2026-03-01,Balochistan,Ormara,25.20913,64.63562,Plastic debris,LDPE bags,Tourism,154,6.22,1.54,46.1,33.5,Moderate,High tide,Dry
+PK-PL-0058,2026-04-01,Balochistan,Pasni,25.26641,63.4737,Plastic debris,LDPE bags,River/drainage,625,19.5,6.25,89.4,86.4,Critical,Low tide,Post-storm
+PK-PL-0059,2026-05-01,Balochistan,Gwadar,25.12475,62.31762,Plastic debris,Food packaging,Port/harbour,153,5.73,1.53,33.2,28.1,Low,Low tide,Post-rain
+PK-PL-0060,2026-06-01,Balochistan,Jiwani,25.04916,61.74338,Plastic debris,PET bottles,Port/harbour,361,10.75,3.61,46.8,50.2,High,Low tide,Post-rain
+PK-PL-0061,2026-07-01,Karachi,Sandspit,24.85069,66.89338,Plastic debris,PET bottles,Port/harbour,122,6.51,1.22,60.4,37.7,Moderate,High tide,Post-storm
+PK-PL-0062,2026-08-01,Karachi,Buleji,24.85297,66.79245,Plastic debris,PET bottles,Fishing activity,748,22.42,7.48,100.0,95.4,Critical,Normal tide,Post-storm
+PK-PL-0063,2026-09-01,Karachi,Paradise Point,24.8897,66.73703,Plastic debris,LDPE bags,Tourism,447,16.4,4.47,84.7,77.0,Critical,Normal tide,Post-rain
+PK-PL-0064,2025-01-01,Karachi,Korangi Creek,24.79134,67.13852,Plastic debris,PET bottles,River/drainage,188,6.82,1.88,58.1,40.1,Moderate,Normal tide,Post-storm
+PK-PL-0065,2025-02-01,Karachi,Manora,24.81009,66.97824,Plastic debris,Fishing gear,River/drainage,168,6.5,1.68,47.1,34.9,Moderate,Normal tide,Dry
+PK-PL-0066,2025-03-01,Karachi,Kemari Jetty,24.80652,66.97995,Plastic debris,LDPE bags,Tourism,272,7.54,2.72,63.6,46.7,Moderate,Low tide,Post-rain
+PK-PL-0067,2025-04-01,Karachi,West Wharf,24.8298,66.98352,Plastic debris,LDPE bags,Fishing activity,667,16.09,6.67,45.0,64.7,High,Low tide,Dry
+PK-PL-0068,2025-05-01,Balochistan,Damb,25.32593,65.49434,Plastic debris,Bottle caps,Municipal runoff,415,10.51,4.15,32.1,46.8,Moderate,Normal tide,Post-storm
+PK-PL-0069,2025-06-01,Balochistan,Ormara,25.21112,64.63692,Plastic debris,Fishing gear,Municipal runoff,302,8.45,3.02,69.2,51.5,High,Normal tide,Post-storm
+PK-PL-0070,2025-07-01,Balochistan,Pasni,25.26565,63.4725,Plastic debris,Food packaging,Municipal runoff,385,11.62,3.85,96.7,70.2,Critical,Low tide,Post-storm
+PK-PL-0071,2025-08-01,Balochistan,Gwadar,25.12142,62.32486,Plastic debris,PET bottles,Port/harbour,280,11.96,2.8,84.5,62.3,High,Normal tide,Post-storm
+PK-PL-0072,2025-09-01,Balochistan,Jiwani,25.05111,61.74694,Plastic debris,Fishing gear,Port/harbour,462,12.57,4.62,67.4,64.7,High,Low tide,Post-rain
+PK-PL-0073,2025-10-01,Karachi,Sandspit,24.84351,66.89735,Plastic debris,Fishing gear,Tourism,493,15.52,4.93,100.0,82.7,Critical,Low tide,Post-storm
+PK-PL-0074,2025-11-01,Karachi,Buleji,24.85095,66.78874,Plastic debris,Fishing gear,Municipal runoff,294,8.55,2.94,77.7,54.3,High,Low tide,Post-storm
+PK-PL-0075,2025-12-01,Karachi,Paradise Point,24.89252,66.73843,Plastic debris,PET bottles,Fishing activity,337,12.57,3.37,55.4,55.5,High,High tide,Post-rain
+PK-PL-0076,2026-01-01,Karachi,Korangi Creek,24.79445,67.13742,Plastic debris,Fishing gear,River/drainage,315,9.78,3.15,64.6,52.8,High,Normal tide,Post-rain
+PK-PL-0077,2026-02-01,Karachi,Manora,24.80505,66.9769,Plastic debris,LDPE bags,Fishing activity,423,13.8,4.23,61.4,63.2,High,High tide,Post-storm
+PK-PL-0078,2026-03-01,Karachi,Kemari Jetty,24.81332,66.98258,Plastic debris,Polystyrene,Port/harbour,380,14.24,3.8,56.3,60.5,High,High tide,Post-storm
+PK-PL-0079,2026-04-01,Karachi,West Wharf,24.83194,66.97894,Plastic debris,Bottle caps,Port/harbour,117,6.34,1.17,6.3,18.3,Low,High tide,Dry
+PK-PL-0080,2026-05-01,Balochistan,Damb,25.32903,65.4924,Plastic debris,Plastic fragments,Tourism,266,7.13,2.66,39.5,37.3,Moderate,Low tide,Dry
+PK-PL-0081,2026-06-01,Balochistan,Ormara,25.2111,64.63175,Plastic debris,PET bottles,Municipal runoff,188,7.39,1.88,29.3,31.1,Moderate,Low tide,Dry
+PK-PL-0082,2026-07-01,Balochistan,Pasni,25.262,63.47087,Plastic debris,Food packaging,Port/harbour,412,13.56,4.12,88.1,71.7,Critical,Normal tide,Post-storm
+PK-PL-0083,2026-08-01,Balochistan,Gwadar,25.12613,62.3239,Plastic debris,Fishing gear,Fishing activity,32,2.0,0.32,44.6,20.5,Low,Low tide,Post-storm
+PK-PL-0084,2026-09-01,Balochistan,Jiwani,25.04775,61.74663,Plastic debris,Food packaging,Port/harbour,281,7.03,2.81,43.8,39.2,Moderate,Normal tide,Dry
+PK-PL-0085,2025-01-01,Karachi,Sandspit,24.84461,66.8942,Plastic debris,Plastic fragments,Port/harbour,153,3.31,1.53,62.2,33.8,Moderate,High tide,Post-storm
+PK-PL-0086,2025-02-01,Karachi,Buleji,24.85092,66.79401,Plastic debris,Bottle caps,Municipal runoff,702,20.63,7.02,100.0,92.1,Critical,Normal tide,Post-storm
+PK-PL-0087,2025-03-01,Karachi,Paradise Point,24.89027,66.73894,Plastic debris,Polystyrene,Fishing activity,237,8.25,2.37,78.1,51.7,High,High tide,Post-rain
+PK-PL-0088,2025-04-01,Karachi,Korangi Creek,24.79367,67.1424,Plastic debris,LDPE bags,Port/harbour,301,8.99,3.01,60.8,49.5,Moderate,High tide,Dry
+PK-PL-0089,2025-05-01,Karachi,Manora,24.80659,66.97625,Plastic debris,PET bottles,Tourism,398,11.4,3.98,43.9,51.8,High,Low tide,Post-storm
+PK-PL-0090,2025-06-01,Karachi,Kemari Jetty,24.81199,66.98188,Plastic debris,PET bottles,Port/harbour,443,11.59,4.43,52.2,56.9,High,High tide,Dry
+PK-PL-0091,2025-07-01,Karachi,West Wharf,24.83652,66.98157,Plastic debris,LDPE bags,Municipal runoff,459,12.78,4.59,51.5,59.4,High,Low tide,Post-rain
+PK-PL-0092,2025-08-01,Balochistan,Damb,25.32776,65.49355,Plastic debris,LDPE bags,Tourism,470,15.54,4.7,79.7,74.7,Critical,Low tide,Post-storm
+PK-PL-0093,2025-09-01,Balochistan,Ormara,25.21028,64.6374,Plastic debris,Fishing gear,River/drainage,405,14.3,4.05,100.0,76.9,Critical,Normal tide,Post-storm
+PK-PL-0094,2025-10-01,Balochistan,Pasni,25.26597,63.47236,Plastic debris,Polystyrene,Tourism,194,5.88,1.94,25.2,27.2,Low,Low tide,Dry
+PK-PL-0095,2025-11-01,Balochistan,Gwadar,25.12382,62.32386,Plastic debris,Polystyrene,Municipal runoff,129,6.74,1.29,49.9,34.8,Moderate,High tide,Post-storm
+PK-PL-0096,2025-12-01,Balochistan,Jiwani,25.05102,61.74757,Plastic debris,Food packaging,Tourism,382,12.97,3.82,80.3,66.7,High,Low tide,Post-rain
+PK-PL-0097,2026-01-01,Karachi,Sandspit,24.84821,66.89493,Plastic debris,LDPE bags,Municipal runoff,564,15.3,5.64,91.1,79.4,Critical,Low tide,Post-storm
+PK-PL-0098,2026-02-01,Karachi,Buleji,24.84783,66.79471,Plastic debris,LDPE bags,Tourism,310,5.21,3.1,60.8,43.1,Moderate,Normal tide,Post-rain
+PK-PL-0099,2026-03-01,Karachi,Paradise Point,24.8928,66.73398,Plastic debris,Fishing gear,Municipal runoff,361,8.97,3.61,12.3,34.9,Moderate,Low tide,Post-rain
+PK-PL-0100,2026-04-01,Karachi,Korangi Creek,24.78919,67.14146,Plastic debris,Polystyrene,Port/harbour,418,11.35,4.18,91.4,69.1,High,Low tide,Dry
+PK-PL-0101,2026-05-01,Karachi,Manora,24.80497,66.97782,Plastic debris,Plastic fragments,Municipal runoff,528,16.37,5.28,93.6,82.2,Critical,Low tide,Dry
+PK-PL-0102,2026-06-01,Karachi,Kemari Jetty,24.81067,66.98298,Plastic debris,Food packaging,Municipal runoff,161,4.07,1.61,47.5,30.4,Moderate,High tide,Post-rain
+PK-PL-0103,2026-07-01,Karachi,West Wharf,24.83067,66.98035,Plastic debris,Fishing gear,Fishing activity,218,10.14,2.18,41.5,41.5,Moderate,Normal tide,Post-rain
+PK-PL-0104,2026-08-01,Balochistan,Damb,25.32811,65.49524,Plastic debris,PET bottles,Municipal runoff,398,12.1,3.98,65.0,60.4,High,High tide,Post-rain
+PK-PL-0105,2026-09-01,Balochistan,Ormara,25.21303,64.63839,Plastic debris,Plastic fragments,Municipal runoff,173,6.13,1.73,54.2,36.9,Moderate,Normal tide,Dry
+PK-PL-0106,2025-01-01,Balochistan,Pasni,25.26058,63.47183,Plastic debris,Food packaging,River/drainage,789,23.86,7.89,89.9,94.4,Critical,Low tide,Dry
+PK-PL-0107,2025-02-01,Balochistan,Gwadar,25.12477,62.32122,Plastic debris,LDPE bags,River/drainage,492,12.74,4.92,100.0,77.6,Critical,Low tide,Post-storm
+PK-PL-0108,2025-03-01,Balochistan,Jiwani,25.0474,61.74493,Plastic debris,PET bottles,Fishing activity,398,10.58,3.98,60.9,56.3,High,High tide,Dry
+PK-PL-0109,2025-04-01,Karachi,Sandspit,24.85305,66.89494,Plastic debris,Polystyrene,Port/harbour,759,24.62,7.59,93.3,97.0,Critical,High tide,Post-storm
+PK-PL-0110,2025-05-01,Karachi,Buleji,24.84828,66.79364,Plastic debris,Polystyrene,Municipal runoff,587,20.29,5.87,92.0,88.7,Critical,Low tide,Dry
+PK-PL-0111,2025-06-01,Karachi,Paradise Point,24.89067,66.73829,Plastic debris,LDPE bags,River/drainage,525,14.04,5.25,81.9,73.9,Critical,Normal tide,Dry
+PK-PL-0112,2025-07-01,Karachi,Korangi Creek,24.79556,67.13938,Plastic debris,LDPE bags,Fishing activity,264,7.42,2.64,58.9,44.5,Moderate,Low tide,Post-storm
+PK-PL-0113,2025-08-01,Karachi,Manora,24.8053,66.97721,Plastic debris,LDPE bags,Port/harbour,335,11.16,3.35,53.0,52.0,High,Normal tide,Post-rain
+PK-PL-0114,2025-09-01,Karachi,Kemari Jetty,24.81079,66.98183,Plastic debris,Fishing gear,Port/harbour,545,15.89,5.45,82.4,77.4,Critical,Normal tide,Post-storm
+PK-PL-0115,2025-10-01,Karachi,West Wharf,24.82986,66.98346,Plastic debris,Polystyrene,Fishing activity,790,25.77,7.9,88.4,95.9,Critical,Normal tide,Post-rain
+PK-PL-0116,2025-11-01,Balochistan,Damb,25.32822,65.49255,Plastic debris,PET bottles,Municipal runoff,175,7.6,1.75,82.1,49.4,Moderate,Normal tide,Post-storm
+PK-PL-0117,2025-12-01,Balochistan,Ormara,25.21131,64.6391,Plastic debris,Polystyrene,River/drainage,393,11.56,3.93,70.2,61.1,High,Normal tide,Dry
+PK-PL-0118,2026-01-01,Balochistan,Pasni,25.26342,63.47703,Plastic debris,Fishing gear,Port/harbour,397,14.03,3.97,76.6,67.9,High,High tide,Dry
+PK-PL-0119,2026-02-01,Balochistan,Gwadar,25.12411,62.32265,Plastic debris,Polystyrene,Municipal runoff,132,2.91,1.32,63.2,32.6,Moderate,Low tide,Post-rain
+PK-PL-0120,2026-03-01,Balochistan,Jiwani,25.0526,61.74526,Plastic debris,LDPE bags,Port/harbour,492,14.56,4.92,59.0,66.5,High,Low tide,Post-rain
