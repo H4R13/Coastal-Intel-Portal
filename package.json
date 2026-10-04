@@ -9,7 +9,8 @@
     "load:ocean": "node server/load-ocean.mjs",
     "load:amib": "node server/load-amib.mjs",
     "load:dmjm": "node server/load-dmjm.mjs",
-    "warm:mangroves": "node server/warm-mangroves.mjs"
+    "warm:mangroves": "node server/warm-mangroves.mjs",
+    "push:cloud": "node server/push-to-cloud.mjs"
   },
   "dependencies": {
     "geotiff": "^2.1.3",
