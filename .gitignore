@@ -1,7 +1,20 @@
 # generated tiles (~550 MB) - rebuild with tools/build-terrain.mjs and tools/build-flood.mjs
 data/
 
-# data-prep dependencies and downloaded geoid grid (80 MB)
+# downloaded basemap/terrain tiles kept by serve.mjs so they are fetched from the providers only once
+.tilecache/
+
+# local database/cache connection settings (contains the PostgreSQL password)
+.env
+
+# AMHK ocean pH / fisheries layers: their LICENSE forbids copying or sharing the files, so they must never be pushed
+Other Data/AMHK*
+
+# AMIB saltwater intrusion / salinity rasters (~7 GB): far too large for git; server/amib.mjs reads them from disk
+Other Data/AMIB/
+
+# dependencies; data-prep downloads (geoid grid, 80 MB)
+node_modules/
 tools/node_modules/
 tools/data/
 tools/*.log
@@ -9,3 +22,6 @@ tools/*.log
 # local rollback copies and editor/assistant config
 _snapshots/
 .claude/
+
+# AMSK mangrove / erosion shapefiles (~220 MB): too large for git; loaded into PostgreSQL by server/load-mangroves.mjs and load-erosion.mjs
+Other Data/AMSK/

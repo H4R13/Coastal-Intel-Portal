@@ -1,10 +1,11 @@
 import { LAYERS, PLACES, REGION_LABELS, MAP_VIEW } from "../config/layers.js";
 import { BASEMAPS, OVERLAYS } from "../config/basemaps.js";
-import { RENDERERS } from "../map/renderers.js";
+import { renderersOf } from "../map/renderers.js";
 import { prefetch, setBusyCheck } from "../map/prefetch.js";
 import { registerDemProtocol } from "../map/demProtocol.js";
 import { getState, subscribe } from "../state.js";
 import { Timeline } from "./timeline.js";
+import { loadAmibCatalog, resolveView } from "../amib/amibData.js";
 
 const DEM_TILES = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
 const GLOBE_VIEW = { center: [66, 20], zoom: 1.75 };
@@ -144,26 +145,43 @@ export function CoastalMap(root) {
   const mounted = new Map();
   function syncLayers(s) {
     mounted.forEach((layer, id) => {
-      if (!s.activeLayers.includes(id)) { RENDERERS[layer.mapLayer.type]?.remove(map, layer); mounted.delete(id); }
+      if (!s.activeLayers.includes(id)) { renderersOf(layer).forEach((r) => r.remove(map, layer)); mounted.delete(id); }
     });
     s.activeLayers.forEach((id) => {
-      if (mounted.has(id)) return;
       const layer = LAYERS.find((l) => l.id === id);
-      RENDERERS[layer.mapLayer.type]?.add(map, layer);
+      if (mounted.has(id)) return renderersOf(layer).forEach((r) => r.update?.(map, layer, s)); // follow the timeline year
+      renderersOf(layer).forEach((r) => r.add(map, layer, s));
       mounted.set(id, layer);
     });
   }
+  window.addEventListener("layerdatachange", () => renderLegend(getState()));
+
+  /* Clicking a layer's dock icon brings the map to where that layer is: the area in layers.js, or for the
+     intrusion/salinity package the extent of the map layer chosen in its panel. */
+  async function focusLayer(id) {
+    const layer = LAYERS.find((l) => l.id === id);
+    let bounds = layer?.focus;
+    if (layer?.amib && !layer.amib.optional) {
+      const catalog = await loadAmibCatalog(), b = catalog && resolveView(catalog, layer, getState().amibView[id]).current?.bounds;
+      if (b) bounds = [[b[0], b[1]], [b[2], b[3]]];
+    }
+    if (!bounds) return;
+    const { l, r } = insets();
+    const cam = map.cameraForBounds(bounds, { padding: { top: 70, bottom: 170, left: 50 + l, right: 60 + r }, maxZoom: 11.5 });
+    map.flyTo({ ...cam, pitch: 0, bearing: 0, padding: { top: 0, bottom: 0, left: 0, right: 0 }, duration: 1800, essential: true });
+  }
+  window.addEventListener("layerfocus", (e) => focusLayer(e.detail));
 
   function renderLegend(s) {
     const layers = s.activeLayers.map((id) => LAYERS.find((l) => l.id === id));
+    const num = (v) => (typeof v === "number" ? +v.toPrecision(4) : v ?? "");
+    const block = (g) => (g.classes
+      ? `<ul class="lg-classes">${g.classes.map((c) => `<li><i style="background:${c.color};opacity:${c.opacity ?? 1}"></i>${c.label}</li>`).join("")}</ul>`
+      : `<span class="sw-ramp filled" style="background:${g.ramp}"></span><span class="lg-scale"><em>${num(g.min)}</em><em>${g.unit ?? ""}</em><em>${num(g.max)}</em></span>`);
     root.querySelector("#legend").innerHTML = `<span class="card-kicker">Legend</span>` + layers.map((l) => {
-      const g = l.legend;
-      const swatch = g.kind === "categorical"
-        ? `<span class="sw-cat" style="--layer:${l.color}"></span>`
-        : `<span class="sw-ramp ${g.kind}" style="--layer:${l.color}"></span>`;
-      const scale = g.kind === "categorical" ? "" : `<span class="lg-scale"><em>min</em><em>${g.unit && g.unit !== "—" ? g.unit : ""}</em><em>max</em></span>`;
-      return `<div class="lg fade"><div class="lg-name">${g.label}</div>${swatch}${scale}</div>`;
-    }).join("") + `<small class="lg-note">${layers.length ? "Scale will appear once data is connected" : "No layers switched on"}</small>`;
+      const rs = renderersOf(l), legends = rs.map((r) => r.legend?.(l)).filter(Boolean), note = rs.map((r) => r.describe?.(l)).filter(Boolean).join(" · ");
+      return `<div class="lg"><div class="lg-name"><i style="background:${l.color}"></i>${l.title}</div>${legends.length ? legends.map(block).join("") : `<small class="lg-note">Nothing to draw for this layer yet</small>`}${note ? `<small class="lg-note">${note}</small>` : ""}</div>`;
+    }).join("") + (!layers.length ? `<small class="lg-note">Switch a layer on with the toggles above to see its colours here.</small>` : "");
   }
 
   /* Raster basemaps are added lazily on first use and cross-faded; the dark vector map is the fallback. */

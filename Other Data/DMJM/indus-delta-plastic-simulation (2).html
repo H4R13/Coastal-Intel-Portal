@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Indus Delta plastic debris simulation</title>
+<!-- INTEGRATION: Open as a standalone demo or embed this file in an iframe.
+     To paste into an existing page, copy the style, section and script.
+     All styles are scoped; no external libraries or network requests are needed.
+     This models relative debris pressure, NOT transport, tonnes, biomagnification,
+     health probability, measured historical data or a validated forecast. -->
+<style>
+#indus-plastic-sim{--ink:#e5f3fa;--muted:#abc2d0;--panel:#102937;--line:#375362;--risk:#22c99a;background:#091e2b;color:var(--ink);font:15px/1.5 system-ui,sans-serif;padding:24px;border-radius:16px;max-width:920px;margin:auto;box-sizing:border-box}
+#indus-plastic-sim *{box-sizing:border-box}#indus-plastic-sim h2{font-size:24px;margin:0 0 4px}#indus-plastic-sim p{margin:6px 0 18px;color:var(--muted)}
+#indus-plastic-sim .ips-controls{display:flex;flex-wrap:wrap;gap:14px;align-items:end;margin:20px 0}#indus-plastic-sim label{display:grid;gap:5px}#indus-plastic-sim select,#indus-plastic-sim button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-height:44px;cursor:pointer}#indus-plastic-sim button:focus-visible,#indus-plastic-sim select:focus-visible,#indus-plastic-sim input:focus-visible{outline:3px solid #7ae0ed;outline-offset:3px}#indus-plastic-sim .ips-play{background:#145967}#indus-plastic-sim .ips-year-control{flex:1;min-width:200px}#indus-plastic-sim input{width:100%;min-height:32px;accent-color:#57cfe0;cursor:ew-resize}
+#indus-plastic-sim .ips-main{display:grid;grid-template-columns:minmax(160px,1fr) minmax(180px,1fr);gap:28px;align-items:center}#indus-plastic-sim .ips-plot{position:relative;height:320px;margin:12px 15px 28px 58px;border-bottom:1px solid var(--line)}#indus-plastic-sim .ips-grid{position:absolute;left:0;right:0;border-top:1px solid var(--line)}#indus-plastic-sim .ips-grid span{position:absolute;right:calc(100% + 10px);transform:translateY(-50%);color:var(--muted);font-size:12px}#indus-plastic-sim .ips-bar{position:absolute;bottom:0;left:27%;width:46%;height:16.667%;background:var(--risk);transition:height .45s ease,background .45s ease;border-radius:7px 7px 0 0}#indus-plastic-sim .ips-bar-label{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;padding-bottom:8px;font-weight:600}#indus-plastic-sim .ips-x-label{position:absolute;top:100%;left:50%;transform:translateX(-50%);padding-top:6px;white-space:nowrap}#indus-plastic-sim .ips-axis-title{color:var(--muted);font-size:13px}#indus-plastic-sim .ips-value{font-size:40px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}#indus-plastic-sim .ips-risk{display:inline-block;color:var(--risk);font-size:21px;font-weight:650;margin:10px 0}#indus-plastic-sim .ips-detail{color:var(--muted);margin-bottom:16px}#indus-plastic-sim .ips-legend{display:flex;gap:8px 18px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-top:8px}#indus-plastic-sim .ips-legend span::before{content:'●';color:var(--swatch);margin-right:6px}#indus-plastic-sim details{margin-top:24px;border-top:1px solid var(--line);padding-top:14px;color:var(--muted)}#indus-plastic-sim summary{cursor:pointer;color:var(--ink);min-height:32px}#indus-plastic-sim code{white-space:normal;overflow-wrap:anywhere}#indus-plastic-sim .ips-note{font-size:13px;margin:16px 0 0}
+@media(max-width:520px){#indus-plastic-sim{padding:18px}#indus-plastic-sim .ips-main{grid-template-columns:1fr;gap:4px}#indus-plastic-sim .ips-plot{height:240px}#indus-plastic-sim .ips-value{font-size:32px}}
+@media(prefers-reduced-motion:reduce){#indus-plastic-sim .ips-bar{transition:none}}
+
+#indus-plastic-sim{background:radial-gradient(ellipse at top right,#123e4c,transparent 65%),#081b28;border:1px solid #234553;box-shadow:0 18px 50px #00121e33}
+#indus-plastic-sim .ips-eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#75d9db;margin-bottom:8px}
+#indus-plastic-sim .ips-scene{position:relative;overflow:hidden;border-radius:12px;background:#103548;border:1px solid #2a5969;margin:20px 0 8px}
+#indus-plastic-sim canvas{display:block;width:100%;height:280px}
+#indus-plastic-sim .ips-scene-caption{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 14px;background:#102a39;color:#b5d4dc;font-size:12px}
+#indus-plastic-sim .ips-pathway{display:flex;gap:8px 16px;flex-wrap:wrap;color:#a6cbd1;font-size:13px;margin:12px 0 24px}
+#indus-plastic-sim .ips-pathway span{display:flex;align-items:center;gap:6px}#indus-plastic-sim .ips-pathway span::before{content:'•';color:#63d8d8}
+#indus-plastic-sim h3{font-size:17px;margin:22px 0 8px;color:#e5f3fa}
+#indus-plastic-sim .ips-impact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#indus-plastic-sim .ips-impact-card{padding:16px;border:1px solid #2b4c5c;border-radius:12px;background:linear-gradient(145deg,#163545,#0e2635)}
+#indus-plastic-sim .ips-impact-card h4{margin:0 0 10px;font-size:16px;color:#77dcdf}
+#indus-plastic-sim .ips-impact-card p{font-size:13px;margin:0;color:#b6ced9}
+#indus-plastic-sim .ips-impact-card strong{display:block;color:#e3eff5;margin-top:12px;font-weight:600}
+#indus-plastic-sim .ips-priority{display:flex;gap:12px;align-items:start;margin-top:14px;background:#142e3b;padding:14px;border-radius:10px;border-left:3px solid var(--risk)}
+#indus-plastic-sim .ips-priority p{margin:0;font-size:13px}#indus-plastic-sim .ips-source{font-size:12px;color:#abc2d0;margin-top:14px}#indus-plastic-sim a{color:#8bdddf}
+@media(max-width:650px){#indus-plastic-sim .ips-impact-grid{grid-template-columns:1fr}#indus-plastic-sim canvas{height:240px}}
+</style>
+</head>
+<body>
+<section id="indus-plastic-sim" aria-label="Indus Delta plastic debris scenario simulation">
+<div class="ips-eyebrow">Coastal decision support / scenario lab</div>
+<h2>Indus Delta · Plastic debris outlook</h2>
+<p>2020–2050 · Illustrative scenario, including the historical years</p>
+<div class="ips-controls">
+<label>Annual growth assumption<select data-role="scenario"><option value="2">Lower growth · 2%</option><option value="4" selected>Central illustration · 4%</option><option value="6">Higher growth · 6%</option></select></label>
+<button type="button" class="ips-play" data-role="play">Play simulation</button>
+<button type="button" data-role="reset">Reset</button>
+<label class="ips-year-control">Year: <output data-role="year">2020</output><input data-role="slider" type="range" min="2020" max="2050" step="1" value="2020" aria-label="Simulation year"></label>
+</div>
+
+<div class="ips-scene">
+<canvas data-role="scene" role="img" aria-label="Schematic river branching toward coastal water, with mangroves, fish, a boat, a settlement and illustrative plastic particles"></canvas>
+<div class="ips-scene-caption"><span>Schematic river → delta → coastal water</span><span data-role="scene-status">Paused · 2020</span></div>
+</div>
+<div class="ips-pathway"><span>Settlements</span><span>River pathways</span><span>Mangroves</span><span>Fisheries</span><span>Coastal water</span></div>
+<div class="ips-main">
+<div><div class="ips-axis-title">Relative debris index · 2020 = 100</div>
+<div class="ips-plot" role="img" data-role="plot" aria-label="2020 debris index 100">
+<div class="ips-grid" style="bottom:100%"><span>600</span></div><div class="ips-grid" style="bottom:66.667%"><span>400</span></div><div class="ips-grid" style="bottom:33.333%"><span>200</span></div><div class="ips-grid" style="bottom:16.667%;border-top-style:dashed"><span>100</span></div><div class="ips-grid" style="bottom:0"><span>0</span></div>
+<div class="ips-bar" data-role="bar"><span class="ips-bar-label" data-role="index">100</span></div><span class="ips-x-label" data-role="xyear">2020</span>
+</div></div>
+<div>
+<div class="ips-value" data-role="percent">+0.0%</div><div class="ips-detail">Change from the assumed 2020 baseline</div>
+<div class="ips-risk" data-role="risk">Low relative pressure</div><div class="ips-detail">Illustrative debris-pressure category; not a measured disaster or health risk.</div>
+<div data-role="action">Planning cue: establish a sampling baseline.</div>
+</div>
+</div>
+<div class="ips-legend" aria-label="Illustrative growth thresholds"><span style="--swatch:#22c99a">Low: &lt;25%</span><span style="--swatch:#f5cf58">Moderate: 25–&lt;75%</span><span style="--swatch:#ff9f52">High: 75–&lt;150%</span><span style="--swatch:#ff657f">Very high: ≥150%</span></div>
+
+<h3>Exposure, impact & community hardship</h3>
+<p class="ips-note" style="margin:0 0 14px">Potential pathways for assessment in the Indus Delta. These are not observed impacts or predictions of affected people.</p>
+<div class="ips-impact-grid">
+<article class="ips-impact-card"><h4>01 / Habitats & wildlife</h4><p><strong>Potential exposure</strong>Debris in river channels, mangroves and coastal water.<strong>Potential impact</strong>Ingestion, entanglement and habitat damage.<strong>Assessment needed</strong>Debris surveys, habitat observations and wildlife monitoring.</p></article>
+<article class="ips-impact-card"><h4>02 / Fisheries & livelihoods</h4><p><strong>Potential exposure</strong>Fishing grounds, gear and coastal landing areas.<strong>Potential hardship</strong>Cleanup costs, gear disruption and pressure on livelihoods.<strong>Assessment needed</strong>Fisher interviews, gear damage records and landing-area surveys.</p></article>
+<article class="ips-impact-card"><h4>03 / Communities & services</h4><p><strong>Potential exposure</strong>Coastal settlements and workers handling debris.<strong>Potential hardship</strong>Waste-management burdens and degraded coastal amenities.<strong>Assessment needed</strong>Local waste-service, household and shoreline assessments.</p></article>
+</div>
+<div class="ips-priority"><div><strong data-role="priority-title">Baseline assessment</strong><p data-role="priority-text">Establish monitoring sites and record debris, habitats and livelihoods before estimating local risk.</p></div></div>
+<div class="ips-source">General impact pathways: <a href="https://www.unep.org/resources/pollution-solution-global-assessment-marine-litter-and-plastic-pollution" target="_blank" rel="noopener noreferrer">UNEP · From Pollution to Solution (2021)</a>. Local exposure, damages and affected-population counts remain unmeasured in this demo.</div>
+
+<details><summary>Formula and assumptions</summary>
+<p><code>Index(year) = 100 × (1 + annualGrowth / 100)^(year − 2020)</code><br><code>Increase (%) = (Index(year) / 100 − 1) × 100</code></p>
+<p>2020 is a normalized baseline, not an observed measurement. All three growth rates and the category thresholds are demonstration assumptions, not official limits. Constant compound growth does not account for cleanup, storms, river discharge, transport, seasonality or policy changes. The graphic is an artistic schematic: particle count, spacing, speed, settlements and habitat symbols are not physical measurements or real mapped locations. This component does not simulate geographic movement or estimate biomagnification. The impact cards show general potential pathways, not confirmed Indus Delta damages, health outcomes or affected-person counts.</p>
+<p>To obtain a data-based forecast, replace these assumptions with consistent Indus Delta measurements and a calibrated model. Total debris growth alone cannot establish ecological or public-health risk.</p>
+</details>
+<p class="ips-note">Demo only · No observed dataset loaded · No live feed connected</p>
+<div data-role="announce" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></div>
+</section>
+<script>
+(()=>{
+  'use strict';
+  const root=document.getElementById('indus-plastic-sim');
+  if(!root || root.dataset.initialized) return;
+  root.dataset.initialized='true';
+  const get=role=>root.querySelector('[data-role="'+role+'"]');
+  // EDITABLE CONFIGURATION: all thresholds refer to percentage INCREASE from 2020.
+  const CONFIG={startYear:2020,endYear:2050,baseline:100,axisMaximum:600,stepMilliseconds:1000};
+  const categories=[
+    {below:25,label:'Low relative pressure',color:'#22c99a',action:'Planning cue: establish a sampling baseline.'},
+    {below:75,label:'Moderate relative pressure',color:'#f5cf58',action:'Planning cue: expand monitoring and review waste interception.'},
+    {below:150,label:'High relative pressure',color:'#ff9f52',action:'Planning cue: assess mangrove, fisheries and livelihood exposure.'},
+    {below:Infinity,label:'Very high relative pressure',color:'#ff657f',action:'Planning cue: prioritize source control and targeted field assessment.'}
+  ];
+  let timer=null;
+  let animationId=0, lastFrame=0, motionTime=0, currentIndex=100;
+  const canvas=get('scene'), ctx=canvas.getContext('2d');
+  const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  function calculate(year,rate){
+    const index=CONFIG.baseline*Math.pow(1+rate/100,year-CONFIG.startYear);
+    return {index,increase:(index/CONFIG.baseline-1)*100};
+  }
+  function render(announce=false){
+    const year=Number(get('slider').value),rate=Number(get('scenario').value);
+    const {index,increase}=calculate(year,rate);
+    const category=categories.find(c=>increase<c.below);
+    currentIndex=index;
+    root.style.setProperty('--risk',category.color);
+    get('bar').style.height=Math.min(100,index/CONFIG.axisMaximum*100)+'%';
+    get('index').textContent=index.toFixed(1);
+    get('percent').textContent='+'+increase.toFixed(1)+'%';
+    get('year').textContent=year;get('xyear').textContent=year;
+    get('risk').textContent=category.label;get('action').textContent=category.action;
+    const text=year+': index '+index.toFixed(1)+', increase '+increase.toFixed(1)+'%, '+category.label+'. Illustrative scenario.';
+    get('plot').setAttribute('aria-label',text);
+    const priority=categories.indexOf(category);
+    const priorities=[
+      ['Baseline assessment','Establish monitoring sites and record debris, habitats and livelihoods before estimating local risk.'],
+      ['Expanded monitoring','In this scenario, rising debris pressure prompts wider sampling and a review of collection and interception options.'],
+      ['Targeted exposure assessment','In this scenario, prioritize field checks near mangroves, fishing areas and settlements; identify which receptors are actually exposed.'],
+      ['Priority planning review','In this scenario, review source control, cleanup capacity and livelihood support needs using verified field evidence.']
+    ];
+    get('priority-title').textContent=priorities[priority][0];
+    get('priority-text').textContent=priorities[priority][1];
+    get('scene-status').textContent=(timer?'Playing':'Paused')+' · '+year;
+    drawScene();
+    if(announce) get('announce').textContent=text;
+    // Parent dashboards can listen for this event when the component is pasted inline.
+    root.dispatchEvent(new CustomEvent('indus-plastic-change',{bubbles:true,detail:{year,annualGrowthPercent:rate,index,increasePercent:increase,pressureCategory:category.label,illustrative:true}}));
+  }
+  function stop(){clearInterval(timer);timer=null;cancelAnimationFrame(animationId);lastFrame=0;get('play').textContent='Play simulation';get('scene-status').textContent='Paused · '+get('slider').value;}
+  // Artistic schematic only: paths and particle positions are not geographic data.
+  function drawScene(){
+    if(!ctx)return;
+    const width=canvas.clientWidth,height=canvas.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);
+    if(!width||!height)return;
+    if(canvas.width!==Math.round(width*dpr)||canvas.height!==Math.round(height*dpr)){canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);}
+    ctx.setTransform(dpr*width/800,0,0,dpr*height/300,0,0);
+    const sea=ctx.createLinearGradient(0,0,800,300);sea.addColorStop(0,'#133d4b');sea.addColorStop(1,'#0b536b');ctx.fillStyle=sea;ctx.fillRect(0,0,800,300);
+    ctx.fillStyle='#254a47';ctx.fillRect(0,0,310,300);
+    // Channels split through an abstract land cross-section, not a mapped outline.
+    const branches=[[[80,-20],[120,110],[240,150],[420,60]],[[80,-20],[120,110],[230,160],[420,170]],[[80,-20],[120,110],[210,190],[420,280]]];
+    ctx.lineCap='round';branches.forEach(points=>{ctx.beginPath();ctx.moveTo(...points[0]);ctx.bezierCurveTo(...points[1],...points[2],...points[3]);ctx.strokeStyle='#176578';ctx.lineWidth=36;ctx.stroke();ctx.strokeStyle='#288da0';ctx.lineWidth=2;ctx.stroke();});
+    // Subtle sea ripples.
+    ctx.strokeStyle='#5fc5d02b';ctx.lineWidth=1;for(let row=0;row<8;row++){ctx.beginPath();for(let x=350;x<800;x+=8){const y=22+row*36+Math.sin(x/40+motionTime*.6)*3;if(x===350)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();}
+    // Schematic settlement.
+    for(let i=0;i<4;i++){const x=22+i*35,y=207+(i%2)*18;ctx.fillStyle='#b2c9c0';ctx.fillRect(x,y,22,20);ctx.fillStyle='#6f9591';ctx.beginPath();ctx.moveTo(x-3,y);ctx.lineTo(x+11,y-13);ctx.lineTo(x+25,y);ctx.fill();ctx.fillStyle='#284749';ctx.fillRect(x+8,y+9,6,11);}
+    // Mangrove symbols with exposed roots.
+    for(let i=0;i<8;i++){const x=210+(i%4)*28,y=24+Math.floor(i/4)*230;ctx.strokeStyle='#76a78a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y+7);ctx.lineTo(x,y+26);ctx.moveTo(x,y+18);ctx.lineTo(x-8,y+29);ctx.moveTo(x,y+18);ctx.lineTo(x+8,y+29);ctx.stroke();ctx.fillStyle='#3fa983';ctx.beginPath();ctx.ellipse(x,y,15,12,0,0,Math.PI*2);ctx.fill();}
+    // Boat and fish; presence is symbolic, not an exposed-population count.
+    ctx.fillStyle='#d8ba89';ctx.beginPath();ctx.moveTo(585,73);ctx.lineTo(650,73);ctx.lineTo(638,91);ctx.lineTo(599,91);ctx.closePath();ctx.fill();ctx.fillStyle='#dce5da';ctx.fillRect(610,53,22,20);ctx.strokeStyle='#e3dbb9';ctx.beginPath();ctx.moveTo(625,53);ctx.lineTo(625,35);ctx.stroke();
+    for(let i=0;i<5;i++){const x=535+(i%3)*68,y=185+Math.floor(i/3)*38+Math.sin(motionTime+i)*3;ctx.fillStyle='#71c9cf';ctx.beginPath();ctx.ellipse(x,y,13,6,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(x+10,y);ctx.lineTo(x+22,y-8);ctx.lineTo(x+22,y+8);ctx.closePath();ctx.fill();}
+    // Particle count scales with relative index solely for visual communication.
+    const count=Math.round(18*currentIndex/100);
+    const cubic=(a,b,c,d,t)=>Math.pow(1-t,3)*a+3*Math.pow(1-t,2)*t*b+3*(1-t)*t*t*c+t*t*t*d;
+    for(let i=0;i<count;i++){
+      const t=((i*.61803398875+motionTime*.035)%1),b=branches[i%3];let x,y;
+      if(t<.55){const u=t/.55;x=cubic(b[0][0],b[1][0],b[2][0],b[3][0],u);y=cubic(b[0][1],b[1][1],b[2][1],b[3][1],u);}
+      else{const u=(t-.55)/.45;x=420+u*365;y=b[3][1]+Math.sin(u*5+i)*18;}
+      ctx.save();ctx.translate(x,y);ctx.rotate(i+motionTime*.2);ctx.fillStyle=['#ffb878','#f0d67d','#ed8ea3'][i%3];if(i%3===0){ctx.fillRect(-3,-5,6,10);ctx.fillRect(-1.5,-7,3,2);}else if(i%3===1){ctx.fillRect(-4,-3,8,6);}else{ctx.beginPath();ctx.arc(0,0,2.5,0,Math.PI*2);ctx.fill();}ctx.restore();
+    }
+  }
+  function animate(timestamp){if(!timer)return;if(lastFrame)motionTime+=Math.min(.1,(timestamp-lastFrame)/1000);lastFrame=timestamp;drawScene();animationId=requestAnimationFrame(animate);}
+  const observer=new ResizeObserver(()=>drawScene());observer.observe(canvas);
+  reducedMotion.addEventListener('change',()=>{cancelAnimationFrame(animationId);lastFrame=0;if(timer&&!reducedMotion.matches)animationId=requestAnimationFrame(animate);else drawScene();});
+  get('play').addEventListener('click',()=>{
+    if(timer){stop();render(true);return;}
+    if(Number(get('slider').value)>=CONFIG.endYear)get('slider').value=CONFIG.startYear;
+    render();get('play').textContent='Pause simulation';
+    timer=setInterval(()=>{
+      get('slider').value=Number(get('slider').value)+1;render();
+      if(Number(get('slider').value)>=CONFIG.endYear){stop();render(true);}
+    },reducedMotion.matches?1200:CONFIG.stepMilliseconds);
+    get('scene-status').textContent='Playing · '+get('slider').value;
+    if(!reducedMotion.matches)animationId=requestAnimationFrame(animate);
+  });
+  get('slider').addEventListener('input',()=>{stop();render();});
+  get('slider').addEventListener('change',()=>render(true));
+  get('scenario').addEventListener('change',()=>{stop();render(true);});
+  get('reset').addEventListener('click',()=>{stop();get('slider').value=CONFIG.startYear;render(true);});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
+  window.addEventListener('pagehide',stop);
+  render();
+})();
+</script>
+</body>
+</html>

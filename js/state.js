@@ -9,6 +9,13 @@ const state = {
   mode: "normal",
   year: PRESENT_YEAR,
   playing: false,
+  speed: 1, // timeline playback: 1 or 2 (twice as fast)
+  loop: false, // start over when playback reaches the last year
+  scenario: "normal", // which projection scenario forecast years use, for layers that have scenarios
+  oceanView: {}, // per ocean-package layer id: { step, variable } chosen in its panel (js/ocean/oceanPanel.js)
+  amibView: {}, // per portal layer id: { product, subgroup, layer } chosen in its intrusion/salinity section (js/amib)
+  oceanScenario: "ssp245", // emissions scenario for the ocean outlook layers
+  plasticsView: {}, // { topic, scenario, growth, tmf, after } chosen in the plastics panel (js/plastics)
   primaryLayer: "sealevel",
   activeLayers: [],
   chartIndex: 0,

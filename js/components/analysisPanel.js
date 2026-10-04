@@ -1,7 +1,12 @@
 import { LAYERS } from "../config/layers.js";
-import { getState, subscribe, setState } from "../state.js";
+import { getState, subscribe, setState, toggleLayer } from "../state.js";
+import { syncTimeCharts } from "./timeChart.js";
 import { renderChart, loadChartData } from "./chart.js";
 import { ModeTabs } from "./modeTabs.js";
+import { loadManifest } from "../map/manifest.js";
+import { oceanPanelHtml, bindOceanPanel } from "../ocean/oceanPanel.js";
+import { amibPanelHtml, bindAmibPanel } from "../amib/amibPanel.js";
+import { plasticsPanelHtml, bindPlasticsPanel } from "../plastics/plasticsPanel.js";
 
 const dash = (v, unit) => (v == null ? "—" : `${v}${unit ? ` <small>${unit}</small>` : ""}`);
 const na = (v, fallback) => v ?? fallback;
@@ -15,14 +20,14 @@ function indicators(layer, title) {
   </section>`;
 }
 
-function about(layer) {
-  const m = layer.meta;
+function about(layer, manifest) {
+  const m = { ...layer.meta, ...manifest?.meta }; // a connected layer describes itself through its manifest
   const row = (label, v, fallback) => `<div><dt>${label}</dt><dd class="${v ? "" : "muted"}">${na(v, fallback)}</dd></div>`;
   return `<section class="block">
     <h3 class="sec-title">What this layer shows</h3>
     <p class="about">${layer.about}</p>
     <h3 class="sec-title sub">Data availability</h3>
-    <ul class="avail">${layer.availability.map((x) => `<li><span>${x}</span><em>Awaiting dataset</em></li>`).join("")}</ul>
+    <ul class="avail">${layer.availability.map((x) => `<li><span>${x}</span><em>${manifest ? "Connected" : "Awaiting dataset"}</em></li>`).join("")}</ul>
     <dl class="meta">
       ${row("Data source", m.source, "Not connected")}
       ${row("Temporal coverage", m.temporal, "Not available")}
@@ -49,12 +54,15 @@ function exposure(selected) {
   </section>`;
 }
 
-function outlook(layer) {
+function outlook(layer, manifest, selected) {
+  const scenarios = manifest?.scenarios ?? [];
   return `<section class="block outlook">
     <div class="field">
       <label class="field-label" for="scenario">Scenario</label>
-      <div class="select"><select id="scenario" disabled><option>Select scenario</option></select></div>
-      <small class="muted">Scenarios will be listed once projection data is connected.</small>
+      <div class="select"><select id="scenario" ${scenarios.length ? "" : "disabled"}>${scenarios.length
+        ? scenarios.map((sc) => `<option value="${sc.id}" ${sc.id === selected ? "selected" : ""}>${sc.label}</option>`).join("")
+        : "<option>Select scenario</option>"}</select></div>
+      <small class="muted">${scenarios.length ? manifest.note ?? "" : "Scenarios will be listed once projection data is connected."}</small>
     </div>
     <div class="field"><span class="field-label">Selected layer</span><strong class="sel-layer" style="--layer:${layer.color}">${layer.title}</strong></div>
     <dl class="indicators one">
@@ -75,17 +83,46 @@ export function AnalysisPanel(root) {
   const body = root.querySelector("#panelBody");
   let lastKey = null, token = 0;
 
+  /* Layers backed by the ocean package or the plastics material have their own panel body. `choices` is whatever the
+     body depends on. Returns false when the data is not available, so the layer falls back to the standard placeholders. */
+  async function renderOwn(layer, s, tag, choices, panelHtml, bind) {
+    const key = `${tag}|${layer.id}|${choices}|${s.activeLayers.includes(layer.id)}`;
+    if (key === lastKey) return true;
+    const my = ++token;
+    const html = await panelHtml(layer, s);
+    if (html == null) return false;
+    if (my !== token) return true;
+    const sameLayer = lastKey?.startsWith(`${tag}|${layer.id}|`), scroll = body.scrollTop;
+    lastKey = key;
+    body.innerHTML = `<div class="fade" style="--layer:${layer.color}">
+      <header class="layer-head">
+        <span class="layer-head-icon">${layer.icon}</span>
+        <div><h2>${layer.title}</h2><p>${layer.lead}</p></div>
+      </header>
+      ${html}
+    </div>`;
+    body.scrollTop = sameLayer ? scroll : 0; // keep the reader's place when only a choice inside the panel changed
+    bind(body, layer, sameLayer ? scroll : 0);
+    return true;
+  }
+
   async function render(s) {
     const layer = LAYERS.find((l) => l.id === s.primaryLayer);
-    const key = `${layer.id}|${s.mode}|${s.chartIndex}|${s.activeLayers.join()}|${s.floodId}`;
+    if (layer.ocean && await renderOwn(layer, s, "ocean", `${JSON.stringify(s.oceanView[layer.id])}|${s.oceanScenario}`, oceanPanelHtml, bindOceanPanel)) return;
+    if (layer.plastics && await renderOwn(layer, s, "plastics", JSON.stringify(s.plasticsView), plasticsPanelHtml, bindPlasticsPanel)) return;
+    const key = `${layer.id}|${s.mode}|${s.chartIndex}|${s.activeLayers.join()}|${s.floodId}|${s.scenario}|${JSON.stringify(s.amibView[layer.id])}`;
     if (key === lastKey) return;
+    const sameLayer = lastKey?.startsWith(`${layer.id}|`), scroll = body.scrollTop;
     lastKey = key;
     const my = ++token;
     await floodReady;
 
     const chartCfg = layer.charts[s.chartIndex] ?? layer.charts[0];
-    const data = await loadChartData(chartCfg);
+    const [data, manifest, amib] = await Promise.all([chartCfg ? loadChartData(chartCfg) : null, loadManifest(layer), layer.amib ? amibPanelHtml(layer, s) : null]);
     if (my !== token) return;
+    // a layer fed only by the intrusion/salinity package shows that package's section in place of the placeholder charts
+    const packageOnly = amib && !layer.amib.optional;
+    const described = manifest ?? (amib ? { meta: { source: "Saltwater intrusion and salinity package supplied by the project team", spatial: "Pakistan coast" } } : null);
 
     const extra = s.activeLayers.length
       ? `<div class="overlay-note"><span class="field-label">On the map</span>${s.activeLayers.map((id) => { const l = LAYERS.find((x) => x.id === id); return `<span class="chip" style="--layer:${l.color}">${l.title}</span>`; }).join("")}</div>`
@@ -97,21 +134,27 @@ export function AnalysisPanel(root) {
         <div><h2>${layer.title}</h2><p>${layer.lead}</p></div>
       </header>
       ${extra}
-      ${s.mode === "forecast" ? outlook(layer) : ""}
+      ${manifest && !s.activeLayers.includes(layer.id) ? `<div class="show-on-map"><button class="xchip" id="showOnMap">Show on the map</button><small class="muted">The map then follows the year on the timeline.</small></div>` : ""}
+      ${s.mode === "forecast" ? outlook(layer, manifest, s.scenario) : ""}
       ${layer.id === "sealevel" ? exposure(s.floodId) : ""}
-      <section class="block">
+      ${packageOnly ? amib : chartCfg ? `<section class="block">
         <div class="chart-tabs" role="tablist">
           ${layer.charts.map((c, i) => `<button role="tab" class="ctab ${i === s.chartIndex ? "active" : ""}" data-i="${i}" aria-selected="${i === s.chartIndex}">${c.title}</button>`).join("")}
         </div>
         ${renderChart(chartCfg, data)}
         ${!data ? `<div class="empty-note"><b>No data connected yet</b><p>This visualization will display ${chartCfg.placeholder.replace(/ will appear here$/, "").toLowerCase()} once the dataset is connected.</p><span class="src"><i>Data source</i>Pending integration</span></div>` : ""}
-      </section>
-      ${indicators(layer, s.mode === "forecast" ? "Forecast indicators" : "Key indicators")}
-      ${about(layer)}
+      </section>` : `<section class="block"><div class="empty-note"><b>No data connected yet</b><p>This layer's data is served by the portal's data API, which is not running.</p></div></section>`}
+      ${amib && !packageOnly ? amib : ""}
+      ${layer.indicators.length && !packageOnly ? indicators(layer, s.mode === "forecast" ? "Forecast indicators" : "Key indicators") : ""}
+      ${about(layer, described)}
     </div>`;
-    body.scrollTop = 0;
+    body.scrollTop = sameLayer ? scroll : 0; // keep the reader's place when only a choice inside the panel changed
+    syncTimeCharts();
+    if (amib) bindAmibPanel(body, layer);
+    body.querySelector("#scenario")?.addEventListener("change", (e) => setState({ scenario: e.target.value }));
+    body.querySelector("#showOnMap")?.addEventListener("click", () => toggleLayer(layer.id, true));
     body.querySelectorAll(".ctab").forEach((b) => b.addEventListener("click", () => setState({ chartIndex: +b.dataset.i })));
-    body.querySelectorAll(".xchip").forEach((b) => b.addEventListener("click", () => setState({ floodId: b.dataset.flood || null })));
+    body.querySelectorAll("[data-flood]").forEach((b) => b.addEventListener("click", () => setState({ floodId: b.dataset.flood || null })));
   }
 
   subscribe(render);

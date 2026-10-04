@@ -31,8 +31,20 @@ async function trim(cache) {
   if (keys.length > MAX_ENTRIES) await Promise.all(keys.slice(0, keys.length - MAX_ENTRIES).map((k) => cache.delete(k)));
 }
 
+// Misses go through the dev server's disk cache (serve.mjs, /tile-cache) so each tile is downloaded from its
+// provider once and survives a cleared browser cache. Hosts without that route are detected and fetched directly.
+let diskCache = true;
+async function fetchTile(req) {
+  if (diskCache) {
+    const res = await fetch(new URL(`tile-cache?u=${encodeURIComponent(req.url)}`, self.location), { signal: req.signal }).catch(() => null);
+    if (res?.headers.has("X-Tile-Cache")) return res;
+    if (res) diskCache = false; // answered, but not by serve.mjs: static hosting
+  }
+  return fetch(req);
+}
+
 async function fromNetwork(req, cache) {
-  const res = await fetch(req);
+  const res = await fetchTile(req);
   if (res.ok) { cache.put(req, res.clone()).then(() => (Math.random() < 0.02 ? trim(cache) : null)); }
   return res;
 }

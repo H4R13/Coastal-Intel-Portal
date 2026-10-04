@@ -6,10 +6,10 @@
   --raise: rgba(229, 232, 229, 0.035);
   --line: rgba(190, 215, 215, 0.09);
   --line-2: rgba(190, 215, 215, 0.16);
-  --text: #e5e8e5;
-  --text-2: #b6c4c4;
-  --muted: #91a8aa;
-  --faint: #5f7a7e;
+  --text: #f1f5f3;
+  --text-2: #cfdbda;
+  --muted: #a9bdbe;
+  --faint: #84a0a3;
   --accent: #45b8b0;
   --accent-2: #78c9c2;
   --accent-dim: rgba(69, 184, 176, 0.13);
@@ -353,6 +353,118 @@ code { font: 12px ui-monospace, Consolas, monospace; color: var(--sand); }
 .sel-layer { font-size: 15px; font-weight: 600; padding-left: 10px; border-left: 3px solid var(--layer); }
 .outlook { background: linear-gradient(180deg, rgba(216, 183, 122, 0.06), transparent); margin: 0 -24px; padding: 22px 24px; }
 
+/* ---- charts that follow the timeline, and the full-screen pop-out (js/components/timeChart.js) ---- */
+.tc .tc-rest { opacity: 0.42; } /* years the timeline has not reached: still clearly visible, so every scenario shows */
+.tc .tc-rest .ln { stroke-dasharray: 4 3; }
+.tc .tc-cur { stroke: var(--text); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.7; }
+.tc .tc-year { fill: var(--text); font: 600 9.5px var(--font); }
+.tc .tc-dot { stroke: var(--panel-solid); stroke-width: 1.2; }
+.tc-read { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 8px 4px 4px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tc-read span { display: flex; align-items: center; gap: 6px; }
+.tc-read i { width: 10px; height: 10px; flex: none; border-radius: 3px; }
+.tc-read b { color: var(--text); font-weight: 600; }
+.tc-read em { font-style: normal; color: var(--faint); }
+.chart .bar.ahead { opacity: 0.22; }
+.chart figcaption { align-items: center; gap: 8px; }
+.chart figcaption .chart-title { flex: 1; }
+.pop-btn { flex: none; width: 26px; height: 26px; display: grid; place-items: center; color: var(--muted); border: 1px solid var(--line-2); border-radius: 7px; transition: all var(--t); }
+.pop-btn:hover, .pop-btn:focus-visible { color: var(--text); border-color: var(--accent); }
+.pop-btn svg { width: 14px; height: 14px; }
+dialog.chart-pop { width: min(1200px, 94vw); max-width: none; max-height: 94vh; margin: auto; padding: 28px 28px 22px; overflow: auto; color: var(--text); background: var(--panel-solid); border: 1px solid var(--line-2); border-radius: var(--radius); box-shadow: var(--shadow); }
+.chart-pop::backdrop { background: rgba(3, 10, 14, 0.72); }
+.chart-pop .pop-close { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; display: grid; place-items: center; font-size: 16px; color: var(--text-2); border: 1px solid var(--line-2); border-radius: 9px; background: var(--raise); }
+.chart-pop .pop-close:hover, .chart-pop .pop-close:focus-visible { color: #fff; border-color: var(--coral); }
+.chart-pop .chart { border: 0; background: none; padding: 0 44px 0 0; }
+.chart-pop .chart-title { font-size: 18px; }
+.chart-pop .tc-read { font-size: 14px; }
+.chart-pop .otable { max-height: 70vh; }
+.chart-pop .otable table { font-size: 13px; }
+.show-on-map { display: flex; align-items: center; gap: 12px; padding-top: 14px; }
+.otable-head { display: flex; align-items: center; gap: 8px; padding: 0 2px 8px; }
+.otable-head .chart-title { flex: 1; font-size: 12.5px; color: var(--text-2); }
+.chart-pop .otable-head { padding-right: 44px; }
+.chart-pop .otable-head .chart-title { font-size: 18px; color: var(--text); }
+
+/* ---- ocean package panel (js/ocean/oceanPanel.js) ---- */
+.select select option, .select select optgroup { background: var(--panel-solid); color: var(--text); }
+.obadges { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 10px; }
+.obadge { padding: 2px 9px; font-size: 11px; color: var(--sand); border-radius: 10px; background: rgba(216, 183, 122, 0.12); }
+.oramp { height: 12px; margin-top: 14px; border-radius: 3px; border: 1px solid var(--line-2); }
+.oramp-scale { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.oclasses { list-style: none; padding: 0; margin-top: 14px; display: grid; gap: 6px; font-size: 12.5px; color: var(--text-2); }
+.oclasses li { display: flex; align-items: center; gap: 8px; }
+.oclasses i, .okey i { width: 12px; height: 12px; flex: none; border-radius: 3px; }
+.ometa { grid-template-columns: 1fr; }
+.oitem { border-bottom: 1px solid var(--line); padding: 4px 0; }
+.oitem:last-child { border-bottom: 0; }
+.oitem summary { padding: 9px 0; font-size: 13.5px; font-weight: 600; color: var(--text); cursor: pointer; }
+.oitem summary:hover { color: var(--accent-2); }
+.oitem[open] { padding-bottom: 14px; }
+.okey { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 8px 4px 2px; font-size: 11.5px; color: var(--muted); }
+.okey span { display: flex; align-items: center; gap: 6px; }
+.otable { max-height: 280px; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.otable table { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; }
+.otable th { position: sticky; top: 0; padding: 7px 10px; text-align: left; font-weight: 600; color: var(--text-2); background: var(--panel-solid); white-space: nowrap; }
+.otable td { padding: 6px 10px; color: var(--text-2); border-top: 1px solid var(--line); white-space: nowrap; }
+.otable td.n { text-align: right; }
+.otable td.txt { white-space: normal; min-width: 260px; }
+.otable tbody th { position: sticky; left: 0; top: auto; font-weight: 500; border-top: 1px solid var(--line); }
+.otable tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.025); }
+
+/* ---- ocean charts, key figures and table tiles (js/ocean/oceanFigures.js) ---- */
+.analysis .caveat, .analysis .meta dt, .analysis .chart-tag { color: var(--muted); }
+.analysis .chart .axl { fill: var(--muted); }
+.ocards, .otiles { display: grid; gap: 12px; margin-top: 14px; }
+.otiles { gap: 8px; }
+.ocard .xchips { margin: 2px 0 10px; }
+.ocard .xchip { padding: 4px 10px; font-size: 11.5px; }
+.ocard-about { margin-top: 10px; padding: 0 4px; font-size: 12px; line-height: 1.55; color: var(--muted); }
+.ocard .obadges { margin: 8px 4px 4px; }
+.omeasure { margin-bottom: 10px; }
+.omeasure select { padding: 7px 10px; font-size: 12.5px; color: var(--text-2); }
+.oflip { flex: none; padding: 4px 10px; font-size: 11.5px; font-weight: 600; color: var(--muted); border: 1px solid var(--line-2); border-radius: 7px; transition: all var(--t); }
+.oflip:hover, .oflip:focus-visible { color: var(--text); border-color: var(--accent); }
+.obars { list-style: none; padding: 0 4px; display: grid; gap: 9px; max-height: 330px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #24424c transparent; }
+.obar-name { display: block; font-size: 12px; line-height: 1.35; color: var(--text-2); }
+.obars li.hl .obar-name { color: #fff; font-weight: 600; }
+.obar { display: grid; grid-template-columns: 1fr 62px; align-items: center; gap: 8px; margin-top: 3px; }
+.obar b { font-size: 12px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.obar-track { position: relative; height: 10px; border-radius: 3px; background: rgba(255, 255, 255, 0.06); }
+.obar-track i { position: absolute; top: 0; bottom: 0; min-width: 2px; border-radius: 3px; opacity: 0.9; }
+.obar-track i.dot { top: -1px; bottom: auto; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; }
+.obar-track u, .okey u { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--text); opacity: 0.75; }
+.okey u { position: static; height: 12px; }
+.obars li.hl .obar-track { background: rgba(255, 255, 255, 0.14); }
+.oaxis { padding: 6px 4px 0; font-size: 11.5px; color: var(--muted); }
+.ostrip-dot { fill: var(--text-2); opacity: 0.3; }
+.ostrip-me, .ostrip-key { fill: var(--coral); background: var(--coral); stroke: var(--panel-solid); stroke-width: 1.2; }
+.ostrip-val { fill: var(--text); font: 600 10px var(--font); }
+.okey i.ostrip-key { border-radius: 50%; }
+.okey i.ostrip-key.other { background: var(--text-2); opacity: 0.4; }
+.ostats { display: grid; gap: 12px; padding: 2px 4px; }
+.ostat b { display: block; font-size: 34px; font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; color: var(--layer, var(--accent)); }
+.ostat b small { margin-left: 3px; font-size: 16px; font-weight: 500; }
+.ostat span { display: block; margin-top: 2px; font-size: 12.5px; color: var(--text-2); }
+.ostat .ostat-name { margin: 0 0 2px; font-size: 11.5px; color: var(--muted); }
+.otile { padding: 11px 12px; border: 1px solid rgba(255, 255, 255, 0.10); border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.04); }
+.otile-head { display: flex; align-items: center; gap: 10px; }
+.otile-head > svg { flex: none; width: 20px; height: 20px; color: var(--layer, var(--accent)); }
+.otile-head > div { flex: 1; min-width: 0; }
+.otile-head .chart-title { display: block; font-size: 13px; line-height: 1.35; }
+.otile-head small { font-size: 11.5px; color: var(--muted); }
+.otile .ocard-about { display: none; }
+.otable-wrap { display: none; }
+.chart-pop .otable-wrap { display: block; margin-top: 16px; }
+.chart-pop .otile { border: 0; background: none; padding: 0 44px 0 0; }
+.chart-pop .otile .ocard-about { display: block; padding: 0; font-size: 14px; }
+.chart-pop .otile-head .chart-title { font-size: 18px; }
+.chart-pop .ocard-about { font-size: 14px; }
+.chart-pop .obars { max-height: none; }
+.chart-pop .obar-name, .chart-pop .obar b { font-size: 14px; }
+.chart-pop .obar { grid-template-columns: 1fr 90px; }
+.chart-pop .ocard .xchip { font-size: 13px; padding: 6px 13px; }
+.chart-pop .omeasure { max-width: 420px; }
+
 /* ---------- status / dialog ---------- */
 dialog { max-width: 440px; padding: 28px; border: 1px solid var(--line-2); border-radius: 16px; background: var(--panel-solid); color: var(--text); }
 dialog::backdrop { background: rgba(5, 12, 16, 0.7); backdrop-filter: blur(3px); }
@@ -446,3 +558,69 @@ dialog .eyebrow { font-size: 12px; color: var(--muted); }
   .sidebar, .analysis { background: var(--bg-2); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
   .sidebar::before, .analysis::before { display: none; }
 }
+
+/* ---- balloon stating a national value on the map (renderer "national" in js/map/renderers.js) ---- */
+.nat-balloon { position: relative; max-width: 190px; padding: 8px 12px 9px; text-align: center; color: var(--text); background: var(--panel-solid); border: 1.5px solid var(--c, var(--accent)); border-radius: 12px; box-shadow: var(--shadow); pointer-events: none; }
+.nat-balloon::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: 11px; height: 11px; margin-left: -6px; background: var(--panel-solid); border: solid var(--c, var(--accent)); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
+.nat-balloon b { display: block; font-size: 20px; font-weight: 700; line-height: 1.15; color: var(--c, var(--accent)); font-variant-numeric: tabular-nums; }
+.nat-balloon span { display: block; font-size: 11.5px; line-height: 1.3; color: var(--text-2); }
+.nat-balloon small { display: block; margin-top: 2px; font-size: 10.5px; color: var(--muted); }
+.nat-balloon.forecast { border-style: dashed; }
+.nat-balloon { z-index: 3; }
+
+/* ---------- readable glass: the panel keeps its frosted look but sits on a much darker pane, so text holds its
+   contrast over bright satellite imagery; a thin lit edge and a faint grid give it a control-surface feel ---------- */
+.analysis {
+  background:
+    linear-gradient(180deg, rgba(120, 201, 194, 0.07), rgba(120, 201, 194, 0) 140px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 45%),
+    rgba(7, 19, 26, 0.84);
+  -webkit-backdrop-filter: blur(26px) saturate(1.5);
+  backdrop-filter: blur(26px) saturate(1.5);
+  border-left: 1px solid rgba(120, 201, 194, 0.32);
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.06), -24px 0 70px rgba(2, 8, 12, 0.55);
+}
+.analysis::before { background: linear-gradient(180deg, rgba(120, 201, 194, 0.55), rgba(120, 201, 194, 0) 38%); inset: 0 auto 0 0; width: 1px; }
+.map-moving .analysis { background: rgba(7, 19, 26, 0.92); }
+.analysis .sec-title { display: flex; align-items: center; gap: 9px; letter-spacing: 0.01em; }
+.analysis .sec-title::before { content: ""; flex: none; width: 3px; height: 13px; border-radius: 2px; background: var(--layer, var(--accent)); box-shadow: 0 0 10px var(--layer, var(--accent)); }
+.analysis .layer-head h2 { text-shadow: 0 0 22px color-mix(in srgb, var(--layer, var(--accent)) 45%, transparent); }
+.analysis .about, .analysis .meta dd { color: #dbe6e4; }
+.analysis .ind, .analysis .chart, .analysis .seg, .analysis .otile { background: rgba(255, 255, 255, 0.045); border-color: rgba(160, 215, 210, 0.16); }
+.analysis .select select { background: rgba(255, 255, 255, 0.06); border-color: rgba(160, 215, 210, 0.22); color: var(--text); }
+.analysis .xchip { border-color: rgba(160, 215, 210, 0.24); }
+.legend, .timeline, .map-tools, .brand-float, .coords { background: rgba(7, 19, 26, 0.82); border-color: rgba(120, 201, 194, 0.22); -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); }
+.orange { width: 100%; accent-color: var(--layer, var(--accent)); }
+
+/* ---------- legend with real colours ---------- */
+.lg-name { display: flex; align-items: center; gap: 7px; }
+.lg-name i { width: 8px; height: 8px; flex: none; border-radius: 50%; }
+.sw-ramp.filled { height: 10px; border: 1px solid rgba(255, 255, 255, 0.18); }
+.lg-classes { list-style: none; padding: 0; display: grid; gap: 4px; font-size: 11.5px; color: var(--text-2); }
+.lg-classes li { display: flex; align-items: center; gap: 7px; }
+.lg-classes i { width: 12px; height: 12px; flex: none; border-radius: 3px; }
+.lg-scale em, .lg-note { color: var(--muted); }
+.lg-note { display: block; margin-top: 5px; line-height: 1.4; }
+.lg + .lg { padding-top: 8px; border-top: 1px solid var(--line); }
+
+/* ---------- timeline: speed and loop bubbles, shown while the play button is hovered or focused ---------- */
+.timeline { overflow: visible; }
+.tl-playwrap { position: relative; flex: none; }
+.tl-bubbles { position: absolute; left: 50%; bottom: 100%; display: flex; gap: 7px; padding-bottom: 10px; opacity: 0; pointer-events: none; transform: translate(-50%, 8px) scale(0.9); transform-origin: 50% 100%; transition: opacity 160ms var(--ease), transform 200ms var(--ease); }
+.tl-playwrap:hover .tl-bubbles, .tl-playwrap:has(:focus-visible) .tl-bubbles { opacity: 1; pointer-events: auto; transform: translate(-50%, 0) scale(1); }
+.tl-bub { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; font-size: 12px; font-weight: 700; color: var(--text); background: rgba(7, 19, 26, 0.94); border: 1px solid rgba(120, 201, 194, 0.4); box-shadow: 0 6px 18px rgba(2, 8, 12, 0.5); transition: background var(--t), color var(--t), box-shadow var(--t); }
+.tl-bub svg { width: 15px; height: 15px; }
+.tl-bub:hover { border-color: var(--accent-2); }
+.tl-bub[aria-pressed="true"] { color: #0b1820; background: var(--accent-2); border-color: transparent; box-shadow: 0 0 16px rgba(120, 201, 194, 0.6); }
+.tl-play.fast { box-shadow: 0 0 0 2px #0b1820, 0 0 0 4px var(--sand); }
+.tl-play.looping { outline: 1.5px dashed var(--accent-2); outline-offset: 5px; }
+
+/* ---------- balloons on the map ---------- */
+.nat-balloon { margin-bottom: 4px; }
+.nat-pin { position: absolute; left: 50%; bottom: -19px; width: 9px; height: 9px; margin-left: -5px; border-radius: 50%; background: var(--c, var(--accent)); box-shadow: 0 0 0 2px var(--panel-solid), 0 0 12px var(--c, var(--accent)); }
+.site-pop .maplibregl-popup-content { padding: 9px 13px 10px; text-align: center; color: var(--text); background: var(--panel-solid); border: 1px solid rgba(120, 201, 194, 0.4); border-radius: 12px; box-shadow: var(--shadow); font: 12px/1.35 var(--font); }
+.site-pop .maplibregl-popup-tip { border-top-color: var(--panel-solid); border-bottom-color: var(--panel-solid); }
+.site-pop b { display: block; font-size: 13px; }
+.site-pop span, .site-pop em { display: block; font-style: normal; font-size: 11px; color: var(--muted); }
+.site-pop strong { display: block; margin: 3px 0 1px; font-size: 19px; font-weight: 700; color: var(--sand); }
+.site-pop strong small { font-size: 11px; font-weight: 500; color: var(--text-2); }

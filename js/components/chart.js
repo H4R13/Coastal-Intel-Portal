@@ -4,6 +4,8 @@
  * With data → minimal line / bar rendering. Expected shape:
  *   data = { series: [{ name, points: [{ x: number|string, y: number }] }] }
  */
+import { timeChart, POP_BUTTON } from "./timeChart.js";
+
 const W = 340, H = 200, M = { l: 44, r: 12, t: 12, b: 34 };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
@@ -32,6 +34,7 @@ function plotted(cfg, data) {
   const pts = series.flatMap((s) => s.points);
   if (!pts.length) return pending(cfg);
   const cat = typeof pts[0].x === "string";
+  if (!cat && cfg.type !== "bar") return timeChart(series, { yLabel: cfg.yLabel, unit: data.unit ?? cfg.unit }); // follows the timeline
   const xs = cat ? [...new Set(pts.map((p) => p.x))] : pts.map((p) => p.x);
   const xMin = cat ? 0 : Math.min(...xs), xMax = cat ? xs.length - 1 || 1 : Math.max(...xs);
   const yMax = Math.max(0, ...pts.map((p) => p.y)), yMin = Math.min(0, ...pts.map((p) => p.y));
@@ -40,7 +43,8 @@ function plotted(cfg, data) {
   let body = "";
   if (cfg.type === "bar") {
     const bw = Math.max(4, ((W - M.l - M.r) / xs.length) * 0.5);
-    body = pts.map((p) => `<rect class="bar" x="${px(p.x) - bw / 2}" y="${Math.min(py(p.y), py(0))}" width="${bw}" height="${Math.abs(py(p.y) - py(0))}" rx="1.5"/>`).join("");
+    // bars that carry the year their period starts (from) fade until the timeline reaches them
+    body = pts.map((p) => `<rect class="bar" ${p.from != null ? `data-from="${p.from}"` : ""} x="${px(p.x) - bw / 2}" y="${Math.min(py(p.y), py(0))}" width="${bw}" height="${Math.abs(py(p.y) - py(0))}" rx="1.5"/>`).join("");
   } else {
     body = series.map((s, i) => `<polyline class="ln s${i % 4}" points="${s.points.map((p) => `${px(p.x)},${py(p.y)}`).join(" ")}"/>`).join("");
   }
@@ -53,8 +57,8 @@ export async function loadChartData(cfg) {
 }
 
 export function renderChart(cfg, data = null) {
-  return `<figure class="chart ${data ? "" : "is-pending"}" data-type="${cfg.type}">
-    <figcaption><span class="chart-title">${esc(cfg.title)}</span><span class="chart-tag">${data ? esc(cfg.unit ?? "") : "No data connected"}</span></figcaption>
+  return `<figure class="chart ${data ? "" : "is-pending"}" data-type="${cfg.type}" ${data ? "data-popbox" : ""}>
+    <figcaption><span class="chart-title">${esc(cfg.title)}</span><span class="chart-tag">${data ? esc(cfg.unit ?? "") : "No data connected"}</span>${data ? POP_BUTTON : ""}</figcaption>
     ${data ? plotted(cfg, data) : pending(cfg)}
   </figure>`;
 }

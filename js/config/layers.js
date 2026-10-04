@@ -7,7 +7,9 @@
  *   - indicators[].value  → real values (null renders "—")
  *   - dataSource          → { name, url, citation, coverage }
  * No component needs to change.
+ * focus = [[west, south], [east, north]]: where the map goes when the layer's dock icon is clicked.
  */
+import { NATIONAL_RAMP } from "../ocean/national.js";
 
 const icon = (body) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
@@ -34,6 +36,8 @@ export const LAYERS = [
     indicators: indicators([["hist", "Historical change", "mm"], ["status", "Current status"], ["proj", "Projection", "mm"], ["cov", "Coverage"]]),
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
+    focus: [[66.4, 23.5], [68.9, 25.3]],
+    amib: { products: ["D"] }, // sea-level rise felt at the coast, including land sinking (js/amib)
   },
   {
     id: "intrusion",
@@ -54,6 +58,8 @@ export const LAYERS = [
     indicators: indicators([["samples", "Sampling points"], ["status", "Current status"], ["trend", "Trend"], ["cov", "Coverage"]]),
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
+    focus: [[67.1, 23.6], [68.95, 25.2]],
+    amib: { products: ["C", "B", "GH"] }, // fresh groundwater, salt moving up the river, salt-water boundary under the coast
   },
   {
     id: "salinity",
@@ -74,6 +80,8 @@ export const LAYERS = [
     indicators: indicators([["current", "Current"], ["trend", "Trend"], ["anom", "Anomaly"], ["cov", "Coverage"]]),
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
+    focus: [[66.9, 23.6], [68.6, 25.1]],
+    amib: { products: ["A", "G", "H"] }, // salty soils, sea-surface salinity and fresh-water signs, future ocean
   },
   {
     id: "mangroves",
@@ -84,48 +92,57 @@ export const LAYERS = [
     availability: ["Extent maps","Historical change"],
     icon: icon('<path d="M12 3c-3 2.4-4.6 5-4.6 7.6a4.6 4.6 0 0 0 9.2 0C16.6 8 15 5.4 12 3Z"/><path d="M12 15v6M9 21h6M8 18l-3 3M16 18l3 3"/>'),
     about: "Mangrove extent maps the area of coastal mangrove forest and how it has changed over time, including the Indus Delta and Balochistan coast.",
-    mapLayer: { type: "polygons", label: "Mangrove extent", planned: ["Polygon extent", "Historical change"], endpoint: null },
-    legend: { kind: "categorical", label: "Mangrove extent", unit: null },
+    // served from the database by server/api.mjs; without that API running the layer falls back to its placeholders
+    // the map shows each year against the first mapped year (kept / gained / lost): pictures from server/mangrove-change.mjs
+    mapLayer: { type: "mangrovechange", label: "Mangrove change", planned: ["Polygon extent", "Historical change"], endpoint: "api/mangroves/change/", manifest: "api/layers/mangroves" },
+    legend: { kind: "categorical", label: "Mangrove change", unit: null },
+    focus: [[67.0, 23.95], [67.95, 24.95]], // the Indus Delta creeks, where most of the change is
     charts: [
-      { id: "area", title: "Mangrove area through time", type: "line", xLabel: "Year", yLabel: "Area", unit: "ha", placeholder: "Historical extent will appear here", endpoint: null },
+      { id: "area", title: "Mangrove area through time", type: "line", xLabel: "Year", yLabel: "Area", unit: "km²", placeholder: "Historical extent will appear here", endpoint: "api/layers/mangroves/series" },
       { id: "change", title: "Gain / loss", type: "bar", xLabel: "Period", yLabel: "Net change", unit: "ha", placeholder: "Gain and loss will appear here", endpoint: null },
       { id: "compare", title: "Extent comparison", type: "bar", xLabel: "Region", yLabel: "Area", unit: "ha", placeholder: "Extent comparison will appear here", endpoint: null },
     ],
     indicators: indicators([["area", "Current extent", "ha"], ["change", "Net change", "ha"], ["proj", "2050"], ["cov", "Coverage"]]),
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
+    amib: { products: ["F"], match: "mangrove", optional: true }, // raster mangrove cover, offered beside the shapefile extent
   },
   {
     id: "erosion",
     title: "Coastal Erosion",
-    descriptor: "Shoreline movement",
+    descriptor: "Land lost to the sea",
     color: "#d98272",
-    lead: "How the shoreline is advancing and retreating",
-    availability: ["Historical shorelines","Erosion and accretion rates"],
+    lead: "Where the coast has been eroded, period by period",
+    availability: ["Eroded area by period","Projection to 2050"],
     icon: icon('<path d="M3 16c3-1 4-5 7-5s3 3 6 3 3-2 5-3"/><path d="M3 20h18"/><path d="M14 5l3 3 3-3"/>'),
-    about: "Coastal erosion tracks shoreline position through time, distinguishing retreat (erosion) from advance (accretion).",
-    mapLayer: { type: "lines", label: "Shoreline positions & transects", planned: ["Historical shoreline lines", "Erosion / accretion transects"], endpoint: null },
-    legend: { kind: "diverging", label: "Erosion ↔ accretion", unit: "m/yr" },
+    about: "Coastal erosion maps the land lost to the sea in each period since 1985. Areas after the last mapped period are a projection to 2050.",
+    // served from the database by server/api.mjs; without that API running the layer falls back to its placeholders
+    mapLayer: { type: "periodtiles", label: "Eroded area by period", planned: ["Eroded area by period", "Projection to 2050"], endpoint: "api/tiles/erosion/", manifest: "api/layers/erosion" },
+    legend: { kind: "categorical", label: "Eroded area", unit: null },
     charts: [
-      { id: "movement", title: "Shoreline movement", type: "line", xLabel: "Year", yLabel: "Shoreline position", unit: "m", placeholder: "Shoreline history will appear here", endpoint: null },
-      { id: "rate", title: "Erosion / accretion rate", type: "bar", xLabel: "Transect", yLabel: "Rate", unit: "m/yr", placeholder: "Rates will appear here", endpoint: null },
+      { id: "movement", title: "Eroded area through time", type: "line", xLabel: "Year", yLabel: "Area lost since 1985", unit: "km²", placeholder: "Eroded area will appear here", endpoint: "api/layers/erosion/series" },
+      { id: "rate", title: "Eroded area by period", type: "bar", xLabel: "Period", yLabel: "Area lost", unit: "km²", placeholder: "Area per period will appear here", endpoint: "api/layers/erosion/periods" },
       { id: "length", title: "Affected coastline length", type: "bar", xLabel: "Class", yLabel: "Length", unit: "km", placeholder: "Coastline statistics will appear here", endpoint: null },
     ],
     indicators: indicators([["rate", "Mean rate", "m/yr"], ["length", "Affected length", "km"], ["proj", "2050"], ["cov", "Coverage"]]),
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
+    focus: [[66.9, 23.6], [68.3, 24.95]],
+    amib: { products: ["F"], exclude: "mangrove", optional: true }, // raster land lost to / gained from the sea, beside the shapefile areas
   },
   {
     id: "microplastics",
-    title: "Microplastics",
-    descriptor: "Marine pollution indicators",
+    title: "Plastics",
+    descriptor: "Debris & biomagnification",
     color: "#d8a85a",
-    lead: "Plastic particles in coastal waters",
-    availability: ["Sampling locations","Particle types"],
+    lead: "Plastic debris on the coast, and how contaminants build up the food chain",
+    availability: ["Beach debris surveys","Scenarios to 2050"],
     icon: icon('<circle cx="8" cy="9" r="2.4"/><circle cx="16" cy="7" r="1.6"/><circle cx="15" cy="15" r="3"/><circle cx="7" cy="17" r="1.4"/>'),
-    about: "Microplastic indicators describe the abundance and character of plastic particles in coastal and marine environments.",
-    mapLayer: { type: "points", label: "Sampling locations", planned: ["Sampling points", "Concentration heatmap"], endpoint: null },
-    legend: { kind: "ramp", label: "Concentration", unit: "—" },
+about: "Plastic debris counted on beaches from Karachi to Jiwani, scenarios for those beaches to 2050, and two illustrations: a debris pressure index and biomagnification in the food chain.",
+    mapLayer: { type: "plastics", label: "Beach debris surveys", planned: [], endpoint: "api/dmjm/" },
+    legend: { kind: "ramp", label: "Beach debris", unit: "items per 100 m" },
+    focus: [[61.5, 24.3], [67.4, 25.7]],
+    plastics: true, // panel: js/plastics/plasticsPanel.js; data: server/load-dmjm.mjs
     charts: [
       { id: "location", title: "Concentration by location", type: "bar", xLabel: "Sampling location", yLabel: "Concentration", unit: "—", placeholder: "Site concentrations will appear here", endpoint: null },
       { id: "trend", title: "Historical trend", type: "line", xLabel: "Year", yLabel: "Concentration", unit: "—", placeholder: "Historical trend will appear here", endpoint: null },
@@ -144,8 +161,9 @@ export const LAYERS = [
     availability: ["Catch and activity records","Species distribution"],
     icon: icon('<path d="M3 12c2.5-4 6-5.5 10-5 3 .4 5.4 2.2 7 5-1.6 2.8-4 4.6-7 5-4 .5-7.5-1-10-5Z"/><circle cx="16.5" cy="11" r=".7" fill="currentColor"/><path d="M3 12 1.5 8.5M3 12l-1.5 3.5"/>'),
     about: "Fisheries information covers marine resources, fishing activity and species distribution along the coast.",
-    mapLayer: { type: "heatmap", label: "Fishing activity", planned: ["Fishing activity", "Fishing grounds", "Species / distribution"], endpoint: null },
-    legend: { kind: "ramp", label: "Fishing activity", unit: "—" },
+    mapLayer: { type: "national", label: "National fisheries indicator", planned: ["Fishing activity", "Fishing grounds", "Species / distribution"], endpoint: null },
+    legend: { kind: "ramp", label: "National fisheries indicator", unit: "—", gradient: NATIONAL_RAMP },
+    focus: [[61.4, 21.0], [68.8, 25.6]],
     charts: [
       { id: "catch", title: "Catch / activity trend", type: "line", xLabel: "Year", yLabel: "Catch", unit: "t", placeholder: "Catch and activity trends will appear here", endpoint: null },
       { id: "species", title: "Species composition", type: "bar", xLabel: "Species", yLabel: "Share", unit: "%", placeholder: "Species composition will appear here", endpoint: null },
@@ -154,6 +172,28 @@ export const LAYERS = [
     indicators: indicators([["catch", "Reported catch", "t"], ["trend", "Trend"], ["species", "Species recorded"], ["cov", "Coverage"]]),
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
+    // catch and stock status, shell-building animals, national index: topics 9-11 of the ocean package (charts and tables;
+    // on the map, a balloon stating the national value of the year)
+    ocean: { steps: [9, 10, 11] },
+  },
+  {
+    id: "ocean",
+    title: "Ocean",
+    descriptor: "Acidity, warming & oxygen",
+    color: "#9a86d1",
+    lead: "How the sea itself is changing: acidity, heat, oxygen and the outlook to 2050",
+    availability: [],
+    icon: icon('<path d="M12 3.5c-2.6 3-4 5.3-4 7.3a4 4 0 0 0 8 0c0-2-1.4-4.3-4-7.3Z"/><path d="M3 18c2.2 0 2.2-1.5 4.5-1.5S9.8 18 12 18s2.2-1.5 4.5-1.5S18.8 18 21 18"/>'),
+    about: "Ocean conditions in Pakistan's Exclusive Economic Zone: surface pH, shell-building conditions, sea temperature and marine heatwaves, dissolved oxygen, combined climate exposure and the outlook to 2050.",
+    mapLayer: { type: "ocean", label: "Ocean conditions", planned: [], endpoint: "api/ocean/" },
+    focus: [[61.4, 21.0], [68.8, 25.6]], // Pakistan's Exclusive Economic Zone
+    legend: { kind: "categorical", label: "Ocean layer", unit: null },
+    charts: [],
+    indicators: [],
+    meta: { source: null, temporal: null, spatial: null, updated: null },
+    endpoint: null,
+    // topics of the ocean package (server/load-ocean.mjs); the panel is js/ocean/oceanPanel.js
+    ocean: { steps: [4, 5, 6, 7, 8, 13] },
   },
 ];
 

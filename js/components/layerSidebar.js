@@ -43,7 +43,7 @@ export function LayerSidebar(root) {
   /* icons open a layer's panel; the toggles below decide what is drawn on the map */
   const items = [...root.querySelectorAll(".dock-item")];
   const icons = items.map((b) => b.querySelector(".dock-icon"));
-  items.forEach((b) => b.addEventListener("click", () => selectLayer(b.dataset.id)));
+  items.forEach((b) => b.addEventListener("click", () => { selectLayer(b.dataset.id); window.dispatchEvent(new CustomEvent("layerfocus", { detail: b.dataset.id })); }));
   const toggles = [...root.querySelectorAll(".lt")];
   toggles.forEach((t) => t.querySelector("input").addEventListener("change", (e) => toggleLayer(t.dataset.id, e.target.checked)));
 

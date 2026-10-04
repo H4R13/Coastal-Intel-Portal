@@ -1,0 +1,21 @@
+{
+  "name": "coastal-intel-portal",
+  "private": true,
+  "description": "Server side of the portal: static files, tile disk cache, and the PostgreSQL/Redis data API. The web app itself needs no build step.",
+  "scripts": {
+    "start": "node serve.mjs",
+    "load:mangroves": "node server/load-mangroves.mjs",
+    "load:erosion": "node server/load-erosion.mjs",
+    "load:ocean": "node server/load-ocean.mjs",
+    "load:amib": "node server/load-amib.mjs",
+    "load:dmjm": "node server/load-dmjm.mjs",
+    "warm:mangroves": "node server/warm-mangroves.mjs"
+  },
+  "dependencies": {
+    "geotiff": "^2.1.3",
+    "ioredis": "^5.4.1",
+    "pg": "^8.13.1",
+    "shapefile": "^0.6.6",
+    "sharp": "^0.35.5"
+  }
+}
