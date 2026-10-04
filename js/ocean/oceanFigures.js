@@ -9,7 +9,7 @@
  * Every chart card can flip to its data table, and every card opens full screen.
  *   figureCard(l, data)    HTML for one catalog entry;  kindOf(l, data) → "stat" | "chart" | "table"
  */
-import { timeChart, syncTimeCharts, POP_BUTTON } from "../components/timeChart.js";
+import { timeChart, syncTimeCharts, POP_BUTTON, FIRST_YEAR } from "../components/timeChart.js";
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 export const num = (v) => (typeof v !== "number" ? esc(v ?? "") : Number.isInteger(v) ? String(v) : Math.abs(v) < 1e-3 || Math.abs(v) >= 1e6 ? v.toExponential(2) : String(+v.toPrecision(4)));
@@ -34,7 +34,8 @@ const chips = (name, values, current, label = (v) => v) => (values.length < 2 ? 
 
 /* ---- tables ---- */
 /** Series files are { region: { product: [rows] } }; flatten them for a table. */
-const flatten = (data) => (Array.isArray(data) ? data : Object.entries(data).flatMap(([region, byProduct]) => Object.entries(byProduct).flatMap(([product, rows]) => rows.map((r) => ({ region, product, ...r })))));
+const early = (r) => (typeof r.year === "number" && r.year < FIRST_YEAR) || (typeof r.time === "string" && +r.time.slice(0, 4) < FIRST_YEAR); // before the timeline: not shown anywhere
+const flatten = (data) => (Array.isArray(data) ? data : Object.entries(data).flatMap(([region, byProduct]) => Object.entries(byProduct).flatMap(([product, rows]) => rows.filter((r) => !early(r)).map((r) => ({ region, product, ...r })))));
 const ID_COLUMNS = ["region", "product", "definition", "variant", "scenario", "metric", "benchmark", "where", "model"];
 const td = (v) => `<td class="${typeof v === "number" ? "n" : typeof v === "string" && v.length > 40 ? "txt" : ""}">${cell(v)}</td>`;
 

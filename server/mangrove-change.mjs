@@ -1,5 +1,6 @@
 /**
  * Mangrove change pictures: the delivered extent of one year compared with the first mapped year, as a PNG.
+ * "First mapped year" means the first one from FIRST_YEAR on.
  *   yellow  mangrove in both years (still standing)
  *   blue    mangrove now, none in the first year (gained)
  *   red     mangrove in the first year, none now (lost)
@@ -9,6 +10,9 @@
  */
 import sharp from "sharp";
 import { query } from "./db.mjs";
+
+/** The portal's timeline starts here; mapped years before it are not served, and change is measured against this year. */
+export const FIRST_YEAR = 1990;
 
 export const FRAMES = {
   east: { bounds: [66.0, 23.6, 68.7, 25.65], width: 4096 },

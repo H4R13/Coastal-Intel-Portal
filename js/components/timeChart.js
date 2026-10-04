@@ -6,6 +6,10 @@
  * Also owns the pop-out view: any element with [data-popbox] gets shown full screen by a [data-pop] button inside it.
  */
 import { getState, subscribe } from "../state.js";
+import { MODES } from "../config/layers.js";
+
+/** First year of the timeline. Yearly charts drop anything earlier and start their axis here, so they all line up with it. */
+export const FIRST_YEAR = Math.min(...MODES.map((m) => m.from));
 
 const W = 340, H = 200, M = { l: 46, r: 12, t: 14, b: 30 };
 const PALETTE = ["var(--layer, var(--accent))", "#c9a3e6", "#7fd0c8", "#d8b77a", "#9fb4ff", "#e79ac0", "#b9d27a", "#f2c179"];
@@ -30,10 +34,13 @@ const px = (c, x) => M.l + ((x - c.x0) / (c.x1 - c.x0 || 1)) * (W - M.l - M.r);
 const py = (c, y) => H - M.b - ((y - c.y0) / (c.y1 - c.y0 || 1)) * (H - M.t - M.b);
 
 export function timeChart(groups, { yLabel = "", unit = "" } = {}) {
+  const yearly = groups.every((g) => g.points.every((p) => p.x > 1800 && p.x < 2300));
+  if (yearly) groups = groups.map((g) => ({ ...g, points: g.points.filter((p) => p.x >= FIRST_YEAR) })).filter((g) => g.points.length);
+  if (!groups.length) return `<p class="caveat">No values from ${FIRST_YEAR} on.</p>`;
   const pts = groups.flatMap((g) => g.points), xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
   const pad = (Math.max(...ys) - Math.min(...ys)) * 0.06 || 1;
   const COLORS = colorsFor(groups);
-  const c = { groups, unit, colors: COLORS, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys) - pad, y1: Math.max(...ys) + pad };
+  const c = { groups, unit, colors: COLORS, x0: yearly ? FIRST_YEAR : Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys) - pad, y1: Math.max(...ys) + pad };
   const id = String(++seq);
   charts.set(id, c);
   const lines = groups.map((g, i) => `<polyline class="ln" style="stroke:${COLORS[i % COLORS.length]}" points="${g.points.map((p) => `${px(c, p.x).toFixed(1)},${py(c, p.y).toFixed(1)}`).join(" ")}"/>`).join("");

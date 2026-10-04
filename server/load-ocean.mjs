@@ -2,7 +2,7 @@
  * Load the ocean pH / warming / oxygen / fisheries package into PostgreSQL (ocean_doc in schema.sql) and clear
  * its cached answers.
  *
- *   node server/load-ocean.mjs ["Other Data/AMHKm/ndma-ocean-portal-data-main"]
+ *   node server/load-ocean.mjs ["Other Data/AMHK/ndma-ocean-portal-data-main"]
  *
  * The package's catalog.json lists every layer; this reads each layer's file and stores it under the key the API
  * serves. GeoTIFFs are decoded here into plain grids (values row by row from the north, null = no data), so the
@@ -13,7 +13,7 @@ import { fromFile } from "geotiff";
 try { process.loadEnvFile(path.join(process.cwd(), ".env")); } catch { /* settings may come from the environment */ }
 const { pool, clearCache, redis } = await import("./db.mjs");
 
-const dir = path.resolve(process.argv[2] ?? "Other Data/AMHKm/ndma-ocean-portal-data-main");
+const dir = path.resolve(process.argv[2] ?? "Other Data/AMHK/ndma-ocean-portal-data-main");
 if (!fs.existsSync(path.join(dir, "catalog.json"))) { console.error(`catalog.json not found in ${dir}`); process.exit(1); }
 const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(dir, rel), "utf8"));
 

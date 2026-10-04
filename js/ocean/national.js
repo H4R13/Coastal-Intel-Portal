@@ -8,8 +8,8 @@ import { loadDoc } from "./oceanData.js";
 /* topic → the package file and column the value comes from. `max` is the top of the colour scale. */
 export const NATIONAL = {
   // the package's own indicator (stock_status_indicator, 26.35 % in 2023) is this sum for the final year
-  9: { doc: "ssp_catch", label: "Catch from over-exploited or collapsed stocks", unit: "%", max: 40, period: "1950–2023", value: (r) => r["over-exploited_pct"] + r.collapsed_pct },
-  10: { doc: "shell_share_series", label: "Molluscs in the catch", unit: "%", max: 4, period: "1950–2023", value: (r) => r.molluscs_pct },
+  9: { doc: "ssp_catch", label: "Catch from over-exploited or collapsed stocks", unit: "%", max: 40, period: "1990–2023", value: (r) => r["over-exploited_pct"] + r.collapsed_pct },
+  10: { doc: "shell_share_series", label: "Molluscs in the catch", unit: "%", max: 4, period: "1990–2023", value: (r) => r.molluscs_pct },
   11: { doc: "national_index", label: "Potential impact (national index, 0–1)", unit: "", max: 1, period: null, fixed: (rows) => rows.find((r) => /^PI\b/.test(r.component))?.value },
 };
 

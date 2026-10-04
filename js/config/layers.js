@@ -37,7 +37,10 @@ export const LAYERS = [
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
     focus: [[66.4, 23.5], [68.9, 25.3]],
-    amib: { products: ["D"] }, // sea-level rise felt at the coast, including land sinking (js/amib)
+    // sea-level rise felt at the coast, including land sinking (js/amib). Its maps are smooth fields that fill the whole
+    // study box with nearly one value; that even background is left clear so only the places that differ are coloured
+    // (owner request)
+    amib: { products: ["D"], clearBackground: true },
   },
   {
     id: "intrusion",
@@ -59,7 +62,7 @@ export const LAYERS = [
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
     focus: [[67.1, 23.6], [68.95, 25.2]],
-    amib: { products: ["C", "B", "GH"] }, // fresh groundwater, salt moving up the river, salt-water boundary under the coast
+    amib: { products: ["C", "B", "GH"], clearBackground: true }, // the wide pale "none" area of its smooth maps is left clear // fresh groundwater, salt moving up the river, salt-water boundary under the coast
   },
   {
     id: "salinity",
@@ -81,7 +84,7 @@ export const LAYERS = [
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
     focus: [[66.9, 23.6], [68.6, 25.1]],
-    amib: { products: ["A", "G", "H"] }, // salty soils, sea-surface salinity and fresh-water signs, future ocean
+    amib: { products: ["A", "G", "H"], hideClasses: ["water"] }, // open water is not drawn on the class maps (owner request) // salty soils, sea-surface salinity and fresh-water signs, future ocean
   },
   {
     id: "mangroves",

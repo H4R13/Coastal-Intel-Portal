@@ -6,7 +6,7 @@
 import { getState, setState, toggleLayer } from "../state.js";
 import { loadCatalog, loadDoc, mapVariables, resolveLayer, panelLayers, variableOf, SCENARIOS } from "./oceanData.js";
 import { gradientCss, CLASS_COLORS } from "./colormaps.js";
-import { syncTimeCharts } from "../components/timeChart.js";
+import { syncTimeCharts, FIRST_YEAR } from "../components/timeChart.js";
 import { figureCard, kindOf, num } from "./oceanFigures.js";
 import { NATIONAL, NATIONAL_RAMP, forecastFigure } from "./national.js";
 
@@ -57,7 +57,7 @@ function mapSection(layer, catalog, view, s) {
       ${legend(L)}
       ${L.overlay ? `<p class="caveat">${esc(L.overlay.legend)}. Test: ${esc(L.overlay.test)}.</p>` : ""}
       <p class="caveat">${L.type === "raster_series"
-        ? `Changes with the year on the timeline. Data covers ${L.years[0]}–${L.years.at(-1)}; later years show ${L.years.at(-1)}.`
+        ? `Changes with the year on the timeline. Data covers ${Math.max(FIRST_YEAR, L.years[0])}–${L.years.at(-1)}; later years show ${L.years.at(-1)}.`
         : `One fixed map${L.period ? ` for ${esc(L.period)}` : ""}: it does not change with the timeline.`}</p>
       <p class="caveat">Shown inside Pakistan's Exclusive Economic Zone only.${L.classes ? "" : " Smoothed between grid points for display; the data itself is on a 25 km or coarser grid."} Where the product stops short of the shore, the nearest value is carried in to the coast; narrow creeks are left out.</p>
       <dl class="meta ometa">

@@ -1,6 +1,7 @@
 /**
  * Data API, mounted by serve.mjs under /api/. Every answer is cached in Redis until its layer is reloaded.
  *   GET /api/health
+ *   GET /api/diagnostics                services, layer data, cache and machine load (server/diagnostics.mjs)
  *   GET /api/layers/<layer>             which years, periods and scenarios exist, source, units
  *   GET /api/layers/<layer>/<chart>     chart data shaped for js/components/chart.js
  *   GET /api/tiles/mangroves/<scenario>/<year>/<z>/<x>/<y>.mvt   mangrove extent for one year
@@ -8,14 +9,17 @@
  *   GET /api/ocean/<key>                ocean package documents: catalog, raster/<id>[/<year>], data/<id>,
  *                                       overlay/<id>, vector/<id>, chart_style, findings (see server/load-ocean.mjs)
  *   GET /api/amib/<key>                 saltwater intrusion / salinity package: catalog, series/<product>, vector/<id>
- *   GET /api/amib/image/<id>/<step>     PNG of one of its map layers at a time step (see server/amib.mjs)
+ *   GET /api/amib/image/<id>/<step>     PNG of one of its map layers at a time step (see server/amib.mjs);
+ *                                       ?bg=clear makes the picture's most common colour see-through,
+ *                                       ?hide=rrggbb,... makes those class colours see-through
  *   GET /api/dmjm/<key>                 plastic debris material: surveys, projection (see server/load-dmjm.mjs)
  *   GET /api/mangroves/change/<frame>/<scenario>/<year>.png   that year's extent against the first mapped year
  *                                       (kept / gained / lost; see server/mangrove-change.mjs)
  */
 import { query, cached, redis } from "./db.mjs";
 import { amibImage } from "./amib.mjs";
-import { mangroveChangeImage, FRAMES } from "./mangrove-change.mjs";
+import { mangroveChangeImage, FRAMES, FIRST_YEAR } from "./mangrove-change.mjs";
+import { diagnostics } from "./diagnostics.mjs";
 
 const JSON_TYPE = "application/json; charset=utf-8";
 const send = (res, status, type, body, extra = {}) => { res.writeHead(status, { "Content-Type": type, ...extra }); res.end(body); };
@@ -31,7 +35,7 @@ const MVT_GEOM = "ST_AsMVTGeom(case when $1::int < 10 then ST_Simplify(geom, $4:
 async function mangroveManifest() {
   const meta = await info("mangroves");
   if (!meta) return null;
-  const { rows } = await query("select distinct scenario, year from mangrove_extent order by year");
+  const { rows } = await query("select distinct scenario, year from mangrove_extent where year >= $1 order by year", [FIRST_YEAR]); // nothing before the timeline's first year
   const observed = rows.filter((r) => r.scenario === "observed").map((r) => r.year);
   const projected = rows.filter((r) => r.scenario !== "observed").map((r) => ({ scenario: r.scenario, year: r.year }));
   const projYears = [...new Set(projected.map((p) => p.year))];
@@ -49,7 +53,7 @@ async function mangroveManifest() {
 }
 
 async function mangroveSeries() {
-  const { rows } = await query("select scenario, year, area_km2 from mangrove_area order by scenario, year");
+  const { rows } = await query("select scenario, year, area_km2 from mangrove_area where year >= $1 order by scenario, year", [FIRST_YEAR]);
   const by = new Map();
   for (const r of rows) (by.get(r.scenario) ?? by.set(r.scenario, []).get(r.scenario)).push({ x: r.year, y: r.area_km2 });
   const order = ["observed", ...[...by.keys()].filter((k) => k !== "observed")];
@@ -115,8 +119,8 @@ async function erosionTile(z, x, y) {
 
 /* ---------- routing ---------- */
 const JSON_ROUTES = {
-  "/api/layers/mangroves": ["mangroves:manifest", mangroveManifest],
-  "/api/layers/mangroves/series": ["mangroves:series", mangroveSeries],
+  "/api/layers/mangroves": ["mangroves:manifest:v3", mangroveManifest],
+  "/api/layers/mangroves/series": ["mangroves:series:v3", mangroveSeries],
   "/api/layers/erosion": ["erosion:manifest", erosionManifest],
   "/api/layers/erosion/series": ["erosion:series", erosionSeries],
   "/api/layers/erosion/periods": ["erosion:periods", erosionByPeriod],
@@ -138,6 +142,7 @@ export async function handleApi(req, res) {
       const [db, cache] = await Promise.all([query("select 1").then(() => true, () => false), redis.ping().then(() => true, () => false)]);
       return sendJson(res, 200, { database: db, cache });
     }
+    if (path === "/api/diagnostics") return send(res, 200, JSON_TYPE, JSON.stringify(await diagnostics()), { "Cache-Control": "no-store" });
     if (JSON_ROUTES[path]) {
       const [key, load] = JSON_ROUTES[path];
       const { body, cache } = await cached(key, async () => Buffer.from(JSON.stringify(await load())));
@@ -146,13 +151,17 @@ export async function handleApi(req, res) {
     const image = path.match(/^\/api\/amib\/image\/([^/]+)\/(\d{1,4})$/);
     if (image) {
       const id = decodeURIComponent(image[1]);
-      const { body, cache } = await cached(`amib:img:${id}:${image[2]}`, async () => (await amibImage(id, +image[2])) ?? Buffer.alloc(0));
+      const params = new URL(req.url, "http://localhost").searchParams;
+      const clear = params.get("bg") === "clear"; // ?bg=clear: hide the even background colour
+      const hide = (params.get("hide") ?? "").split(",").filter((h) => /^[0-9a-f]{6}$/i.test(h)).slice(0, 8).map((h) => h.toLowerCase()); // ?hide=rrggbb,...: hide these class colours
+      const { body, cache } = await cached(`amib:img:${id}:${image[2]}${clear ? ":clear" : ""}${hide.length ? `:hide-${hide.join("-")}` : ""}`,
+        async () => (await amibImage(id, +image[2], { clearBackground: clear, hideColors: hide.map((h) => [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16))) })) ?? Buffer.alloc(0));
       return body.length ? send(res, 200, "image/png", body, { "X-Cache": cache, "Cache-Control": "public, max-age=86400" }) : sendJson(res, 404, { error: "No such layer image" });
     }
     const change = path.match(/^\/api\/mangroves\/change\/([a-z]+)\/([a-z]+)\/(\d{4})\.png$/);
     if (change) {
       const [, frame, scenario, year] = change, base = (await mangroveManifest())?.observed[0];
-      const { body, cache } = await cached(`mangroves:change:${frame}:${scenario}:${year}`, async () => (base && (await mangroveChangeImage(frame, scenario, +year, base))) || Buffer.alloc(0));
+      const { body, cache } = await cached(`mangroves:change:${base}:${frame}:${scenario}:${year}`, async () => (base && (await mangroveChangeImage(frame, scenario, +year, base))) || Buffer.alloc(0));
       return body.length ? send(res, 200, "image/png", body, { "X-Cache": cache, "Cache-Control": "public, max-age=86400" }) : sendJson(res, 404, { error: "No such picture" });
     }
     const doc = path.match(/^\/api\/(ocean|amib|dmjm)\/(.+)$/);

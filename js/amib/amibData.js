@@ -5,6 +5,9 @@
  *             rise, GH salt-water boundary, F mangroves and shoreline change, G fresh-water signs at sea, H future ocean)
  *   match / exclude   keep only layers whose name does / does not contain this text
  *   optional  true when the button already has its own map layer: no package layer is drawn until one is chosen
+ *   mapOff    true to draw no package layer until one is chosen in the panel, while the panel stays the package's own
+ *   clearBackground  true to leave the even background colour of smooth maps see-through (server/amib.mjs)
+ *   hideClasses      class labels of class maps that are not drawn, e.g. ["water"]
  * Everything resolves to null when the API is not running.
  */
 const docs = new Map();
@@ -34,9 +37,12 @@ export function resolveView(catalog, layer, view = {}) {
   const subgroups = [...new Set(inProduct.map((l) => l.subgroup))].sort((a, b) => (b === YEARLY) - (a === YEARLY)); // year-by-year first
   const subgroup = subgroups.includes(view.subgroup) ? view.subgroup : subgroups[0];
   const layers = inProduct.filter((l) => l.subgroup === subgroup);
-  const current = layers.find((l) => l.id === view.layer) ?? (layer.amib.optional ? null : layers[0] ?? null);
+  const current = layers.find((l) => l.id === view.layer) ?? (layer.amib.optional || layer.amib.mapOff ? null : layers[0] ?? null);
   return { products, product, subgroups, subgroup, layers, current };
 }
+
+/** Legend entries of a class map that the portal layer hides (layer.amib.hideClasses). */
+export const hiddenStops = (layer, l) => (l?.kind === "categorical" ? (l.legend ?? []).filter((c) => (layer.amib.hideClasses ?? []).includes(c.label ?? l.classes?.[c.value])) : []);
 
 /** For a year-by-year layer: index of the newest step at or before the timeline year (else the first step). */
 export function pickStep(l, year) {

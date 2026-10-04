@@ -5,6 +5,9 @@ import { MapSettings } from "./components/mapSettings.js";
 import { AnalysisPanel } from "./components/analysisPanel.js";
 import { PanelToggles } from "./components/panelToggles.js";
 import { getState, subscribe } from "./state.js";
+import { runIntro } from "./components/intro.js";
+import { openTerminal, TerminalButton } from "./components/terminal.js";
+import { AssistantButton, announce } from "./components/assistant.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -18,6 +21,12 @@ MapSettings($("map-area"));
 LayerSidebar($("sidebar"));
 AnalysisPanel($("analysis"));
 PanelToggles(document.querySelector(".shell"), $("map-area"));
+TerminalButton($("map-area"));
+AssistantButton($("sidebar"));
+
+// every page load: the opening sequence, the system check (which closes by itself), then the assistant's warnings
+// (?nointro skips all three)
+if (!new URLSearchParams(location.search).has("nointro")) runIntro().then(() => openTerminal({ auto: true })).then(announce);
 
 $("closeAbout").addEventListener("click", () => $("aboutDialog").close());
 $("aboutDialog").addEventListener("click", (e) => e.target === e.currentTarget && e.currentTarget.close());

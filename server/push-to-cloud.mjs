@@ -55,7 +55,7 @@ try {
     const from = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379"), to = new Redis(process.env.CLOUD_REDIS_URL);
     const stale = await to.keys("pakcoast:*"); // answers cached from an older copy of the data
     if (stale.length) await to.del(...stale);
-    const keys = await from.keys("pakcoast:mangroves:change:*");
+    const keys = await from.keys("pakcoast:mangroves:change:*"); // includes the first-year part of the key
     for (const k of keys) await to.set(k, await from.getBuffer(k));
     console.log(`cache: ${stale.length} old answers cleared, ${keys.length} mangrove pictures copied`);
     from.disconnect(); to.disconnect();

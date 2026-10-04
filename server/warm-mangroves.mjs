@@ -8,9 +8,9 @@
 import path from "node:path";
 try { process.loadEnvFile(path.join(process.cwd(), ".env")); } catch { /* settings may come from the environment */ }
 const { pool, query, redis, PREFIX } = await import("./db.mjs");
-const { mangroveChangeImage, FRAMES } = await import("./mangrove-change.mjs");
+const { mangroveChangeImage, FRAMES, FIRST_YEAR } = await import("./mangrove-change.mjs");
 
-const { rows } = await query("select distinct scenario, year from mangrove_extent order by year, scenario");
+const { rows } = await query("select distinct scenario, year from mangrove_extent where year >= $1 order by year, scenario", [FIRST_YEAR]);
 const base = rows.find((r) => r.scenario === "observed")?.year;
 if (!base) { console.error("No mangrove shapes loaded: run load:mangroves first"); process.exit(1); }
 let n = 0, bytes = 0;
@@ -18,7 +18,7 @@ const started = Date.now();
 for (const { scenario, year } of rows) {
   for (const frame of Object.keys(FRAMES)) {
     const png = await mangroveChangeImage(frame, scenario, year, base);
-    await redis.set(`${PREFIX}mangroves:change:${frame}:${scenario}:${year}`, png);
+    await redis.set(`${PREFIX}mangroves:change:${base}:${frame}:${scenario}:${year}`, png);
     n++; bytes += png.length;
   }
   process.stdout.write(`\r${scenario} ${year}   `);

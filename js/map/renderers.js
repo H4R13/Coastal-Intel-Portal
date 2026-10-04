@@ -10,7 +10,7 @@ import { loadCatalog, loadDoc, resolveLayer, pickYear } from "../ocean/oceanData
 import { drawGrid, gradientCss, CLASS_COLORS } from "../ocean/colormaps.js";
 import { nationalAt, NATIONAL_RAMP } from "../ocean/national.js";
 import { loadPlastics, viewOf as plasticsView, sitesGeojson, scaleMax, colorExpr, PLASTIC_RAMP } from "../plastics/plastics.js";
-import { loadAmibCatalog, resolveView, pickStep, stepLabel } from "../amib/amibData.js";
+import { loadAmibCatalog, resolveView, pickStep, stepLabel, hiddenStops } from "../amib/amibData.js";
 
 const srcId = (l) => `env-${l.id}`;
 const lyrId = (l, s) => `env-${l.id}-${s}`;
@@ -336,25 +336,31 @@ const amib = {
     if (!L) { map.getLayer(src) && map.setLayoutProperty(src, "visibility", "none"); }
     else {
       const [w, sth, e, n] = L.bounds;
-      const img = { url: `${new URL("api/amib/image/", location.href).href}${encodeURIComponent(L.id)}/${step}`, coordinates: [[w, n], [e, n], [e, sth], [w, sth]] };
+      const clear = layer.amib.clearBackground && L.kind !== "categorical";
+      const hide = hiddenStops(layer, L).map((c) => c.color.replace("#", "")).join(",");
+      const query = [clear && "bg=clear", hide && `hide=${hide}`].filter(Boolean).join("&");
+      const img = { url: `${new URL("api/amib/image/", location.href).href}${encodeURIComponent(L.id)}/${step}${query ? `?${query}` : ""}`, coordinates: [[w, n], [e, n], [e, sth], [w, sth]] };
       if (map.getSource(src)) { map.getSource(src).updateImage(img); map.setLayoutProperty(src, "visibility", "visible"); }
       else {
         map.addSource(src, { type: "image", ...img });
         map.addLayer({ id: src, type: "raster", source: src, paint: { "raster-opacity": 0.85, "raster-fade-duration": 0 } });
       }
       map.setPaintProperty(src, "raster-resampling", L.kind === "categorical" ? "nearest" : "linear"); // class maps keep hard edges
+      map.setPaintProperty(src, "raster-opacity", L.kind === "categorical" || clear ? 0.85 : 0.6); // smooth fields cover their whole box, land included: let the map show through
     }
     window.dispatchEvent(new Event("layerdatachange"));
   },
   describe(layer) {
     const st = amibShown.get(layer.id);
-    return st?.layer ? `${st.layer.name}${stepLabel(st.layer, st.step) ? ` · ${stepLabel(st.layer, st.step)}` : ""}` : null;
+    if (!st?.layer) return null;
+    const clear = layer.amib.clearBackground && st.layer.kind !== "categorical";
+    return `${st.layer.name}${stepLabel(st.layer, st.step) ? ` · ${stepLabel(st.layer, st.step)}` : ""}${clear ? " · the most common value is left clear; colour marks where it differs" : ""}`;
   },
   legend(layer) {
     const L = amibShown.get(layer.id)?.layer, stops = L?.legend ?? [];
     if (!stops.length) return null;
     return L.kind === "categorical"
-      ? { classes: stops.map((c) => ({ color: c.color, label: c.label ?? L.classes?.[c.value] ?? c.value })) }
+      ? { classes: stops.filter((c) => !hiddenStops(layer, L).includes(c)).map((c) => ({ color: c.color, label: c.label ?? L.classes?.[c.value] ?? c.value })) }
       : { ramp: `linear-gradient(to right, ${stops.map((c) => c.color).join(", ")})`, min: stops[0].value, max: stops.at(-1).value, unit: L.units };
   },
   remove(map, layer) {

@@ -3,14 +3,15 @@
   "private": true,
   "description": "Server side of the portal: static files, tile disk cache, and the PostgreSQL/Redis data API. The web app itself needs no build step.",
   "scripts": {
-    "start": "node serve.mjs",
+    "start": "node --watch serve.mjs",
     "load:mangroves": "node server/load-mangroves.mjs",
     "load:erosion": "node server/load-erosion.mjs",
     "load:ocean": "node server/load-ocean.mjs",
     "load:amib": "node server/load-amib.mjs",
     "load:dmjm": "node server/load-dmjm.mjs",
     "warm:mangroves": "node server/warm-mangroves.mjs",
-    "push:cloud": "node server/push-to-cloud.mjs"
+    "push:cloud": "node server/push-to-cloud.mjs",
+    "dev": "node --watch serve.mjs"
   },
   "dependencies": {
     "geotiff": "^2.1.3",
