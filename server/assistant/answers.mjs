@@ -18,7 +18,7 @@ const n = (v, d = 2) => (+Number(v).toFixed(d)).toLocaleString("en", { maximumFr
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const list = (items) => (items.length < 3 ? items.join(" and ") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`);
 const doc = async (table, key) => (await query(`select body from ${table} where key = $1`, [key])).rows[0]?.body;
-const yearsIn = (text) => [...text.matchAll(/\b(19[89]\d|20\d\d|2100)\b/g)].map((m) => +m[1]);
+const yearsIn = (text) => [...text.matchAll(/\b(19[5-9]\d|20\d\d|2100)\b/g)].map((m) => +m[1]);
 const FUTURE = /project|forecast|future|scenario|outlook|expect|\bwill\b|going to|\bnext\b|by 20[3-9]\d|in 20[3-9]\d/;
 /** Runs of years as text: [1995, 1997, 1998, 1999] → "1995 and 1997–1999". */
 function ranges(years) {
@@ -34,6 +34,7 @@ function dates(all) {
 }
 
 /* ---------- mangroves ---------- */
+const MANGROVE_ZONES = [[/karachi/, "karachi", "Karachi"], [/indus delta|\bdelta\b/, "indus_delta", "the Indus Delta"], [/sonmiani|miani hor/, "sonmiani_miani_hor", "Sonmiani (Miani Hor)"], [/jiwani|dasht/, "jiwani_dasht", "Jiwani (Dasht)"], [/ormara|kalmat/, "ormara_kalmat", "Ormara (Kalmat)"], [/pasni|gwadar/, "pasni_gwadar", "Pasni to Gwadar"]];
 async function mangroves({ s, q, ask, years }) {
   if (!/mangrove/.test(s)) return null;
   const rows = (await query("select scenario, year, area_km2 from mangrove_area order by year")).rows, seen = rows.filter((r) => r.scenario === "observed");
@@ -42,6 +43,12 @@ async function mangroves({ s, q, ask, years }) {
   const gaps = []; for (let y = first.year; y < last.year; y++) if (!at(y)) gaps.push(y);
   const change = (a, b, lead, now) => `${lead} ${b.area_km2 >= a.area_km2 ? (now ? "rises" : "rose") : now ? "falls" : "fell"} from ${n(a.area_km2)} km² in ${a.year} to ${n(b.area_km2)} km² in ${b.year}: ${b.area_km2 >= a.area_km2 ? "up" : "down"} ${n(Math.abs(b.area_km2 - a.area_km2))} km² (${n(Math.abs((b.area_km2 - a.area_km2) / a.area_km2) * 100, 1)}%).`;
   const measured = "Measured from satellite (Global Mangrove Watch).", whole = `${change(first, last, "Mapped mangrove area")} ${measured}`;
+  /* The saltwater package holds a second mangrove dataset, by zone (GMW v3). It does not agree with the table above, and an honest answer says so. */
+  const zones = (await doc("amib_doc", "series/F"))?.["mangrove extent (GMW v3)"]?.series ?? [], zy = zones[0]?.year ?? [], total = (i) => zones.reduce((t, z) => t + (z.p50?.[i] ?? 0), 0), delta = zones.find((z) => z.zone === "indus_delta");
+  const other = zones.length ? `The portal's second mangrove dataset (Global Mangrove Watch v3 by zone, in the saltwater package) ${(total(zy.length - 1) < total(0)) === (last.area_km2 < first.area_km2) ? "agrees in direction" : "points the other way"}: its zones total ${n(total(0), 1)} km² in ${zy[0]} and ${n(total(zy.length - 1), 1)} km² in ${zy.at(-1)}${delta ? `, with the Indus Delta going from ${n(delta.p50[0], 1)} to ${n(delta.p50.at(-1), 1)} km²` : ""}. The two datasets do not agree, and I cannot tell you which is right.` : null;
+  const here = MANGROVE_ZONES.filter(([re]) => re.test(q)).map(([, id, label]) => [zones.find((z) => z.zone === id), label]).filter(([z]) => z);
+  for (const [z, label] of here) { const mid = z.year.indexOf(2010); say.push(`Mangroves at ${label} (Global Mangrove Watch v3, by zone): ${list([`${n(z.p50[0], 1)} km² in ${z.year[0]}`, ...(mid > 0 ? [`${n(z.p50[mid], 1)} km² in 2010`] : []), `${n(z.p50.at(-1), 1)} km² in ${z.year.at(-1)}`])}.`); }
+  if (here.length) also.push(`The mangrove layer's own table covers the whole coast, is not split by place, and shows a rise instead (${n(first.area_km2)} km² in ${first.year} to ${n(last.area_km2)} km² in ${last.year}). The two datasets do not agree, and I cannot tell you which is right.`);
   const since = ask(/since|\bfrom\b|after|over the (last|past)/), past = years.filter((v) => v <= last.year);
   const near = (y) => at(y) ?? [...seen].sort((a, b) => Math.abs(a.year - y) - Math.abs(b.year - y))[0]; // the map of that year, or the nearest one there is
   if (past.length >= 2 && ask(/between|\bfrom\b.*\bto\b|\bto\b|versus|\bvs\b|compare/)) { // "between 2005 and 2020": from the one to the other, not each to today
@@ -49,6 +56,7 @@ async function mangroves({ s, q, ask, years }) {
     say.push(`${change(a, b, "Mapped mangrove area")} ${measured}${moved.length ? ` There is no map for ${list(moved.map(String))}, so the nearest mapped year is used.` : ""}`);
   } else for (const y of past) {
     const row = at(y);
+    if (y < first.year) { say.push(`The mangrove record starts in ${first.year} (${n(first.area_km2)} km²); there is no map for ${y}.`); continue; }
     if (row && since && y < last.year) say.push(`${change(row, last, "Mapped mangrove area")} ${measured}`);
     else if (row) say.push(`In ${y} the mapped mangrove area was ${n(row.area_km2)} km² (measured from satellite, Global Mangrove Watch).`);
     else {
@@ -63,7 +71,7 @@ async function mangroves({ s, q, ask, years }) {
     const hit = seen.find((r) => r.area_km2 >= level), before = hit && seen.filter((r) => r.year < hit.year).at(-1);
     say.push(!hit ? `Mapped mangrove area has not reached ${n(level)} km²: the largest is ${n(last.area_km2)} km² (${last.year}).` : !before ? `Mapped mangrove area was already above ${n(level)} km² in the earliest map (${first.year}: ${n(first.area_km2)} km²).` : `Mapped mangrove area first passed ${n(level)} km² in ${hit.year} (${n(hit.area_km2)} km²); the map before it, ${before.year}, shows ${n(before.area_km2)} km².`);
   }
-  if (!say.length && last.area_km2 > first.area_km2 && ask(/\blost\b|\bloss\b|losing|declin|shrink|shrunk|disappear|destroy|gone|dying|deforest/)) say.push(`The maps show a gain, not a loss: ${whole.charAt(0).toLowerCase()}${whole.slice(1)}`);
+  if (!say.length && last.area_km2 > first.area_km2 && ask(/\blost\b|\bloss\b|losing|declin|shrink|shrunk|disappear|destroy|gone|dying|deforest/)) say.push(`The mangrove layer's table shows a gain, not a loss: ${whole.charAt(0).toLowerCase()}${whole.slice(1)}`, ...(other ? [other] : []));
   if (ask(/earliest|first|oldest|start|began|begin/)) say.push(`The earliest mangrove map is from ${first.year}: ${n(first.area_km2)} km².`);
   if (ask(/no map|missing|gaps?\b|which years|not mapped|without a map|have no/)) say.push(gaps.length ? `There is no mangrove map for ${ranges(gaps)}. Maps exist for ${seen.length} years between ${first.year} and ${last.year}.` : `Every year from ${first.year} to ${last.year} has a mangrove map.`);
   if (ask(/peak|highest|largest|biggest|maximum|lowest|smallest|minimum/)) {
@@ -71,20 +79,22 @@ async function mangroves({ s, q, ask, years }) {
     say.push(`The largest mapped mangrove area is ${n(top.area_km2)} km² (${top.year}) and the smallest ${n(low.area_km2)} km² (${low.year}).`);
   }
   const future = years.filter((y) => y > last.year);
-  if (future.length || ask(FUTURE) || ask(/worst|best|good case|normal case|decline/)) {
+  if (future.length || ask(FUTURE) || ask(/worst|best|good case|normal case/)) {
     const named = ["worst", "good", "normal"].filter((sc) => ask(new RegExp(sc === "good" ? "good|best" : sc)));
     for (const sc of named.length ? named : ["normal", "good", "worst"]) {
       const line = rows.filter((r) => r.scenario === sc);
       if (line.length) say.push(`${change(line[0], line.find((r) => r.year === future[0]) ?? line.at(-1), `Projected, ${sc} case: mangrove area`, true)} This is the team's scenario, not a measurement.`);
     }
   }
-  if (!say.length) { say.push(whole); if (gaps.length) also.push(`No map exists for ${ranges(gaps)}.`); } // the gaps matter to someone reading the whole record, not to someone asking about one year
-  else if (!say.some((l) => /mapped mangrove area (rose|fell)/i.test(l))) also.push(whole);
-  return { title: "Mangroves", tool: "mangrove_area", say, also, source: "mangrove_area (Global Mangrove Watch extracts supplied by the project team)" };
+  if (ask(WHY)) say.push("The portal records the mangrove area, not the reasons it changed: it holds no data on planting, protection or cutting.");
+  if (!say.length) { say.push(whole); if (other) say.push(other); if (gaps.length) also.push(`No map exists for ${ranges(gaps)}.`); } // the gaps matter to someone reading the whole record, not to someone asking about one year
+  else if (!here.length) { if (!say.some((l) => /mapped mangrove area (rose|fell)/i.test(l))) also.push(whole); if (other && !say.includes(other)) also.push(other); }
+  return { title: "Mangroves", tool: "mangrove_area", say, also, source: `mangrove_area (Global Mangrove Watch extracts supplied by the project team)${zones.length ? "; amib:series/F (GMW v3 by zone)" : ""}` };
 }
 
 /* ---------- coastal erosion ---------- */
-async function erosion({ s, ask, years }) {
+const PLACE = /karachi|korangi|thatta|sujawal|badin|sindh|balochistan|makran|gwadar|pasni|ormara|jiwani|sonmiani|keti ?bandar|indus delta|\bdelta\b/; // a place named in a question about figures that exist for the whole coast only
+async function erosion({ s, q, ask, years }) {
   if (!/erosion|erod|land (lost|loss)|lost land|shoreline|retreat/.test(s)) return null;
   const e = JSON.parse(await runTool("erosion_summary", {}, 100000)), seen = e.observed_periods ?? [], ahead = e.projected_running_total_km2 ?? {};
   if (!seen.length) return null;
@@ -96,8 +106,14 @@ async function erosion({ s, ask, years }) {
   if (ask(/which (period|decade|years)|when was|most land|least land|fastest|slowest|worst (period|decade)|in which/)) say.push(`The most land was lost in ${span(most)}: ${n(most.lost_km2)} km². The least was in ${span(least)}: ${n(least.lost_km2)} km².`);
   if (projected && (years.some((y) => y > total.to) || ask(FUTURE) || ask(/more land/))) say.push(projected);
   if (ask(/each (period|decade)|by (period|decade)|per (period|decade)|break ?down/)) say.push(periods);
+  for (const y of years.filter((v) => v <= total.to)) { // one year: the mapped period it falls in, since the mapping is by period
+    const p = seen.find((x) => y >= x.from && y < x.to) ?? (y === total.to ? total : null);
+    say.push(p ? `${y} falls in the mapped period ${span(p)}, when ${n(p.lost_km2)} km² of land was lost: about ${n(p.lost_km2 / (p.to - p.from), 1)} km² a year. The portal has no figure for a single year.` : `The erosion record starts in ${seen[0].from}; there is nothing mapped for ${y}.`);
+  }
+  if (ask(WHY)) say.push("The portal maps where land was lost, not why: it holds no analysis of the causes of the erosion.");
+  if (PLACE.test(q)) say.push("The erosion figures are for the whole coast: I have no breakdown by district or town.");
   if (ask(/how fast|how quick|\brate\b|per year|a year|each year|speed|faster|slower|accelerat|slowing/)) say.push(`Land was lost at about ${list(seen.map((p) => `${n(p.lost_km2 / (p.to - p.from), 1)} km² a year in ${span(p)}`))} (mapped).${targets.length ? ` The projection continues at about ${n((ahead[lastY] - total.running_total_km2) / (lastY - total.to), 1)} km² a year.` : ""}`);
-  if (!say.length) say.push(mapped);
+  if (!say.length || say.every((l) => /whole coast|not why/.test(l))) say.push(mapped);
   return { title: "Coastal erosion", tool: "erosion_summary", say, also: [mapped, periods, projected].filter((l) => l && !say.includes(l)), source: "erosion_area (eroded-area polygons by period supplied by the project team; projection = CA-Markov run)" };
 }
 
@@ -142,6 +158,8 @@ async function plastics({ s, q, ask, back }, anyway = false) { // anyway: a stat
   if (ask(/what (should|can|could|must|to)\b.*\b(do|done)|\bactions?\b|recommend|solution|response plan|measures?\b|mandate|clean.?up|how (to|do we|can we) (fix|stop|reduce|clean)/)) for (const r of byPlastic.slice(0, 4)) say.push(`Recommended at ${where(r)}: ${r.Action_Mandate}`);
   if (ask(/\bwhen\b|what date|which date|sampling dates?|how (old|recent)|what year/)) say.push(`${scope.length === all.length ? `The ${all.length} stations were` : `${list(groups.map((g) => g.label))} ${scope.length > 1 ? "were" : "was"}`} sampled on ${dates(scope.map((r) => r.Sampling_Date))}.`);
   if (!say.length && groups.length && ask(/\ball\b|every|each\b|\blist\b|details?|\bfull\b|break ?down|numbers for/)) for (const r of byPlastic.slice(0, 6)) say.push(detail(r));
+  const elsewhere = !groups.length && q.match(/gwadar|pasni|ormara|jiwani|sonmiani|makran|balochistan|lasbela|gadani|clifton|manora|hawks ?bay|sea ?view|port qasim|bin qasim|keti ?bandar|hyderabad|lahore|islamabad/)?.[0];
+  if (elsewhere) say.unshift(`None of the ${all.length} sampling stations is at ${cap(elsewhere)}: they are in ${list([...new Set(all.map((r) => r.District.split(" / ")[0]))])}.`); // not the figures of somewhere else, passed off as this place
   const asked = say.length > 0; // a specific question was answered; otherwise the general picture is the answer
   if (!asked) for (const g of wide) say.push(g.rows.length > 1 ? overall(g) : detail(g.rows[0]));
   if (!asked) for (const r of byPlastic.slice(0, groups.length > 1 ? 0 : groups.length ? 4 : 2)) { const line = detail(r); if (!say.includes(line)) (groups.length ? say : also).push(line); }
@@ -257,6 +275,8 @@ async function delta({ s, years }, want) {
     /* the main measure at the place asked about; other places and side measures are left out. Two scenarios asked for: the leading line of each, side by side */
     const say = runs.length > 1 ? runs.map((x) => x.statements[0]).filter(Boolean) : r.statements.slice(0, r.core || 3);
     if (WHY.test(s) && r.driver) say.unshift(r.driver); // "why?" is answered first, then the figures behind it
+    const far = topic === "sea_level" && s.match(/gwadar|pasni|ormara|jiwani|makran|balochistan/)?.[0];
+    if (far) say.unshift(`The sea-level series cover Karachi, the Indus Delta and Bela–Sonmiani; there is none for ${cap(far)}. The Indus Delta figures are:`);
     sections.push({ title: r.title, tool: "delta_series", say, also: [], source: r.source, matched: r.matched });
   }
   const exact = sections.filter((sec) => sec.matched); // a measure was named ("how many days...", "tidal flats"): only the topic that holds it
@@ -283,7 +303,7 @@ async function health({ s, ask }) {
     say.push(img.length ? `In the last ${a.hours} hours there were ${n(img.reduce((t, r) => t + r.requests, 0), 0)} year-map picture requests; ${img.reduce((t, r) => t + r.errors, 0)} failed, and the slowest took ${n(Math.max(...img.map((r) => r.slowest_ms)) / 1000, 1)} seconds.` : "No year-map picture requests are in the access log for the last 24 hours.");
     also.push(overall);
   } else {
-    const named = checks.filter((c) => c.name.toLowerCase().split(/[^a-z]+/).some((w) => w.length > 4 && new RegExp(`\\b${w}`).test(s)) || (/database|postgres|\bdb\b/.test(s) && /postgres/i.test(c.name)) || (/redis|cache/.test(s) && /redis/i.test(c.name)));
+    const named = checks.filter((c) => c.name.toLowerCase().split(/[^a-z]+/).some((w) => w.length > 4 && new RegExp(`\\b${w.replace(/s$/, "")}`).test(s)) || (/database|postgres|\bdb\b/.test(s) && /postgres/i.test(c.name)) || (/redis|cache/.test(s) && /redis/i.test(c.name)));
     for (const c of named.slice(0, 3)) say.push(`${one(c)}.`);
     say.push(overall);
     if (!named.length) { say.push(layers); also.push(services); } // asked about one thing (the database, a layer): that line and the overall verdict are the answer
