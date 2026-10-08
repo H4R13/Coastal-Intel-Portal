@@ -144,7 +144,8 @@ function Chat({ button, onClose }) {
         const u = new SpeechSynthesisUtterance(words), voices = synth.getVoices();
         /* a woman's English voice: Edge's natural voices first, then any other known female voice, then any English voice that is not a known male one */
         const english = voices.filter((v) => /^en/i.test(v.lang)), natural = (v) => /natural/i.test(v.name);
-        const voice = english.find((v) => WOMEN.test(v.name) && natural(v)) ?? english.find((v) => WOMEN.test(v.name)) ?? english.find((v) => !MEN.test(v.name)) ?? english[0];
+        const voice = english.find((v) => /Sonia/i.test(v.name)) ?? english.find((v) => /en-GB/i.test(v.lang) && WOMEN.test(v.name)) // Sonia (British), the voice the user chose; another British woman if she is not installed
+          ?? english.find((v) => WOMEN.test(v.name) && natural(v)) ??english.find((v) => WOMEN.test(v.name)) ?? english.find((v) => !MEN.test(v.name)) ?? english[0];
         if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = "en-US";
         u.rate = 1.03; u.onend = u.onerror = () => { clearTimeout(giveUp); resolve(); };
         const giveUp = setTimeout(resolve, 4000 + words.length * 95); // some browsers never report the end of a long sentence: do not wait for ever
