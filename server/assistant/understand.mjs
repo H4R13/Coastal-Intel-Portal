@@ -6,13 +6,13 @@
  */
 
 /** The words that say what a question is about. A question with none of them is a follow-up to the ones before it. */
-export const TOPIC = /mangrove|erosion|erod|shoreline|plastic|polymer|debris|metal|cadmium|chromium|station|oyster|crab|prawn|species|seafood|heat ?wave|hot spell|temperature|warm|acid|\bph\b|aragonite|oxygen|fish|\bstocks?\b|\bcatch|salin|salt|intrusion|groundwater|aquifer|sea.?level|flood|subsid|kotri|river|layer|portal|database|map|earthquake|seismic|shelf|bathymetr/;
+export const TOPIC = /mangrove|erosion|erod|shoreline|plastic|polymer|debris|pollut|garbage|rubbish|trash|korangi|thatta|sujawal|\btemps?\b|metal|cadmium|chromium|station|oyster|crab|prawn|species|seafood|heat ?wave|hot spell|temperature|warm|acid|\bph\b|aragonite|oxygen|fish|\bstocks?\b|\bcatch|salin|salt|intrusion|groundwater|aquifer|sea.?level|flood|subsid|kotri|river|layer|portal|database|map|earthquake|seismic|shelf|bathymetr/;
 
 /* The portal's own vocabulary: a word one or two letters off one of these is taken to be it. */
 const WORDS = ["mangrove", "mangroves", "erosion", "plastic", "plastics", "microplastic", "microplastics", "salinity", "saltwater", "groundwater", "oxygen", "heatwave", "heatwaves", "temperature",
   "earthquake", "earthquakes", "karachi", "thatta", "sujawal", "korangi", "cadmium", "chromium", "acidic", "acidification", "aragonite", "fisheries", "oyster", "oysters", "station", "stations",
   "intrusion", "polymer", "seafood", "sediment", "shoreline", "bathymetry", "database", "projection", "scenario"];
-const KNOWN = new Set(WORDS);
+const KNOWN = new Set([...WORDS, "fishermen", "fisherman", "fisherfolk", "protection", "sentiment", "temperate", "intrusive", "elastic", "nation", "national", "stationed", "acidity", "scenery"]); // the last ones are ordinary words that sit close to the portal's, and must be left alone
 
 /** Edit distance, stopping early once it is clearly more than `max`. */
 function distance(a, b, max) {
@@ -27,8 +27,15 @@ function distance(a, b, max) {
   return prev[b.length];
 }
 
+/* Roman Urdu, as people here type it: the words that carry the question, put into the English the rest of the code reads. */
+const URDU = [[/\bsab ?se zyada\b|\bsabse zyada\b/g, "most"], [/\bsab ?se kam\b/g, "least"], [/\bkitn[aei]\b/g, "how much"], [/\bky[uo]+n?\b/g, "why"], [/\bkab\b/g, "when"], [/\bkaha+n?\b/g, "where"],
+  [/\bab(hi)?\b/g, "now"], [/\bsamand[ae]r\b/g, "sea"], [/\bpaani\b|\bpani\b/g, "water"], [/\bmach+h?li(yan)?\b/g, "fish"], [/\bzam[ei]+n\b/g, "land"], [/\bgara?m\b/g, "warmer"], [/\bnamak(een)?\b|\bkhara\b/g, "salt"],
+  [/\bkachra\b|\bgandagi\b/g, "garbage"], [/\bdarya\b/g, "river flow"], [/\bzalzal[ae]\b/g, "earthquake"], [/\bjungle?\b|\bdarakht\b/g, "mangrove"], [/\bkata[ou]\b/g, "erosion"], [/\bsaal\b/g, "year"],
+  [/\b(theek|sahi) (chal|kaam)\b|\bchal raha\b/g, "working"], [/\bkharab\b/g, "broken"], [/\baisa\b|\bwoh?\b/g, "that"], [/\bye+h?\b|\bis ?ka\b/g, "this"], [/\bwaha+n?\b/g, "there"], [/^\s*aur\b/g, "and"], [/\bmukhtasar\b|\bchota\b/g, "short"]];
+
 export function tidy(text) {
-  return String(text).toLowerCase().replace(/[a-z]{5,}/g, (w) => {
+  const english = URDU.reduce((t, [re, word]) => t.replace(re, word), String(text).toLowerCase());
+  return english.replace(/[a-z]{5,}/g, (w) => {
     if (KNOWN.has(w)) return w;
     const max = w.length >= 8 ? 2 : 1; // short words: one slip only, or "nation" becomes "station"
     return WORDS.find((k) => k[0] === w[0] && distance(w, k, max) <= max) ?? w;

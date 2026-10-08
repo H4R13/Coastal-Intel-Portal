@@ -93,12 +93,14 @@ const UNITS = { "km from mouth": ["km", 1], "km inland": ["km", 1], km2: ["km²"
 const unitOf = (unit) => UNITS[unit] ?? (/^m\b/.test(unit ?? "") ? ["m", 3] : [unit ?? "", 2]);
 const PLACES = { indus_delta: "the Indus Delta", karachi: "Karachi", bela_sonmiani: "Bela–Sonmiani", ketibandar_coast: "the Keti Bandar coast", sujawal: "Sujawal" };
 const listed = (items) => (items.length < 3 ? items.join(" and ") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`);
-function seriesLine(metric, k, unit) {
+function seriesLine(metric, k, unit, asked = []) {
   const sc = String(k.scenario ?? ""), ssp = sc.match(/ssp\d+/i)?.[0], kind = String(k.kind ?? "");
   const flow = /accord/i.test(sc) ? "If the water accord's promised river flow is delivered" : /degraded/i.test(sc) ? "If river flow drops below today's" : /current/i.test(sc) ? "If the river keeps flowing as it does today" : null;
   const lead = flow ? `${flow} (projected${ssp ? `, ${ssp}` : ""})` : /observ/i.test(kind) ? "Measured" : /reconstruct/i.test(kind) ? "Reconstructed from observations" : /project/i.test(kind) ? `Projected${ssp ? ` (${ssp})` : ""}` : kind || "Modelled";
   const [u, d, note] = unitOf(unit), place = PLACES[k.zone] ?? String(k.zone ?? "").replace(/_/g, " ");
-  const ys = Object.keys(k.at).filter((y, i, a) => i === 0 || i === a.length - 1 || y === "2030" || y === "2050");
+  const have = Object.keys(k.at), mine = asked.map(String).filter((y) => have.includes(y));
+  const record = !/project/i.test(kind) && !/accord|current|degraded/i.test(sc);
+  const ys = have.filter((y, i, a) => (mine.length ? i === 0 || mine.includes(y) || (record && i === a.length - 1) : i === 0 || i === a.length - 1 || y === "2030" || y === "2050")); // a year that was asked about is shown beside the first one; otherwise the usual milestones
   const value = (y) => { // the likely range once the projection is far enough out to need it: 2050 and the last year
     const v = k.at[y], wide = typeof v === "object" && (y === "2050" || y === ys.at(-1));
     return `${round(v?.p50 ?? v, d)}${u ? ` ${u}` : ""} in ${y}${wide ? ` (likely ${round(v.low, d)} to ${round(v.high, d)})` : ""}`;
@@ -109,9 +111,9 @@ function seriesLine(metric, k, unit) {
 /** A summary row without its test statistics (p-values, standard errors), with numbers rounded: what a reader needs. */
 const plain = (row) => Object.fromEntries(Object.entries(row).filter(([k]) => !/(_p|_se|^sigma.*|^neff|^ci.*|^mk_p|^ts)$/.test(k)).map(([k, v]) => [k, typeof v === "number" ? round(v, 3) : v]));
 /** One series of the saltwater package as its values at a few key years. */
-function keyYears(s) {
+function keyYears(s, asked = []) {
   const years = s.year ?? [], now = new Date().getFullYear(), at = {};
-  for (const y of [years[0], 2000, 2020, now, 2030, 2040, 2050, years.at(-1)]) {
+  for (const y of [years[0], 2000, 2020, now, 2030, 2040, 2050, years.at(-1), ...asked.map(Number)].sort((a, b) => a - b)) {
     const i = years.indexOf(y);
     if (i < 0 || s.p50?.[i] == null) continue;
     at[y] = s.p17?.[i] != null && s.p83?.[i] != null ? { p50: round(s.p50[i], 3), low: round(s.p17[i], 3), high: round(s.p83[i], 3) } : round(s.p50[i], 3);
@@ -263,7 +265,7 @@ export const TOOLS = [
     name: "delta_series",
     description: "Year-by-year series for the Indus Delta and coast from the saltwater / sea-level package, as values at key years (first, 2000, 2020, now, 2030, 2040, 2050, last). Topics: saltwater (how far salt reaches up the river and underground), groundwater (fresh groundwater lens), sea_level (tide gauge and relative sea-level rise), salt_land (salt-affected land, tidal flats), shelf (shelf salinity and river plume), river_flow (Indus flow below Kotri), climate_models (CMIP6 anomalies). Each series says observed, modelled or projected.",
     input_schema: { type: "object", properties: { topic: { type: "string", enum: Object.keys(DELTA_TOPICS) }, scenario: { type: "string", description: "Emissions scenario for projections: ssp126, ssp245 (default, medium) or ssp585." } }, required: ["topic"] },
-    run: async ({ topic, scenario = "ssp245", place }) => {
+    run: async ({ topic, scenario = "ssp245", place, measure, years = [] }) => { // measure: part of a metric's name to lead with; years: years asked about, shown beside the first one
       const keys = DELTA_TOPICS[topic];
       if (!keys) return { error: `topic must be one of ${Object.keys(DELTA_TOPICS).join(", ")}` };
       const want = String(scenario).toLowerCase().replace(/[^a-z0-9]/g, ""), where = String(place ?? "indus").toLowerCase().replace(/[^a-z]/g, ""), lines = [];
@@ -276,9 +278,10 @@ export const TOOLS = [
           for (const x of series.length ? series : m.series ?? []) {
             const tag = `${x.scenario} ${x.kind}`.toLowerCase(), zone = String(x.zone ?? "").toLowerCase().replace(/[^a-z]/g, "");
             // most relevant first: the topic's main measure, the place asked about, today's river flow before the alternatives, projections before reconstructions
-            const rank = (first.test(metric) ? 0 : 20) + (zone.includes(where) ? 0 : 6) + (/current/.test(tag) ? 0 : /accord/.test(tag) ? 1 : /degraded/.test(tag) ? 2 : /reconstruct/.test(tag) ? 4 : 0);
-            const k = keyYears(x);
-            lines.push({ rank, k, metric, tag, text: seriesLine(metric, k, m.unit) }); // one whole sentence per series: a figure never leaves its scenario
+            const asked = !!measure && metric.toLowerCase().includes(String(measure).toLowerCase());
+            const rank = (asked ? -30 : first.test(metric) ? 0 : 20) + (zone.includes(where) ? 0 : 6) + (/current/.test(tag) ? 0 : /accord/.test(tag) ? 1 : /degraded/.test(tag) ? 2 : /reconstruct/.test(tag) ? 4 : 0);
+            const k = keyYears(x, years);
+            lines.push({ rank, k, metric, tag, asked, text: seriesLine(metric, k, m.unit, years) }); // one whole sentence per series: a figure never leaves its scenario
           }
         }
       }
@@ -287,7 +290,7 @@ export const TOOLS = [
       const top = lines[0], v0 = (l) => { const y = Object.keys(l.k.at)[0], v = l.k.at[y]; return { y, v: round(v?.p50 ?? v, 1) }; };
       const now = lines.find((l) => /intrusion length L1/.test(l.metric) && /current/.test(l.tag)), accord = lines.find((l) => /intrusion length L1/.test(l.metric) && /accord/.test(l.tag));
       const driver = now && accord ? `River flow is the main driver in this data: in ${v0(now).y}, salt water reaches ${v0(now).v} km up the river with today's flow but ${v0(accord).v} km if the water accord's flow is delivered. Sea-level rise adds the slow increase after that.` : undefined;
-      return { source: keys.map((k) => `amib:series/${k}`).join(", "), topic, title: DELTA_TITLES[topic], note: DELTA_NOTES[topic], driver, core: lines.filter((l) => l.rank < (top?.rank ?? 0) + 5).length, statements: lines.slice(0, 8).map((l) => l.text) }; // core: how many lines are on the main measure at the place asked about
+      return { source: keys.map((k) => `amib:series/${k}`).join(", "), topic, title: DELTA_TITLES[topic], note: DELTA_NOTES[topic], driver, matched: lines.some((l) => l.asked), core: lines.filter((l) => l.rank < (top?.rank ?? 0) + 5).length, statements: lines.slice(0, 8).map((l) => l.text) }; // core: how many lines are on the main measure at the place asked about
     },
   },
   {
