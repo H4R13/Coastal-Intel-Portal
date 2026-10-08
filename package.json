@@ -15,7 +15,9 @@
     "load:dmjm": "node run.mjs server/load-dmjm.mjs",
     "warm:mangroves": "node run.mjs server/warm-mangroves.mjs",
     "warm:amib": "node run.mjs server/warm-amib.mjs",
-    "push:cloud": "node run.mjs server/push-to-cloud.mjs"
+    "push:cloud": "node run.mjs server/push-to-cloud.mjs",
+    "hela:eval": "node run.mjs server/assistant/eval.mjs",
+    "hela:review": "node run.mjs server/assistant/review.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

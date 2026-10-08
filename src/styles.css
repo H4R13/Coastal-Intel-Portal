@@ -735,6 +735,10 @@ dialog .eyebrow { font-size: calc(12px * var(--fs)); color: var(--muted); }
 .bc-msg.user { justify-self: end; }
 .bc-text { padding: 8px 11px; font-size: calc(13px * var(--fs)); line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; border-radius: 12px; background: var(--raise); border: 1px solid var(--line); }
 .bc-msg.user .bc-text { background: var(--accent-dim); border-color: rgba(69, 184, 176, 0.4); }
+.bc-par + .bc-par { margin-top: 8px; }
+.bc-par ul { margin: 5px 0 0; padding-left: 17px; display: grid; gap: 4px; }
+.bc-par.src { font-size: calc(11px * var(--fs)); line-height: 1.4; color: var(--faint); }
+.bc-par.none { color: var(--sand); }
 .bc-msg.err .bc-text { color: var(--sand); }
 .bc-wait::after { content: "…"; animation: term-blink 900ms steps(2) infinite; }
 .bc-rate { display: flex; align-items: center; gap: 6px; font-size: calc(11px * var(--fs)); color: var(--faint); }

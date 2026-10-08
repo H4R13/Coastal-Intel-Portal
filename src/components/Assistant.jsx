@@ -75,12 +75,22 @@ const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Typ
   .then((r) => r.json().catch(() => ({ ok: false, error: "The server sent something unreadable." })))
   .catch(() => ({ ok: false, error: "Could not reach the portal server." }));
 
+/** An answer as paragraphs: "- " lines become a list, the "Source:" line is set small, and what is not loaded is set apart. */
+function Answer({ text }) {
+  return String(text).split(/\n{2,}/).map((block, i) => {
+    const lines = block.split("\n"), items = lines.filter((l) => l.startsWith("- ")), head = lines.filter((l) => !l.startsWith("- ")).join("\n");
+    const kind = /^Source:/.test(head) ? "src" : /^Not loaded in the portal:/.test(head) ? "none" : "";
+    return <div key={i} className={`bc-par ${kind}`}>{head}{items.length ? <ul>{items.map((l, j) => <li key={j}>{l.slice(2)}</li>)}</ul> : null}</div>;
+  });
+}
+
 /** The chat: each answer comes from the portal's own datasets (server/assistant) and can be rated; ratings are stored. */
 function Chat({ button, onClose }) {
   const [msgs, setMsgs] = useState([]), [text, setText] = useState(""), [busy, setBusy] = useState(false), [ready, setReady] = useState(null);
   const [hint, setHint] = useState(""), [why, setWhy] = useState(null); // hint: why the assistant is off; why: id of an answer being marked unhelpful, and the reason typed so far
   const end = useRef(null);
-  useEffect(() => { get("api/assistant/status").then((s) => { setReady(s?.ready ?? false); setHint(s?.hint ?? ""); }); }, []);
+  const [modelOff, setModelOff] = useState(false); // the language model is unreachable: answers written from the data still work, open questions do not
+  useEffect(() => { get("api/assistant/status").then((s) => { setReady(s?.ready ?? false); setHint(s?.hint ?? ""); setModelOff(!!s?.ready && s.model_ready === false); }); }, []);
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [msgs, busy, why]);
 
   async function ask(q) {
@@ -103,12 +113,13 @@ function Chat({ button, onClose }) {
         {!msgs.length ? (
           <div className="bc-start">
             {ready === false ? <p className="bc-warn">Hela isn't switched on yet. {hint}</p> : <p>I'm Hela. Ask me about mangroves, erosion, ocean health, saltwater intrusion or plastics, or whether a layer is working.</p>}
+            {modelOff ? <p className="bc-warn">The language model is not reachable, so I can only answer questions the portal's data covers directly. {hint}</p> : null}
             {STARTERS.map((s) => <button key={s} className="bc-chip" disabled={ready === false} onClick={() => ask(s)}>{s}</button>)}
           </div>
         ) : null}
         {msgs.map((m, i) => (
           <div key={i} className={`bc-msg ${m.role} ${m.error ? "err" : ""}`}>
-            <div className="bc-text">{m.content}</div>
+            <div className="bc-text">{m.role === "assistant" ? <Answer text={m.content} /> : m.content}</div>
             {m.role === "assistant" && m.id ? (
               <div className="bc-rate">
                 {m.tools?.length ? <span className="bc-src" title="Tools used to find this">from: {m.tools.join(", ")}</span> : null}

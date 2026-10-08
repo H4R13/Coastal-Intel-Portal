@@ -1,9 +1,16 @@
 /**
- * The portal assistant: a language model answers by calling the tools in tools.mjs and nothing else, so every figure
- * comes from the portal's own datasets. Chats, ratings and the API access log are kept in PostgreSQL (see ensureTables).
- *   POST /api/assistant/chat      { messages: [{ role, content }] } → { id, answer, tools, ok }
+ * The portal assistant (Hela). Every figure in an answer comes from the portal's own datasets. Chats, ratings and the
+ * API access log are kept in PostgreSQL (see ensureTables).
+ *   POST /api/assistant/chat      { messages: [{ role, content }] } → { id, answer, tools, ok, mode }
  *   POST /api/assistant/feedback  { id, rating: 1 | -1, comment? } → { ok }
- *   GET  /api/assistant/status    → { ready, provider, model, hint? }
+ *   GET  /api/assistant/status    → { ready, model_ready, provider, model, hint? }
+ *
+ * How a question is answered with a local model, in order (chat → viaOllama):
+ *   1. small talk (greetings, "who are you")                         at once, no look-up
+ *   2. a ready-made answer written from the database (answers.mjs)   at once, no model: mode "data"
+ *   3. the model names the topics of a question whose words matched nothing (route), and step 2 is tried again
+ *   4. a text search of the documents; the model explains what it found, or "nothing on that" is said without it
+ * With Claude as the provider, steps 2-4 are replaced by Claude calling the tools in tools.mjs itself.
  *
  * Two ways to run the model (ASSISTANT_PROVIDER, or chosen automatically):
  *   ollama     (default) an open model running on this machine or your own server through Ollama: no key, no per-question cost,
@@ -15,17 +22,19 @@ import Anthropic from "@anthropic-ai/sdk";
 import crypto from "node:crypto";
 import { query } from "../db.mjs";
 import { toolDefs, runTool, retrieve } from "./tools.mjs";
+import { answerDirect } from "./answers.mjs";
 
 const hasKey = () => !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 const PROVIDER = () => process.env.ASSISTANT_PROVIDER || (hasKey() ? "anthropic" : "ollama");
 const CLAUDE = () => process.env.ASSISTANT_MODEL || "claude-opus-5-5";
 const EFFORT = () => process.env.ASSISTANT_EFFORT || "medium";
 const OLLAMA_URL = () => (process.env.OLLAMA_URL || "http://localhost:11434").replace(/\/$/, "");
+const SHORT = /\b(short(er)?|brief(ly)?|concise|summar\w*|in (one|a) (line|sentence)|tl;?dr|quick(ly)?)\b/i; // the user asked for a short answer
 const THREADS = () => +process.env.OLLAMA_THREADS || 0; // processor threads the local model may use; 0 = Ollama's own choice
 const MAX_TURNS = 8;          // tool rounds per question
 const MAX_HISTORY = 12;       // messages sent back with a question
 const MAX_QUESTION = 2000;    // characters
-const PER_MINUTE = 8;         // questions per visitor per minute
+const PER_MINUTE = +process.env.ASSISTANT_PER_MINUTE || 8; // questions per visitor per minute (raised for eval.mjs runs)
 const LOCAL_TOOL_CHARS = 6000; // a small model has a small context: keep each tool answer shorter than for Claude
 const LOCAL_TIMEOUT = 5 * 60 * 1000;
 
@@ -71,7 +80,8 @@ export async function provider() {
     return { name, ready: false, hint: "Ollama is not running. Start it (or install it from ollama.com), then run: ollama pull qwen3:4b" };
   }
 }
-export const assistantStatus = async () => { const p = await provider(); return { ready: p.ready, provider: p.name, model: p.model, hint: p.hint }; };
+/** With a local model the assistant is always ready: the ready-made answers (answers.mjs) need no model. `model_ready` says whether open questions can be answered too. */
+export const assistantStatus = async () => { const p = await provider(); return { ready: p.ready || p.name !== "anthropic", model_ready: p.ready, provider: p.name, model: p.model, hint: p.hint }; };
 
 /* ---------- storage ---------- */
 let tablesReady = null;
@@ -139,38 +149,61 @@ async function viaClaude(messages, used, usage) {
   return null;
 }
 
+/* The portal's topics as the model is shown them, and the words that stand for each one in answers.mjs. */
+const ROUTES = {
+  mangroves: ["mangrove forests, trees along the coast, forest cover", "mangrove area"],
+  erosion: ["the coastline retreating, land lost to the sea", "coastal erosion land lost"],
+  plastics: ["plastic litter, pollution and heavy metals at the sampling stations and creeks", "plastic debris stations"],
+  seafood: ["microplastics and metals inside fish, crabs, prawns and oysters; whether seafood is safe to eat", "seafood species"],
+  heatwaves: ["marine heatwaves, unusually hot spells in the sea", "marine heatwave"],
+  sea_temperature: ["the sea getting warmer", "sea temperature warming"],
+  acidity: ["ocean acidification, pH", "ocean acidity ph"],
+  shell_building: ["aragonite saturation, conditions for shells and corals", "aragonite saturation"],
+  oxygen: ["oxygen in the sea, low-oxygen water", "oxygen"],
+  fish_stocks: ["overfishing, the state of fish stocks and the catch", "fish stocks"],
+  climate_exposure: ["the overall climate pressure on Pakistan's sea", "climate exposure"],
+  salt_in_river: ["salt water moving up the Indus, salinity", "saltwater intrusion"],
+  groundwater: ["fresh groundwater, wells, the aquifer under the delta", "fresh groundwater"],
+  sea_level: ["sea-level rise, the land sinking, the sea flooding the land", "sea level"],
+  salt_affected_land: ["salty soil, salt-affected land, tidal flats", "salt-affected land"],
+  river_flow: ["how much Indus river water still reaches the delta and the sea, Kotri barrage", "river flow kotri"],
+  portal_status: ["whether the portal, a map or a layer is working, loading or slow", "portal layers status working"],
+  earthquakes: ["earthquakes, tremors, tsunamis", "earthquake"],
+  shelf_depth: ["the depth of the sea floor, bathymetry", "continental shelf depth"],
+};
+
+/* Worked examples shown to the model before the real question: everyday wording → topic. Add one when a kind of question keeps being sorted wrongly (see review.mjs). */
+const ROUTE_EXAMPLES = [
+  ["Are the coastal forests getting smaller?", "mangroves"], ["How much ground has the sea taken from us?", "erosion"], ["How polluted is Korangi?", "plastics"],
+  ["Is it okay to eat crabs caught there?", "seafood"], ["Is the ocean staying unusually hot for longer each summer?", "heatwaves"], ["Do fish have enough air down deep?", "oxygen"],
+  ["Are the village wells still sweet?", "groundwater"], ["Will the coast be drowned as the ocean rises?", "sea_level"], ["Is the Indus drying up before it gets to the coast?", "river_flow"],
+  ["Is the salt creeping up the river and are fishermen catching less?", "salt_in_river", "fish_stocks"], ["Is the map broken?", "portal_status"], ["Was there a tremor in Makran?", "earthquakes"],
+  ["What time is it in London?", "none"], ["Write me a poem.", "none"],
+];
+
 /**
- * When every look-up came back as ready statements (whole sentences written from the data by tools.mjs), the answer's
- * figures are those sentences, shown as they are: a small model swaps numbers between scenarios when it rewrites them.
- * The model adds only the opening line, in words, and any sentence of its with a number in it is dropped.
- * Returns { answer, ok }, or null when the facts are not in statement form (the model then answers as usual).
+ * What a question is about when its own words matched no topic ("are the trees along the coast disappearing?"). The model
+ * only chooses from the list above, in a fixed format: sorting questions is something a small model does well, and it cannot
+ * invent a figure while doing it. Returns the words for the chosen topics, or "" for none.
  */
-async function factsFirst(question, found, short, model, usage) {
-  const facts = found.map((f) => { try { return JSON.parse(f.result); } catch { return null; } });
-  if (!facts.every((r) => r && Array.isArray(r.statements))) return null;
-  const parts = facts.filter((r) => r.statements.length), per = short ? 1 : parts.length >= 3 ? 2 : parts.length === 2 ? 3 : 4;
-  if (!parts.length) return null;
-  const sections = parts.map((r) => ({ title: r.title, lines: r.statements.slice(0, Math.min(per, r.core || per)) })); // the main measure at the place asked about; side measures only add noise
-  const body = sections.map((s) => `${sections.length > 1 && s.title ? `${s.title}:\n` : ""}${s.lines.map((l) => `- ${l}`).join("\n")}`).join("\n\n");
-  const missing = facts.map((r) => r.not_loaded).filter(Boolean), notes = parts.map((r) => r.note).filter(Boolean).join(" ");
-  const why = /\bwhy\b|reason|cause|driver|due to|because|behind/i.test(question), driver = facts.map((r) => r.driver).find(Boolean);
-  let lead = parts.every((r) => r.gist) ? `In short, ${parts.map((r) => r.gist).join("; ")}.${why && driver ? ` ${driver}` : ""}` : ""; // the tool worked the gist out itself: nothing for the model to get wrong
-  if (!lead) try {
-    const r = await fetch(`${OLLAMA_URL()}/api/chat`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(LOCAL_TIMEOUT),
-      body: JSON.stringify({ model, stream: false, think: false, options: { num_ctx: 4096, temperature: 0, num_predict: 90, ...(THREADS() ? { num_thread: THREADS() } : {}) }, messages: [
-        { role: "system", content: `You are ${NAME}, the assistant of a coastal data portal for Pakistan. You write short, plain, careful sentences and never state anything the given statements do not say.` },
-        { role: "user", content: `Question: ${question}\n\nStatements from the portal's data (these will be shown to the user as they are, right under your reply):\n${body}\n\nHow to read them: ${notes || "each statement is complete as written."}${missing.length ? `\nNot in the portal's data: ${missing.join("; ")}` : ""}\n\nWrite ${short ? "ONE sentence" : "one or two sentences"} that answer the question directly, using only what the statements say. Rules: no numbers or years at all; say "projected" for projections and "measured" for observations; name no cause or effect that is not in the statements; no greeting.` },
-      ] }),
-    });
-    if (r.ok) {
-      const j = await r.json();
-      usage.in += j.prompt_eval_count ?? 0; usage.out += j.eval_count ?? 0;
-      lead = (j.message?.content ?? "").replace(/<think>[\s\S]*?<\/think>/g, "").replace(/\*\*/g, "").split(/(?<=[.!?])\s+/).filter((s) => s.trim() && !/\d/.test(s) && /[.!?]$/.test(s.trim())).slice(0, 2).join(" ").trim();
-    }
-  } catch (e) { console.warn(`assistant lead: ${e.message}`); } // the statements stand on their own
-  const sources = [...new Set(facts.map((r) => r.source).filter(Boolean))].join(", ");
-  return { answer: [lead, body, missing.length ? `Not loaded in the portal: ${missing.join("; ")}` : "", sources ? `Source: ${sources}.` : ""].filter(Boolean).join("\n\n"), ok: true };
+async function route(question, model, usage) {
+  const names = Object.keys(ROUTES);
+  const r = await fetch(`${OLLAMA_URL()}/api/chat`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(LOCAL_TIMEOUT),
+    body: JSON.stringify({
+      model, stream: false, think: false, options: { num_ctx: 6144, temperature: 0, num_predict: 60, ...(THREADS() ? { num_thread: THREADS() } : {}) },
+      format: { type: "object", properties: { topic: { type: "string", enum: [...names, "none"] }, second: { type: "string", enum: [...names, "none"] } }, required: ["topic", "second"] },
+      messages: [
+        { role: "system", content: `You sort questions for a data portal about the coast of Pakistan. Reply with the one topic the question is mainly about, chosen only from this list:\n${names.map((k) => `- ${k}: ${ROUTES[k][0]}`).join("\n")}\n- none: anything else (general knowledge, other places, chit-chat)\n"second" is "none" unless the question plainly asks about two different things. If the question is not clearly about any topic in the list, "topic" is "none".` },
+        ...ROUTE_EXAMPLES.flatMap(([q, topic, second = "none"]) => [{ role: "user", content: q }, { role: "assistant", content: JSON.stringify({ topic, second }) }]),
+        { role: "user", content: question },
+      ],
+    }),
+  });
+  if (!r.ok) throw new Error(`Ollama ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  const j = await r.json();
+  usage.in += j.prompt_eval_count ?? 0; usage.out += j.eval_count ?? 0;
+  try { const o = JSON.parse(j.message?.content ?? "{}"); return [...new Set([o.topic, o.second])].filter((t) => ROUTES[t]).map((t) => ROUTES[t][1]).join(" "); } catch { return ""; }
 }
 
 /** Ollama: the same loop against its /api/chat. A small model sometimes answers from memory; it is sent back once to look it up. */
@@ -179,15 +212,24 @@ async function viaOllama(history, model, used, usage) {
   const msgs = [{ role: "system", content: SYSTEM }, ...history];
   let nudged = false;
   const asked = history.at(-1).content, earlier = history.slice(0, -1).filter((m) => m.role === "user").map((m) => m.content);
-  const short = /\b(short(er)?|brief(ly)?|concise|summar\w*|in (one|a) (line|sentence)|tl;?dr|quick(ly)?)\b/i.test(asked);
+  const short = SHORT.test(asked);
   const redo = short && earlier.length && asked.length < 160; // "make that shorter": the real questions are the ones before it
   const length = short ? "The user wants it short: at most 3 short sentences, the key figures only." : "Lead with the direct answer. At most 6 short sentences or \"-\" lines (about 110 words) unless the user asks for detail.";
   for (let i = 1; i < msgs.length - 1; i++) if (msgs[i].role === "assistant" && msgs[i].content.length > 500) msgs[i] = { ...msgs[i], content: `${msgs[i].content.slice(0, 500)}…` }; // old answers are context, not facts: keep them small
+  /* the question's own words matched no ready-made answer (chat() tried): let the model say which topics it is about, and try again */
+  const topics = await route(redo ? earlier.slice(-2).join(" ") : asked, model, usage).catch((e) => { console.warn(`assistant route: ${e.message}`); return ""; });
+  if (topics) {
+    const direct = await answerDirect(`${topics}: ${asked}`, earlier, { short });
+    if (direct) { used.push(...direct.tools); return { answer: direct.answer, ok: true, mode: "data" }; }
+  }
   const found = await retrieve(asked, LOCAL_TOOL_CHARS, earlier); // look up first: the model only has to read and explain
+  if (found.length === 1 && found[0].name === "search_text" && /"matches":\[\]/.test(found[0].result)) { // nothing in any document: say so, without asking the model to
+    used.push("search_text");
+    return { answer: `The portal's data has nothing on that (I searched its documents for "${found[0].input.text}"). ${SCOPE}`, ok: true, mode: "data" };
+  }
+  if (found.length === 1 && found[0].name === "list_datasets") return { answer: `That is outside what I can answer: I only answer from the portal's data. ${SCOPE}`, ok: true, mode: "data" }; // no topic, and no word worth searching for ("tell me a joke")
   if (found.length) {
     for (const f of found) used.push(f.name);
-    const ready = await factsFirst(redo ? earlier.slice(-2).join(" ") : asked, found, short, model, usage);
-    if (ready) return ready;
     msgs[msgs.length - 1] = { role: "user", content: `${history.at(-1).content}\n\n[Facts just looked up in the portal's data. Answer only from these. Give the figures that bear on the question with their source, year and units exactly as written, and whether each is observed or projected. Use the ready-made lowest / highest / average values; do no arithmetic of your own. If the facts answer only part of the question, give that part and name what is missing. Every claim must come from a statement below: name no cause, effect or impact that is not written there. Where a statement is a full sentence, use its figures and its condition together, in your own short wording. Add no general background and no closing disclaimer. Do not repeat field names.${earlier.length ? " If this is a follow-up, it refers to the earlier questions in this chat; answer it from the facts below." : ""}]\n${found.map((f) => `# ${f.name} ${JSON.stringify(f.input)}\n${f.result}`).join("\n\n")}\n\n[Now answer${redo ? ` these earlier questions again, briefly: ${earlier.slice(-2).join(" / ")}` : `: ${asked}`}\n${length}]` }; // the question and the length limit come last: a small model follows what it read most recently
   }
   for (let turn = 0; turn < MAX_TURNS; turn++) {
@@ -214,13 +256,15 @@ async function viaOllama(history, model, used, usage) {
       msgs.push({ role: "assistant", content: text }, { role: "user", content: "Do not answer from memory. Call a tool to look this up in the portal's data (start with list_datasets if unsure), then answer from what it returns." });
       continue;
     }
-    return { answer: text || "I couldn't put an answer together. Please try rephrasing.", ok: !!text };
+    return { answer: text || "I couldn't put an answer together. Please try rephrasing.", ok: !!text, mode: "model" };
   }
   return null;
 }
 
+const SCOPE = "I can answer about mangroves, coastal erosion, plastics and seafood, the sea (heatwaves, temperature, acidity, oxygen, fish stocks), salt water, groundwater, sea level and river flow in the Indus Delta, and whether the portal is working. Earthquakes, sea-floor depth and raw Earth Engine exports are not loaded.";
+
 /** A greeting or a thank-you is answered here, at once: there is nothing to look up, and a local model takes a minute to say so. */
-function smallTalk(question) {
+export function smallTalk(question) {
   const s = question.toLowerCase().replace(/[^a-z' ]/g, " ").replace(/\s+/g, " ").trim();
   const topics = "mangroves, coastal erosion, ocean health, saltwater intrusion, sea level and plastics, or whether a layer is working";
   if (!s || /^(hi+|hello+|hey+|yo|salam|salaam|assalam ?o? ?alaikum|aoa|good (morning|afternoon|evening))( there| again)?( how are you| how r u)?$/.test(s) || /^how are you$/.test(s))
@@ -228,25 +272,36 @@ function smallTalk(question) {
   if (/^(who|what) (are|r) (you|u)( exactly| really)?$|^(what is|what's|whats|tell me) your name|^who is hela|^what is hela|^what are you called|^(are you|r u) (a |an )?(robot|ai|bot|human)|^who (made|built|created) you/.test(s))
     return `I'm ${NAME}, the assistant of this portal. I answer from the portal's own datasets (${topics}): I look each fact up in the database and say where it came from, instead of answering from memory. I run on an open language model on the team's own machine.`;
   if (/^what can you do|^help$|^what (do|can) (you|i) (know|ask)/.test(s)) return `I can look things up in the portal's data: ${topics}. Try "How has mangrove area changed since 1990?" or "What are the plastics levels at the Karachi stations?"`;
+  if (/^(i was |i am |i'm |im )?(just |only )?(tryna|trying to|wanted to|saying|said|say) (say )?(hi|hello|hey)$|^(whats ?up|what's up|wass?up|sup|whatsyo|kya haal hai|kaise ho|kese ho)$/.test(s))
+    return `Hello! I'm ${NAME}. Ask me anything about the portal's data: ${topics}.`;
   if (/^(thanks|thank you|thankyou|thx|shukria|ok thanks|great thanks)( a lot| so much)?( hela)?$/.test(s)) return "You're welcome. Ask me anything else about the portal's data.";
+  if (/^(ok|okay|k|cool|nice|great|good|got it|i see|alright|fine|perfect|wow)( then| thanks)?$/.test(s)) return "Good. Ask me anything else about the portal's data.";
+  if (/^(bye|goodbye|good bye|see you|see ya|khuda hafiz|allah hafiz|good night)( hela)?$/.test(s)) return "Goodbye. I'll be here when you need the portal's data.";
   return null;
 }
 /** "Hey Hela, how are the mangroves?" → "how are the mangroves?": the name addresses the assistant and is not part of the question. */
-const unaddressed = (q) => q.replace(new RegExp(`^\\s*((hey|hi|hello|ok|okay|yo|dear)[\\s,]+)?${NAME}\\b[\\s,!.:;-]*`, "i"), "").replace(new RegExp(`[\\s,]+${NAME}\\s*([?!.]*)\\s*$`, "i"), "$1");
+export const unaddressed = (q) => q.replace(new RegExp(`^\\s*((hey|hi|hello|ok|okay|yo|dear)[\\s,]+)?${NAME}\\b[\\s,!.:;-]*`, "i"), "").replace(new RegExp(`[\\s,]+${NAME}\\s*([?!.]*)\\s*$`, "i"), "$1");
 
 export async function chat(rawMessages) {
   const messages = clean(rawMessages);
   if (!messages.length) return { status: 400, body: { ok: false, error: "Ask a question first." } };
-  const p = await provider();
-  if (!p.ready) return { status: 503, body: { ok: false, error: `The assistant is not switched on: ${p.hint}` } };
-
   const id = crypto.randomUUID(), started = Date.now(), used = [], usage = { in: 0, out: 0 };
   const question = messages.at(-1).content, asked = unaddressed(question);
   messages[messages.length - 1] = { ...messages.at(-1), content: asked || question };
-  let answer = smallTalk(asked) ?? "", ok = true;
+  let answer = smallTalk(asked) ?? "", ok = true, mode = "data", p = { name: "data", model: "answers" }; // mode: "data" = written from the database here, "model" = written by the language model
+  /* Ready-made answers first: instant, and right by construction. They need no model, so they work when Ollama is unreachable too.
+     With Claude as the provider every question goes to it: it reads the tools' output reliably and writes a fuller answer. */
+  if (!answer && PROVIDER() !== "anthropic") {
+    const earlier = messages.slice(0, -1).filter((m) => m.role === "user").map((m) => m.content);
+    const direct = await answerDirect(asked || question, earlier, { short: SHORT.test(asked) }).catch((e) => { console.warn(`assistant answers: ${e.message}`); return null; });
+    if (direct) { answer = direct.answer; used.push(...direct.tools); }
+  }
   if (!answer) try {
+    p = await provider();
+    if (!p.ready) return { status: 200, body: { ok: false, id, answer: `I couldn't answer that from the portal's data directly, and the language model that handles open questions is not reachable (${p.hint}) ${SCOPE}`, tools: [], mode: "data" } };
+    mode = "model";
     const r = p.name === "anthropic" ? await viaClaude(messages, used, usage) : await viaOllama(messages, p.model, used, usage);
-    if (r) ({ answer, ok } = r);
+    if (r) ({ answer, ok, mode = "model" } = r);
     else { answer = "That needed more lookups than I'm allowed in one question. Try asking about one dataset at a time."; ok = false; }
   } catch (e) {
     ok = false;
@@ -262,7 +317,7 @@ export async function chat(rawMessages) {
     await query("insert into assistant_chat (id, question, answer, tools, model, input_tokens, output_tokens, ms, ok) values ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
       [id, question, answer, JSON.stringify(used), `${p.name}:${p.model}`, usage.in, usage.out, Date.now() - started, ok]);
   } catch (e) { console.warn(`assistant log: ${e.message}`); }
-  return { status: 200, body: { ok, id, answer, tools: [...new Set(used)] } };
+  return { status: 200, body: { ok, id, answer, tools: [...new Set(used)], mode } };
 }
 
 export async function feedback({ id, rating, comment }) {

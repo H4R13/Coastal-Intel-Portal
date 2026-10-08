@@ -14,11 +14,11 @@
  */
 import { query, cached } from "../db.mjs";
 import { diagnostics } from "../diagnostics.mjs";
+import { subject } from "./understand.mjs";
 
 const MAX_CHARS = 14000; // one tool answer never exceeds this, so a big document cannot swamp the conversation
 const FACTS_CHARS = 9200; // retrieve(): all the facts handed to a small local model together
 const STOP = new Set("about there their which where would could should please portal coast coastal pakistan data dataset datasets information between because these those whats happening going doing today right think know tell show give much many".split(" "));
-const TOPIC = /mangrove|erosion|erod|shoreline|plastic|polymer|debris|metal|cadmium|chromium|station|oyster|crab|species|heat ?wave|temperature|warm|acid|\bph\b|aragonite|oxygen|fish|stock|catch|salin|salt|intrusion|groundwater|aquifer|sea.?level|flood|subsid|kotri|river|layer|portal|map|earthquake|seismic|shelf|bathymetr/;
 const NOT_LOADED = ["earthquake / seismic catalogues (and tsunami records)", "continental-shelf bathymetry (depth) change", "raw Google Earth Engine exports"];
 const DOCS = { ocean: "ocean_doc", amib: "amib_doc", dmjm: "dmjm_doc" };
 const HIDDEN = /^(files|raster)\//; // server paths and decoded grids: not for answering questions
@@ -64,24 +64,47 @@ const DELTA_NOTES = {
   river_flow: "Flow below Kotri barrage is the river water that actually reaches the delta; MAF = million acre-feet a year.",
   salt_land: "Mapped from satellite each year, for two coastal areas.", shelf: "Shelf sea-surface salinity is measured (observed); the turbidity index is a weak proxy for the river plume.",
 };
-/** One series as a sentence the model can quote without mixing rows up. */
-const LABELS = [ // the package's metric names, as a reader would say them: these sentences are quoted in answers
-  [/intrusion length L1/, "how far slightly salty water (1 psu) reaches up the river from the sea in the dry season"], [/intrusion length L5/, "how far salty water (5 psu) reaches up the river from the sea in the dry season"],
-  [/days with L1 > 60/, "the number of days a year that salt water reaches more than 60 km up the river"], [/usable fresh-lens area/, "the area of usable fresh groundwater (the fresh lens people can pump)"],
-  [/usable lens thickness/, "the average thickness of the usable fresh groundwater lens"], [/mixed \/ uncertain lens/, "the area where groundwater is mixed or uncertain"], [/saline, probable marine/, "the area where groundwater is saline from the sea"],
-  [/relative sea-level rise/, "sea level relative to the land (climate rise plus the land sinking), compared with 1995-2014"], [/climate sea-level rise only/, "sea-level rise from climate alone, compared with 1995-2014"], [/tide gauge/, "mean sea level at the Karachi tide gauge"],
-  [/Kotri \(annual\)/, "the Indus water passing Kotri barrage to the delta in the year"], [/Kotri \(Rabi/, "the Indus water passing Kotri barrage in the dry half of the year (Oct-Mar)"],
-  [/salt-affected area/, "salt-affected land"], [/salt-affected share/, "the share of inland land that is salt-affected"], [/tidal flat/, "tidal flat area"], [/shelf sea-surface salinity/, "sea-surface salinity on the shelf"], [/turbidity/, "the river-plume turbidity index (a weak proxy)"],
+/*
+ * One series as one sentence: its condition, what it measures, and the values at a few years. A figure never leaves the
+ * words that say what it is, so nothing can be swapped between scenarios. Each label is the start of the sentence, ending
+ * where the values go ("... 64.2 km in 2025 and 65.4 km in 2050"); {place} is filled where the series is per place.
+ */
+const LABELS = [
+  [/intrusion length L1/, "in the dry season slightly salty water (1 psu) reaches up the Indus as far as"],
+  [/intrusion length L5/, "in the dry season salty water (5 psu) reaches up the Indus as far as"],
+  [/days with L1 > 60/, "salt water reaches more than 60 km up the Indus on"],
+  [/usable fresh-lens area/, "the usable fresh groundwater under the delta (the fresh lens people can pump) covers"],
+  [/usable lens thickness/, "the usable fresh groundwater lens is on average as thick as"],
+  [/mixed \/ uncertain lens/, "groundwater that is mixed or uncertain covers"],
+  [/saline, probable marine/, "groundwater made saline by the sea covers"],
+  [/relative sea-level rise/, "sea level relative to the land at {place} (climate rise plus the land sinking) is above its 1995–2014 level by"],
+  [/climate sea-level rise only/, "sea level from climate alone at {place} is above its 1995–2014 level by"],
+  [/tide gauge/, "mean sea level at the Karachi tide gauge, against its 2007–2014 mean, is"],
+  [/Kotri \(annual\)/, "the Indus carried past Kotri barrage to the delta"],
+  [/Kotri \(Rabi/, "in the dry half of the year (October to March) the Indus carried past Kotri barrage"],
+  [/salt-affected area/, "salt-affected land at {place} covers"],
+  [/salt-affected share/, "the salt-affected share of inland land at {place} is"],
+  [/tidal flat/, "tidal flats at {place} cover"],
+  [/shelf sea-surface salinity/, "sea-surface salinity on the Indus shelf is"],
+  [/turbidity/, "the river-plume turbidity index at the Indus mouth (a weak proxy) is"],
 ];
-const UNITS = { "km from mouth": "km", km2: "km²", "days/yr": "days", MAF: "MAF (million acre-feet)", "m vs 1995-2014": "m", fraction: "(as a fraction)", "log ratio (weak proxy)": "" };
+/* unit as stored → [as written, decimals worth showing, a note added once after the sentence] */
+const UNITS = { "km from mouth": ["km", 1], "km inland": ["km", 1], km2: ["km²", 1], "days/yr": ["days a year", 0], MAF: ["MAF", 1, "(MAF = million acre-feet.)"], psu: ["psu", 2], fraction: ["", 3], "log ratio (weak proxy)": ["", 2] };
+const unitOf = (unit) => UNITS[unit] ?? (/^m\b/.test(unit ?? "") ? ["m", 3] : [unit ?? "", 2]);
+const PLACES = { indus_delta: "the Indus Delta", karachi: "Karachi", bela_sonmiani: "Bela–Sonmiani", ketibandar_coast: "the Keti Bandar coast", sujawal: "Sujawal" };
+const listed = (items) => (items.length < 3 ? items.join(" and ") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`);
 function seriesLine(metric, k, unit) {
   const sc = String(k.scenario ?? ""), ssp = sc.match(/ssp\d+/i)?.[0], kind = String(k.kind ?? "");
-  const when = /accord/i.test(sc) ? "If the water accord's promised river flow is delivered (accord flow)" : /degraded/i.test(sc) ? "If river flow drops below today's (degraded flow)" : /current/i.test(sc) ? "If the river keeps flowing as it does today (current flow)"
-    : /observ/i.test(kind) ? "Measured (observed)" : /reconstruct/i.test(kind) ? "Reconstructed from observations" : /project/i.test(kind) ? "Projected" : kind || "Modelled";
-  const ys = Object.keys(k.at).filter((y, i, a) => i === 0 || i === a.length - 1 || y === "2030" || y === "2050"), val = (y, u) => { const v = k.at[y], unit = u ? ` ${u}` : ""; return typeof v === "object" ? `${v.p50}${unit}${y === ys.at(-1) || y === "2050" ? ` (likely ${v.low} to ${v.high})` : ""}` : `${v}${unit}`; }; // the likely range on 2050 and the last year
-  const place = String(k.zone ?? "").replace(/_/g, " "), u = UNITS[unit] ?? unit, what = LABELS.find(([re]) => re.test(metric))?.[1] ?? metric;
-  const trend = k.change ? ` (${{ rises: "rising", falls: "falling", stays: "no change" }[k.change.split(" ")[0]]})` : "";
-  return `${when}${/^If/.test(when) ? `, projected${ssp ? ` under ${ssp}` : ""}` : ssp && !/observ/i.test(kind) ? ` under ${ssp}` : ""}: ${what}, ${place}, is ${ys.map((y) => `${val(y, u)} in ${y}`).join(", ")}${trend}.`;
+  const flow = /accord/i.test(sc) ? "If the water accord's promised river flow is delivered" : /degraded/i.test(sc) ? "If river flow drops below today's" : /current/i.test(sc) ? "If the river keeps flowing as it does today" : null;
+  const lead = flow ? `${flow} (projected${ssp ? `, ${ssp}` : ""})` : /observ/i.test(kind) ? "Measured" : /reconstruct/i.test(kind) ? "Reconstructed from observations" : /project/i.test(kind) ? `Projected${ssp ? ` (${ssp})` : ""}` : kind || "Modelled";
+  const [u, d, note] = unitOf(unit), place = PLACES[k.zone] ?? String(k.zone ?? "").replace(/_/g, " ");
+  const ys = Object.keys(k.at).filter((y, i, a) => i === 0 || i === a.length - 1 || y === "2030" || y === "2050");
+  const value = (y) => { // the likely range once the projection is far enough out to need it: 2050 and the last year
+    const v = k.at[y], wide = typeof v === "object" && (y === "2050" || y === ys.at(-1));
+    return `${round(v?.p50 ?? v, d)}${u ? ` ${u}` : ""} in ${y}${wide ? ` (likely ${round(v.low, d)} to ${round(v.high, d)})` : ""}`;
+  };
+  const stem = (LABELS.find(([re]) => re.test(metric))?.[1] ?? `${metric}${place ? ` at {place}` : ""} is`).replace("{place}", place);
+  return `${lead}, ${stem} ${listed(ys.map(value))}.${note ? ` ${note}` : ""}`;
 }
 /** A summary row without its test statistics (p-values, standard errors), with numbers rounded: what a reader needs. */
 const plain = (row) => Object.fromEntries(Object.entries(row).filter(([k]) => !/(_p|_se|^sigma.*|^neff|^ci.*|^mk_p|^ts)$/.test(k)).map(([k, v]) => [k, typeof v === "number" ? round(v, 3) : v]));
@@ -260,13 +283,11 @@ export const TOOLS = [
         }
       }
       lines.sort((a, b) => a.rank - b.rank);
-      /* the one-line gist, worked out here and not by the model: which way the main measure goes, and on what basis */
-      const top = lines[0], way = { rises: "rising", falls: "falling", stays: "no change" }[top?.k.change?.split(" ")[0]] ?? "see below";
-      const basis = /observ/.test(top?.tag ?? "") ? "measured" : /reconstruct/.test(top?.tag ?? "") ? "reconstructed" : /current/.test(top?.tag ?? "") ? "projected, if the river flows as today" : "projected";
-      const v0 = (l) => { const y = Object.keys(l.k.at)[0], v = l.k.at[y]; return { y, v: v?.p50 ?? v }; };
+      /* why salt reaches where it does, as far as this data can say: the same year under two river flows */
+      const top = lines[0], v0 = (l) => { const y = Object.keys(l.k.at)[0], v = l.k.at[y]; return { y, v: round(v?.p50 ?? v, 1) }; };
       const now = lines.find((l) => /intrusion length L1/.test(l.metric) && /current/.test(l.tag)), accord = lines.find((l) => /intrusion length L1/.test(l.metric) && /accord/.test(l.tag));
-      const driver = now && accord ? `River flow is the main driver in this data: in ${v0(now).y}, salt water reaches ${v0(now).v} km up the river with today's flow but ${v0(accord).v} km if the water accord's flow is delivered; sea-level rise adds the slow increase after that.` : undefined;
-      return { source: keys.map((k) => `amib:series/${k}`).join(", "), topic, title: DELTA_TITLES[topic], note: DELTA_NOTES[topic], gist: top ? `${DELTA_TITLES[topic].toLowerCase()}: ${way} (${basis})` : undefined, driver, core: lines.filter((l) => l.rank < (top?.rank ?? 0) + 5).length, statements: lines.slice(0, 8).map((l) => l.text) }; // core: how many lines are on the main measure at the place asked about
+      const driver = now && accord ? `River flow is the main driver in this data: in ${v0(now).y}, salt water reaches ${v0(now).v} km up the river with today's flow but ${v0(accord).v} km if the water accord's flow is delivered. Sea-level rise adds the slow increase after that.` : undefined;
+      return { source: keys.map((k) => `amib:series/${k}`).join(", "), topic, title: DELTA_TITLES[topic], note: DELTA_NOTES[topic], driver, core: lines.filter((l) => l.rank < (top?.rank ?? 0) + 5).length, statements: lines.slice(0, 8).map((l) => l.text) }; // core: how many lines are on the main measure at the place asked about
     },
   },
   {
@@ -320,10 +341,7 @@ export const TOOLS = [
  * Returns [{ name, input, result }]; empty when nothing obvious matches (the model then falls back to calling tools itself).
  */
 export async function retrieve(question, max = 5000, earlier = []) {
-  const q = String(question).toLowerCase(), plan = [];
-  /* a follow-up ("why is that?", "make it shorter") names no topic of its own: the topic is in the questions before it */
-  const followUp = earlier.length && (!TOPIC.test(q) || /\b(it|its|this|that|these|those|they|them|same|above|previous|earlier|last (one|two|answers?|questions?)|the (change|increase|decrease|rise|fall|trend|reason)|shorter|short|brief|concise|summar\w*|simpler|again)\b/.test(q));
-  const s = followUp ? `${earlier.slice(-2).join(" ")} ${q}`.toLowerCase() : q;
+  const { s } = subject(question, earlier), plan = []; // tidied, and with the earlier questions when this one is a follow-up
   const year = s.match(/\b(19[89]\d|20[0-4]\d)\b/)?.[1];
   const has = (re) => re.test(s);
   if (has(/mangrove/)) {
@@ -346,7 +364,7 @@ export async function retrieve(question, max = 5000, earlier = []) {
   /* ocean and delta topics: the headline numbers, not a text search */
   const scenario = s.match(/ssp ?-?(1-?2\.?6|2-?4\.?5|5-?8\.?5)/)?.[1]?.replace(/\D/g, "");
   const ocean = [[/heat ?wave/, "heatwave"], [/temperature|warming|warmer|\bsst\b|\bhot(ter)?\b/, "temperature"], [/acidif|\bph\b|acid/, "ph"], [/aragonite|omega|shell/, "aragonite"], [/oxygen|plankton|hypoxi|dead zone/, "oxygen"], [/stock|fisher|catch|overfish|\bfish\b/, "fisheries"], [/exposure|vulnerab/, "exposure"]];
-  const delta = [[/saltwater|salt water|intrusion|salt wedge|seawater/, "saltwater"], [/groundwater|aquifer|fresh ?water|\blens\b|tube ?wells?/, "groundwater"], [/sea.?level|tide gauge|inundat|subsid|sinking|flood/, "sea_level"], [/salt.affected|saline (soil|land)|tidal flat|soil salinity/, "salt_land"], [/shelf salinity|plume|turbid/, "shelf"], [/kotri|river flow|indus flow|discharge|barrage/, "river_flow"]];
+  const delta = [[/saltwater|salt water|intrusion|salt wedge/, "saltwater"], [/groundwater|aquifer|fresh ?water|\blens\b|tube ?wells?/, "groundwater"], [/sea.?level|tide gauge|inundat|subsid|sinking|flood/, "sea_level"], [/salt.affected|saline (soil|land)|tidal flat|soil salinity/, "salt_land"], [/shelf salinity|plume|turbid/, "shelf"], [/kotri|river flow|indus flow|discharge|barrage/, "river_flow"]];
   const want = new Set(delta.filter(([re]) => has(re)).map(([, topic]) => topic)), salty = has(/salinity|saline|\bsalt(y|ier|iness)?\b/);
   if (salty && !want.has("salt_land")) { want.add("saltwater"); want.add("shelf"); } // "salinity" alone: how far salt reaches up the river (projected) and the measured shelf salinity
   if (salty || want.has("saltwater")) {
