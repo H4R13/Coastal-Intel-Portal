@@ -135,10 +135,15 @@ function Chat({ button, onClose }) {
       if (!words) return resolve();
       c.done = resolve;
       const own = () => { // the browser's built-in voice: no key needed, and the fallback when ElevenLabs cannot be reached
-        if (!window.speechSynthesis) return resolve();
-        const u = new SpeechSynthesisUtterance(words);
-        u.lang = "en-GB"; u.rate = 1.03; u.onend = u.onerror = () => resolve();
-        window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+        const synth = window.speechSynthesis;
+        if (!synth) { setNote("This browser has no voice of its own, so the answer is shown but not spoken."); return resolve(); }
+        const u = new SpeechSynthesisUtterance(words), voices = synth.getVoices();
+        const voice = ["en-GB", "en-IN", "en-US", "en"].map((l) => voices.find((v) => v.lang.startsWith(l))).find(Boolean); // an English voice that is installed; none named = the browser's default
+        if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = "en-US";
+        u.rate = 1.03; u.onend = u.onerror = () => { clearTimeout(giveUp); resolve(); };
+        const giveUp = setTimeout(resolve, 4000 + words.length * 95); // some browsers never report the end of a long sentence: do not wait for ever
+        if (synth.speaking || synth.pending) synth.cancel(); // cancelling when nothing is being said makes Chrome drop the next sentence
+        setTimeout(() => { synth.resume(); synth.speak(u); }, 80);
       };
       if (!c.eleven || !reply?.id) return own();
       fetch("api/assistant/speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: reply.id }) })
