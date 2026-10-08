@@ -65,6 +65,12 @@ more" adds the context; "short" gives the answer alone. She reads English, Roman
 The local model writes none of the answer text. Measured on `hermes3:8b`, it moved numbers between scenarios and added effects that
 were not in the data whenever it rewrote facts, so every sentence is written by `answers.mjs` and the model only sorts questions.
 
+**Talking to her (call mode).** The phone button in the chat starts a call: she listens, answers aloud, and listens again until
+you press End; tapping "Speaking…" cuts in. Hearing you is the browser's own speech recognition (Edge or Chrome, needs the
+internet, English or Urdu by the language button). Her voice is ElevenLabs when `ELEVENLABS_API_KEY` is in `.env`
+(`ELEVENLABS_VOICE`, `ELEVENLABS_MODEL` optional) and the browser's built-in voice otherwise. The key never reaches the browser, and
+the server only speaks answers Hela has given (`server/assistant/voice.mjs`). Spoken answers are the short form, with units in words.
+
 **The model.** No API key is needed: an open model runs through Ollama (https://ollama.com), on this machine or on another one named
 by `OLLAMA_URL` (`OLLAMA_MODEL`, default the best one installed; `OLLAMA_THREADS` for the processor threads it may use). With
 `ANTHROPIC_API_KEY` in `.env` Claude is used instead and calls the tools in `tools.mjs` itself (`ASSISTANT_PROVIDER=ollama|anthropic`

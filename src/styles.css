@@ -735,6 +735,23 @@ dialog .eyebrow { font-size: calc(12px * var(--fs)); color: var(--muted); }
 .bc-msg.user { justify-self: end; }
 .bc-text { padding: 8px 11px; font-size: calc(13px * var(--fs)); line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; border-radius: 12px; background: var(--raise); border: 1px solid var(--line); }
 .bc-msg.user .bc-text { background: var(--accent-dim); border-color: rgba(69, 184, 176, 0.4); }
+.bc-call { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; color: var(--muted); background: none; border: 1px solid var(--line-2); border-radius: 50%; }
+.bc-call svg { width: 14px; height: 14px; }
+.bc-call:hover:not(:disabled) { color: #fff; border-color: var(--accent); }
+.bc-call.on { color: #fff; background: #b3261e; border-color: #ff6b62; }
+.bc-call:disabled { opacity: 0.4; }
+.bc-voice { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line); font-size: calc(12.5px * var(--fs)); }
+.bc-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+.bc-voice.listening .bc-dot { animation: bc-pulse 1.1s ease-in-out infinite; }
+.bc-voice.thinking .bc-dot { background: var(--sand); }
+.bc-voice.speaking .bc-dot { background: #6eb4ff; animation: bc-pulse 0.6s ease-in-out infinite; }
+.bc-vtext { flex: 1; min-width: 0; padding: 0; text-align: left; font: inherit; color: var(--text-2); background: none; border: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+button.bc-vtext:hover { color: #fff; }
+.bc-lang, .bc-end { flex: none; padding: 3px 9px; font-size: calc(11.5px * var(--fs)); color: var(--text-2); background: none; border: 1px solid var(--line-2); border-radius: 999px; }
+.bc-lang:hover { border-color: var(--accent); color: #fff; }
+.bc-end { color: #fff; background: #b3261e; border-color: #ff6b62; }
+.bc-note { margin: 0; padding: 7px 12px; font-size: calc(11.5px * var(--fs)); line-height: 1.4; color: var(--sand); border-top: 1px solid var(--line); }
+@keyframes bc-pulse { 0%, 100% { transform: scale(0.7); opacity: 0.55; } 50% { transform: scale(1.25); opacity: 1; } }
 .bc-par + .bc-par { margin-top: 8px; }
 .bc-par ul { margin: 5px 0 0; padding-left: 17px; display: grid; gap: 4px; }
 .bc-par.src { font-size: calc(11px * var(--fs)); line-height: 1.4; color: var(--faint); }

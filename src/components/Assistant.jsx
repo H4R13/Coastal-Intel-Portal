@@ -89,35 +89,122 @@ function Labelled({ text }) {
   return at > 2 && at <= 40 && !/[.?!]/.test(text.slice(0, at)) ? <><b>{text.slice(0, at + 1)}</b>{text.slice(at + 1)}</> : text;
 }
 
+/* Call mode: speak to Hela and hear the answer. Hearing is the browser's own speech recognition (Edge, Chrome); her voice is
+   ElevenLabs through the portal server when a key is set there, and the browser's built-in voice otherwise. */
+const Recognition = typeof window !== "undefined" ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
+const LANGS = [["en-IN", "English"], ["ur-PK", "اردو"]]; // what the user speaks; Hela answers in English either way
+const PHONE = '<path d="M21.5 16.6v2.9a2 2 0 0 1-2.2 2 19.5 19.5 0 0 1-8.5-3 19.2 19.2 0 0 1-5.9-5.9A19.5 19.5 0 0 1 1.9 4 2 2 0 0 1 3.9 1.8h2.9a2 2 0 0 1 2 1.7c.1.9.4 1.9.7 2.7a2 2 0 0 1-.5 2.1L7.8 9.5a16 16 0 0 0 6.7 6.7l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>';
+
 /** The chat: each answer comes from the portal's own datasets (server/assistant) and can be rated; ratings are stored. */
 function Chat({ button, onClose }) {
   const [msgs, setMsgs] = useState([]), [text, setText] = useState(""), [busy, setBusy] = useState(false), [ready, setReady] = useState(null);
   const [hint, setHint] = useState(""), [why, setWhy] = useState(null); // hint: why the assistant is off; why: id of an answer being marked unhelpful, and the reason typed so far
   const end = useRef(null);
   const [modelOff, setModelOff] = useState(false); // the language model is unreachable: answers written from the data still work, open questions do not
+  /* the call: phase is what Hela is doing ("listening", "thinking", "speaking"); heard is what has been made out of the user's speech so far */
+  const [call, setCall] = useState(false), [phase, setPhase] = useState(""), [heard, setHeard] = useState(""), [lang, setLang] = useState(0), [note, setNote] = useState("");
+  const live = useRef({ on: false, rec: null, audio: null, done: null, lang: 0, eleven: false, msgs: [], busy: false }); // what the call's callbacks need as it is now, not as it was when they were made
+  live.current.msgs = msgs; live.current.lang = lang;
   useEffect(() => { get("api/assistant/status").then((s) => { setReady(s?.ready ?? false); setHint(s?.hint ?? ""); setModelOff(!!s?.ready && s.model_ready === false); }); }, []);
-  useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [msgs, busy, why]);
+  useEffect(() => { get("api/assistant/voice").then((v) => { live.current.eleven = !!v?.elevenlabs; }); return hangUp; }, []); // leaving the chat ends the call
+  useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [msgs, busy, why, phase]);
 
-  async function ask(q) {
+  /** Ask one question; `voice` marks it as spoken, so the answer comes short and with a version to say aloud. Returns the server's reply. */
+  async function ask(q, voice = false) {
     q = q.trim();
-    if (!q || busy) return;
-    const next = [...msgs, { role: "user", content: q }];
+    if (!q || live.current.busy) return null;
+    const next = [...live.current.msgs, { role: "user", content: q }];
+    live.current.busy = true; live.current.msgs = next;
     setMsgs(next); setText(""); setBusy(true);
-    const r = await post("api/assistant/chat", { messages: next.filter((m) => !m.error).map(({ role, content }) => ({ role, content })) });
+    const r = await post("api/assistant/chat", { messages: next.filter((m) => !m.error).map(({ role, content }) => ({ role, content })), ...(voice ? { voice: true } : {}) });
+    live.current.busy = false;
     setBusy(false);
     setMsgs([...next, r.answer ? { role: "assistant", content: r.answer, id: r.id, tools: r.tools, error: !r.ok } : { role: "assistant", content: r.error ?? "No answer.", error: true }]);
+    return r;
   }
   async function rate(m, rating, comment) {
     setMsgs((all) => all.map((x) => (x === m ? { ...x, rating } : x)));
     await post("api/assistant/feedback", { id: m.id, rating, comment });
   }
+
+  /* ---- the call ---- */
+  /** Say the answer aloud and resolve when it has been said (or cut short by `quiet`). */
+  function say(reply) {
+    return new Promise((resolve) => {
+      const c = live.current, words = reply?.spoken || reply?.answer || reply?.error || "";
+      if (!words) return resolve();
+      c.done = resolve;
+      const own = () => { // the browser's built-in voice: no key needed, and the fallback when ElevenLabs cannot be reached
+        if (!window.speechSynthesis) return resolve();
+        const u = new SpeechSynthesisUtterance(words);
+        u.lang = "en-GB"; u.rate = 1.03; u.onend = u.onerror = () => resolve();
+        window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+      };
+      if (!c.eleven || !reply?.id) return own();
+      fetch("api/assistant/speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: reply.id }) })
+        .then((r) => (r.ok ? r.blob() : Promise.reject(new Error("no audio")))).then((blob) => {
+          if (!c.on) return resolve();
+          const url = URL.createObjectURL(blob), a = new Audio(url);
+          c.audio = a; a.onended = a.onerror = () => { URL.revokeObjectURL(url); c.audio = null; resolve(); };
+          a.play().catch(own);
+        }).catch(own);
+    });
+  }
+  /** Stop speaking now (the user tapped to cut in, or hung up). */
+  function quiet() {
+    const c = live.current;
+    if (c.audio) { c.audio.pause(); c.audio = null; }
+    window.speechSynthesis?.cancel();
+    c.done?.(); c.done = null;
+  }
+  /** Listen for one thing said; when the user stops, answer it, say the answer, and listen again. */
+  function listen() {
+    const c = live.current;
+    if (!c.on) return;
+    let said = "";
+    const rec = new Recognition();
+    c.rec = rec; rec.lang = LANGS[c.lang][0]; rec.interimResults = true; rec.continuous = false;
+    rec.onresult = (e) => { said = Array.from(e.results).map((r) => r[0].transcript).join(" "); setHeard(said); };
+    rec.onerror = (e) => { if (e.error === "not-allowed" || e.error === "service-not-allowed") { setNote("The microphone is blocked for this page. Allow it in the browser's address bar, then start the call again."); hangUp(); } else if (e.error === "network") { setNote("Speech recognition needs an internet connection."); hangUp(); } };
+    rec.onend = async () => {
+      if (!c.on || c.rec !== rec) return;
+      if (!said.trim()) return listen(); // silence: the browser stops listening after a few seconds, so start again
+      setPhase("thinking"); setHeard("");
+      const reply = await ask(said, true);
+      if (!c.on) return;
+      setPhase("speaking");
+      await say(reply);
+      if (c.on) listen();
+    };
+    setPhase("listening"); setHeard("");
+    try { rec.start(); } catch { /* already started */ }
+  }
+  function startCall() {
+    setNote("");
+    if (!Recognition) return setNote("Voice calls need Microsoft Edge or Google Chrome: this browser cannot turn speech into text.");
+    live.current.on = true; setCall(true); listen();
+  }
+  function hangUp() {
+    const c = live.current;
+    c.on = false;
+    try { c.rec?.abort(); } catch { /* not running */ }
+    c.rec = null; quiet(); setCall(false); setPhase(""); setHeard("");
+  }
+  function switchLang() { // takes effect at once: what is being listened to is dropped and listening starts again in the other language
+    const c = live.current, to = (c.lang + 1) % LANGS.length;
+    c.lang = to; setLang(to);
+    if (c.on && phase === "listening") { const old = c.rec; c.rec = null; try { old?.abort(); } catch { /* not running */ } listen(); }
+  }
+
   return (
     <Above button={button} gap={12} className="bot-chat" role="dialog" aria-label="Hela, the portal assistant" onClick={(e) => e.stopPropagation()}>
-      <div className="bc-head"><b>Hela</b><span>Answers come from the portal's datasets</span><button className="bc-x" aria-label="Close" onClick={onClose}>×</button></div>
+      <div className="bc-head"><b>Hela</b><span>Answers come from the portal's datasets</span>
+        <button className={`bc-call ${call ? "on" : ""}`} aria-label={call ? "End the call" : "Talk to Hela"} title={call ? "End the call" : "Talk to Hela"} disabled={ready === false} onClick={call ? hangUp : startCall}><Icon width={1.7} paths={PHONE} /></button>
+        <button className="bc-x" aria-label="Close" onClick={onClose}>×</button></div>
       <div className="bc-log">
         {!msgs.length ? (
           <div className="bc-start">
-            {ready === false ? <p className="bc-warn">Hela isn't switched on yet. {hint}</p> : <p>I'm Hela. Ask me about mangroves, erosion, ocean health, saltwater intrusion or plastics, or whether a layer is working.</p>}
+            {ready === false ? <p className="bc-warn">Hela isn't switched on yet. {hint}</p> : <p>I'm Hela. Ask me about mangroves, erosion, ocean health, saltwater intrusion or plastics, or whether a layer is working. Press the phone to talk instead of typing.</p>}
             {modelOff ? <p className="bc-warn">The language model is not reachable, so I can only answer questions the portal's data covers directly. {hint}</p> : null}
             {STARTERS.map((s) => <button key={s} className="bc-chip" disabled={ready === false} onClick={() => ask(s)}>{s}</button>)}
           </div>
@@ -147,8 +234,18 @@ function Chat({ button, onClose }) {
         {busy ? <div className="bc-msg assistant"><div className="bc-text bc-wait">Looking it up in the data</div></div> : null}
         <div ref={end} />
       </div>
+      {note ? <p className="bc-note">{note}</p> : null}
+      {call ? (
+        <div className={`bc-voice ${phase}`}>
+          <i className="bc-dot" aria-hidden="true" />
+          {phase === "speaking" ? <button className="bc-vtext" onClick={quiet} title="Stop her and speak">Speaking… tap to cut in</button>
+            : <span className="bc-vtext" aria-live="polite">{phase === "thinking" ? "Looking it up…" : heard || "Listening… go ahead"}</span>}
+          <button className="bc-lang" title="The language you speak" onClick={switchLang}>{LANGS[lang][1]}</button>
+          <button className="bc-end" onClick={hangUp}>End</button>
+        </div>
+      ) : null}
       <form className="bc-in" onSubmit={(e) => { e.preventDefault(); ask(text); }}>
-        <input value={text} placeholder={ready === false ? "Hela is not switched on" : "Ask Hela…"} maxLength={2000} disabled={busy || ready === false} onChange={(e) => setText(e.target.value)} />
+        <input value={text} placeholder={ready === false ? "Hela is not switched on" : call ? "…or type here" : "Ask Hela…"} maxLength={2000} disabled={busy || ready === false} onChange={(e) => setText(e.target.value)} />
         <button type="submit" disabled={busy || !text.trim() || ready === false}>Ask</button>
       </form>
     </Above>

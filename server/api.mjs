@@ -17,13 +17,15 @@
  *   GET /api/mangroves/change/<frame>/<scenario>/<year>.png   that year's extent against the first mapped year
  *                                       (kept / gained / lost; see server/mangrove-change.mjs)
  *   POST /api/assistant/chat, /feedback; GET /api/assistant/status   the portal assistant (server/assistant/chat.mjs)
+ *   GET /api/assistant/voice; POST /api/assistant/speak              its voice (server/assistant/voice.mjs)
  * Every request except tiles, health and the assistant is written to access_log (route, status, time).
  */
 import { query, cached, redis } from "./db.mjs";
 import { amibImage, hexToRgb } from "./amib.mjs";
 import { mangroveChangeImage, FRAMES, FIRST_YEAR } from "./mangrove-change.mjs";
 import { diagnostics } from "./diagnostics.mjs";
-import { chat, feedback, allowed, assistantStatus, logAccess } from "./assistant/chat.mjs";
+import { chat, feedback, allowed, assistantStatus, logAccess, spokenAnswer } from "./assistant/chat.mjs";
+import { speak, voiceStatus } from "./assistant/voice.mjs";
 
 const JSON_TYPE = "application/json; charset=utf-8";
 const send = (res, status, type, body, extra = {}) => { res.writeHead(status, { "Content-Type": type, ...extra }); res.end(body); };
@@ -154,13 +156,22 @@ export async function handleApi(req, res) {
   }
   try {
     if (path === "/api/assistant/status") return sendJson(res, 200, await assistantStatus());
+    if (path === "/api/assistant/voice") return sendJson(res, 200, voiceStatus());
+    if (path === "/api/assistant/speak") { // the audio of one stored answer, for the call mode
+      if (req.method !== "POST") return sendJson(res, 405, { error: "POST only" });
+      if (!allowed(`voice:${req.socket.remoteAddress ?? "unknown"}`)) return sendJson(res, 429, { ok: false, error: "Too many at once. Wait a moment." });
+      const body = await readJson(req).catch(() => null), text = body && (await spokenAnswer(body.id));
+      if (!text) return sendJson(res, 404, { ok: false, error: "No such answer." });
+      const out = await speak(text);
+      return out.status === 200 ? send(res, 200, out.type, out.body, { "Cache-Control": "no-store" }) : sendJson(res, out.status, { ok: false, error: out.error });
+    }
     if (path === "/api/assistant/chat" || path === "/api/assistant/feedback") {
       if (req.method !== "POST") return sendJson(res, 405, { error: "POST only" });
       const who = req.socket.remoteAddress ?? "unknown";
       if (!allowed(who)) return sendJson(res, 429, { ok: false, error: "Too many questions at once. Wait a moment and try again." });
       const body = await readJson(req).catch(() => null);
       if (!body) return sendJson(res, 400, { ok: false, error: "Bad request" });
-      const { status, body: out } = path.endsWith("/chat") ? await chat(body.messages) : await feedback(body);
+      const { status, body: out } = path.endsWith("/chat") ? await chat(body.messages, { voice: body.voice === true }) : await feedback(body);
       return sendJson(res, status, out);
     }
     if (path === "/api/health") {

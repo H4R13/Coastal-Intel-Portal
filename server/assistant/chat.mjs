@@ -4,6 +4,7 @@
  *   POST /api/assistant/chat      { messages: [{ role, content }] } → { id, answer, tools, ok, mode }
  *   POST /api/assistant/feedback  { id, rating: 1 | -1, comment? } → { ok }
  *   GET  /api/assistant/status    → { ready, model_ready, provider, model, hint? }
+ *   GET  /api/assistant/voice     → { elevenlabs }      POST /api/assistant/speak { id } → audio of that answer (voice.mjs)
  *
  * How a question is answered with a local model, in order (chat → viaOllama):
  *   1. small talk (greetings, "who are you")                         at once, no look-up
@@ -24,6 +25,7 @@ import { query } from "../db.mjs";
 import { toolDefs, runTool, retrieve } from "./tools.mjs";
 import { answerDirect } from "./answers.mjs";
 import { tidy, inUrduScript, TOPIC } from "./understand.mjs";
+import { speakable } from "./voice.mjs";
 
 const hasKey = () => !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 const PROVIDER = () => process.env.ASSISTANT_PROVIDER || (hasKey() ? "anthropic" : "ollama");
@@ -208,12 +210,12 @@ async function route(question, model, usage) {
 }
 
 /** Ollama: the same loop against its /api/chat. A small model sometimes answers from memory; it is sent back once to look it up. */
-async function viaOllama(history, model, used, usage) {
+async function viaOllama(history, model, used, usage, voice = false) {
   const tools = toolDefs.map((t) => ({ type: "function", function: { name: t.name, description: t.description, parameters: t.input_schema } }));
   const msgs = [{ role: "system", content: SYSTEM }, ...history];
   let nudged = false;
   const asked = history.at(-1).content, earlier = history.slice(0, -1).filter((m) => m.role === "user").map((m) => m.content);
-  const short = SHORT.test(asked);
+  const short = SHORT.test(asked) || voice; // spoken answers are the short ones
   const redo = short && earlier.length && asked.length < 160; // "make that shorter": the real questions are the ones before it
   const length = short ? "The user wants it short: at most 3 short sentences, the key figures only." : "Be concise: lead with the direct answer, at most 3 short sentences (about 60 words) unless the user asks for detail.";
   for (let i = 1; i < msgs.length - 1; i++) if (msgs[i].role === "assistant" && msgs[i].content.length > 500) msgs[i] = { ...msgs[i], content: `${msgs[i].content.slice(0, 500)}…` }; // old answers are context, not facts: keep them small
@@ -289,7 +291,8 @@ export function smallTalk(question) {
 /** "Hey Hela, how are the mangroves?" → "how are the mangroves?": the name addresses the assistant and is not part of the question. */
 export const unaddressed = (q) => q.replace(new RegExp(`^\\s*((hey|hi|hello|ok|okay|yo|dear)[\\s,]+)?${NAME}\\b[\\s,!.:;-]*`, "i"), "").replace(new RegExp(`[\\s,]+${NAME}\\s*([?!.]*)\\s*$`, "i"), "$1");
 
-export async function chat(rawMessages) {
+/** opts.voice: the question was spoken (call mode): the answer is kept short, and comes with a version to say aloud (`spoken`). */
+export async function chat(rawMessages, { voice = false } = {}) {
   const messages = clean(rawMessages);
   if (!messages.length) return { status: 400, body: { ok: false, error: "Ask a question first." } };
   const id = crypto.randomUUID(), started = Date.now(), used = [], usage = { in: 0, out: 0 };
@@ -303,14 +306,14 @@ export async function chat(rawMessages) {
      With Claude as the provider every question goes to it: it reads the tools' output reliably and writes a fuller answer. */
   if (!answer && PROVIDER() !== "anthropic") {
     const earlier = messages.slice(0, -1).filter((m) => m.role === "user").map((m) => m.content);
-    const direct = await answerDirect(asked || question, earlier, { short: SHORT.test(asked) }).catch((e) => { console.warn(`assistant answers: ${e.message}`); return null; });
+    const direct = await answerDirect(asked || question, earlier, { short: SHORT.test(asked) || voice }).catch((e) => { console.warn(`assistant answers: ${e.message}`); return null; });
     if (direct) { answer = direct.answer; used.push(...direct.tools); }
   }
   if (!answer) try {
     p = await provider();
     if (!p.ready) return { status: 200, body: { ok: false, id, answer: `I couldn't answer that from the portal's data directly, and the language model that handles open questions is not reachable (${p.hint}) ${SCOPE}`, tools: [], mode: "data" } };
     mode = "model";
-    const r = p.name === "anthropic" ? await viaClaude(messages, used, usage) : await viaOllama(messages, p.model, used, usage);
+    const r = p.name === "anthropic" ? await viaClaude(messages, used, usage) : await viaOllama(messages, p.model, used, usage, voice);
     if (r) ({ answer, ok, mode = "model" } = r);
     else { answer = "That needed more lookups than I'm allowed in one question. Try asking about one dataset at a time."; ok = false; }
   } catch (e) {
@@ -328,7 +331,14 @@ export async function chat(rawMessages) {
       [id, question, answer, JSON.stringify(used), `${p.name}:${p.model}`, usage.in, usage.out, Date.now() - started, ok]);
   } catch (e) { console.warn(`assistant log: ${e.message}`); }
   if (urdu && mode === "data" && used.length) answer = `(I read the subject of your question from the Urdu and answer in English.)\n\n${answer}`;
-  return { status: 200, body: { ok, id, answer, tools: [...new Set(used)], mode } };
+  return { status: 200, body: { ok, id, answer, tools: [...new Set(used)], mode, ...(voice ? { spoken: speakable(answer) } : {}) } };
+}
+
+/** The stored answer to one question, as it is said aloud. The voice route speaks only these: never text sent in by a browser. */
+export async function spokenAnswer(id) {
+  if (!/^[0-9a-f-]{36}$/.test(String(id))) return null;
+  const row = (await query("select answer from assistant_chat where id = $1", [id])).rows[0];
+  return row?.answer ? speakable(row.answer) : null;
 }
 
 export async function feedback({ id, rating, comment }) {
