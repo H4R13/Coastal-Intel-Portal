@@ -56,7 +56,7 @@ const OCEAN_TOPICS = {
   fisheries: { keys: ["data/stock_status_indicator"], theme: /fish/i, note: "Fish stock status for 2023: the share of assessed stocks, and of the catch, that is overexploited or collapsed. A catch-based estimate, not an official stock assessment." },
   exposure: { keys: ["data/exposure_summary", "data/national_index"], keep: eez, theme: /exposure|warm|acid/i, note: "Climate exposure index (0-1) from heat and acidification pressure, whole EEZ." },
 };
-const DELTA_TOPICS = { saltwater: ["B"], groundwater: ["C", "E"], interface: ["GH"], sea_level: ["D"], salt_land: ["A"], shelf: ["G"], river_flow: ["drivers"], climate_models: ["H"] };
+const DELTA_TOPICS = { saltwater: ["B"], groundwater: ["C", "E"], interface: ["GH"], sea_level: ["D", "GH"], salt_land: ["A"], shelf: ["G"], river_flow: ["drivers"], climate_models: ["H"] };
 const DELTA_TITLES = { saltwater: "Salt water in the river", groundwater: "Fresh groundwater", interface: "Fresh / salt groundwater boundary", sea_level: "Sea level", salt_land: "Salt-affected land", shelf: "Salinity at sea (shelf)", river_flow: "River flow reaching the delta", climate_models: "Climate model outlook" };
 const DELTA_NOTES = {
   saltwater: "The flow scenarios differ only in how much Indus water reaches the delta: 'accord flow' = the release promised by the water accord, 'current flow' = as today, 'degraded flow' = less than today. Comparing them shows what river flow does to salt intrusion; the slow rise within one scenario is the sea-level part.",
@@ -87,10 +87,13 @@ const LABELS = [
   [/tidal flat/, "tidal flats at {place} cover"],
   [/shelf sea-surface salinity/, "sea-surface salinity on the Indus shelf is"],
   [/turbidity/, "the river-plume turbidity index at the Indus mouth (a weak proxy) is"],
+  [/land newly below MSL/, "land at {place} that has dropped below mean sea level since 2020 and is open to the sea covers"],
+  [/GH interface < 10 m/, "the area at {place} where the boundary between fresh and salt groundwater lies less than 10 m down covers"],
+  [/median GH interface depth/, "the boundary between fresh and salt groundwater at {place} lies at a median depth of"],
 ];
 /* unit as stored → [as written, decimals worth showing, a note added once after the sentence] */
 const UNITS = { "km from mouth": ["km", 1], "km inland": ["km", 1], km2: ["km²", 1], "days/yr": ["days a year", 0], MAF: ["MAF", 1, "(MAF = million acre-feet.)"], psu: ["psu", 2], fraction: ["", 3], "log ratio (weak proxy)": ["", 2] };
-const unitOf = (unit) => UNITS[unit] ?? (/^m\b/.test(unit ?? "") ? ["m", 3] : [unit ?? "", 2]);
+const unitOf = (unit) => UNITS[unit] ?? (/^m vs 2007/.test(unit ?? "") ? ["m", 3, "(The years 1993–2006 are missing and a break in the gauge's reference level is suspected, so the long-term rise from this gauge is uncertain.)"] : /^m\b/.test(unit ?? "") ? ["m", 3] : [unit ?? "", 2]);
 const PLACES = { indus_delta: "the Indus Delta", karachi: "Karachi", bela_sonmiani: "Bela–Sonmiani", ketibandar_coast: "the Keti Bandar coast", sujawal: "Sujawal" };
 const listed = (items) => (items.length < 3 ? items.join(" and ") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`);
 function seriesLine(metric, k, unit, asked = []) {
@@ -106,7 +109,9 @@ function seriesLine(metric, k, unit, asked = []) {
     return `${round(v?.p50 ?? v, d)}${u ? ` ${u}` : ""} in ${y}${wide ? ` (likely ${round(v.low, d)} to ${round(v.high, d)})` : ""}`;
   };
   const stem = (LABELS.find(([re]) => re.test(metric))?.[1] ?? `${metric}${place ? ` at {place}` : ""} is`).replace("{place}", place);
-  return `${lead}, ${stem} ${listed(ys.map(value))}.${note ? ` ${note}` : ""}`;
+  const a = k.at[ys[0]]?.p50 ?? k.at[ys[0]], b = k.at[ys.at(-1)]?.p50 ?? k.at[ys.at(-1)], pct = a > 0 && ys.length > 1 && ["km", "km²", "MAF", "days a year"].includes(u) ? ((b - a) / a) * 100 : 0;
+  const moved = Math.abs(pct) >= 5 ? `, ${round(Math.abs(pct), 1)}% ${pct < 0 ? "lower" : "higher"} than in ${ys[0]}` : ""; // "by what percentage has it fallen?"
+  return `${lead}, ${stem} ${listed(ys.map(value))}${moved}.${note ? ` ${note}` : ""}`;
 }
 /** A summary row without its test statistics (p-values, standard errors), with numbers rounded: what a reader needs. */
 const plain = (row) => Object.fromEntries(Object.entries(row).filter(([k]) => !/(_p|_se|^sigma.*|^neff|^ci.*|^mk_p|^ts)$/.test(k)).map(([k, v]) => [k, typeof v === "number" ? round(v, 3) : v]));
@@ -279,7 +284,7 @@ export const TOOLS = [
             const tag = `${x.scenario} ${x.kind}`.toLowerCase(), zone = String(x.zone ?? "").toLowerCase().replace(/[^a-z]/g, "");
             // most relevant first: the topic's main measure, the place asked about, today's river flow before the alternatives, projections before reconstructions
             const asked = !!measure && metric.toLowerCase().includes(String(measure).toLowerCase());
-            const rank = (asked ? -30 : first.test(metric) ? 0 : 20) + (zone.includes(where) ? 0 : 6) + (/current/.test(tag) ? 0 : /accord/.test(tag) ? 1 : /degraded/.test(tag) ? 2 : /reconstruct/.test(tag) ? 4 : 0);
+            const rank = (asked ? -30 : first.test(metric) ? 0 : 20) + (zone.includes(where) ? 0 : 6) + (/current/.test(tag) ? 0 : /accord/.test(tag) ? 1 : /degraded/.test(tag) ? 2 : /reconstruct/.test(tag) ? 4 : /present state/.test(tag) ? 3 : 0);
             const k = keyYears(x, years);
             lines.push({ rank, k, metric, tag, asked, text: seriesLine(metric, k, m.unit, years) }); // one whole sentence per series: a figure never leaves its scenario
           }

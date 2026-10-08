@@ -33,8 +33,18 @@ const URDU = [[/\bsab ?se zyada\b|\bsabse zyada\b/g, "most"], [/\bsab ?se kam\b/
   [/\bkachra\b|\bgandagi\b/g, "garbage"], [/\bdarya\b/g, "river flow"], [/\bzalzal[ae]\b/g, "earthquake"], [/\bjungle?\b|\bdarakht\b/g, "mangrove"], [/\bkata[ou]\b/g, "erosion"], [/\bsaal\b/g, "year"],
   [/\b(theek|sahi) (chal|kaam)\b|\bchal raha\b/g, "working"], [/\bkharab\b/g, "broken"], [/\baisa\b|\bwoh?\b/g, "that"], [/\bye+h?\b|\bis ?ka\b/g, "this"], [/\bwaha+n?\b/g, "there"], [/^\s*aur\b/g, "and"], [/\bmukhtasar\b|\bchota\b/g, "short"]];
 
+/* Urdu in its own script: the words that name the portal's subjects, as English. Enough to find the topic; the answer is given in English. */
+const SCRIPT = [["سمندر کی سطح", "sea level"], ["سطح سمندر", "sea level"], ["زیر زمین پانی", "groundwater"], ["زیرِ زمین پانی", "groundwater"], ["نمکین پانی", "saltwater"], ["درجہ حرارت", "temperature"], ["بھاری دھات", "heavy metals"],
+  ["مینگرووز", "mangrove"], ["مینگروو", "mangrove"], ["منگروو", "mangrove"], ["منگروے", "mangrove"], ["تمر", "mangrove"], ["پلاسٹک", "plastic"], ["آلودگی", "pollution"], ["کچرا", "garbage"], ["مچھلیوں", "fish"], ["مچھلیاں", "fish"], ["مچھلی", "fish"],
+  ["کراچی", "karachi"], ["ٹھٹھہ", "thatta"], ["ٹھٹہ", "thatta"], ["سجاول", "sujawal"], ["کورنگی", "korangi"], ["کوٹری", "kotri"], ["کٹاؤ", "erosion"], ["کٹاو", "erosion"], ["زلزلہ", "earthquake"], ["زلزلے", "earthquake"],
+  ["آکسیجن", "oxygen"], ["تیزابیت", "acidity"], ["دھاتیں", "metals"], ["دھاتوں", "metals"], ["دھات", "metals"], ["نمک", "salt"], ["کھارا", "salt"], ["گرمی", "warmer"], ["گرم", "warmer"], ["سمندر", "sea"], ["دریا", "river flow"],
+  ["کتنا", "how much"], ["کتنی", "how much"], ["کتنے", "how much"], ["کیوں", "why"], ["کہاں", "where"], ["کب", "when"], ["سب سے زیادہ", "most"], ["سب سے کم", "least"]];
+/** True when the text is written in Urdu (Arabic) script. */
+export const inUrduScript = (text) => /[؀-ۿ]/.test(String(text));
+
 export function tidy(text) {
-  const english = URDU.reduce((t, [re, word]) => t.replace(re, word), String(text).toLowerCase());
+  const latin = SCRIPT.reduce((t, [word, english]) => t.split(word).join(` ${english} `), String(text)).replace(/[؀-ۿ‌‍؟،۔]+/g, " ");
+  const english = URDU.reduce((t, [re, word]) => t.replace(re, word), latin.toLowerCase());
   return english.replace(/[a-z]{5,}/g, (w) => {
     if (KNOWN.has(w)) return w;
     const max = w.length >= 8 ? 2 : 1; // short words: one slip only, or "nation" becomes "station"

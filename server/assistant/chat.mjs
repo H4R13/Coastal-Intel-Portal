@@ -23,6 +23,7 @@ import crypto from "node:crypto";
 import { query } from "../db.mjs";
 import { toolDefs, runTool, retrieve } from "./tools.mjs";
 import { answerDirect } from "./answers.mjs";
+import { tidy, inUrduScript, TOPIC } from "./understand.mjs";
 
 const hasKey = () => !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 const PROVIDER = () => process.env.ASSISTANT_PROVIDER || (hasKey() ? "anthropic" : "ollama");
@@ -265,6 +266,7 @@ const SCOPE = "I can answer about mangroves, coastal erosion, plastics and seafo
 
 /** A greeting or a thank-you is answered here, at once: there is nothing to look up, and a local model takes a minute to say so. */
 export function smallTalk(question) {
+  if (/[^\x00-\x7F]/.test(question) && !/[a-z]{3}/i.test(question)) return null; // not Latin letters: not a greeting to guess at
   const s = question.toLowerCase().replace(/[^a-z' ]/g, " ").replace(/\s+/g, " ").trim();
   const topics = "mangroves, coastal erosion, ocean health, saltwater intrusion, sea level and plastics, or whether a layer is working";
   if (!s || /^(hi+|hello+|hey+|yo|salam|salaam|assalam ?o? ?alaikum|aoa|good (morning|afternoon|evening))( there| again)?( how are you| how r u)?$/.test(s) || /^how are you$/.test(s))
@@ -288,7 +290,10 @@ export async function chat(rawMessages) {
   const id = crypto.randomUUID(), started = Date.now(), used = [], usage = { in: 0, out: 0 };
   const question = messages.at(-1).content, asked = unaddressed(question);
   messages[messages.length - 1] = { ...messages.at(-1), content: asked || question };
-  let answer = smallTalk(asked) ?? "", ok = true, mode = "data", p = { name: "data", model: "answers" }; // mode: "data" = written from the database here, "model" = written by the language model
+  let answer = smallTalk(asked) ?? "", ok = true, mode = "data", p = { name: "data", model: "answers" };
+  /* Urdu script: the subject words are read (understand.mjs) and the answer is in English; with no subject found, say which languages work */
+  const urdu = inUrduScript(asked);
+  if (urdu && !answer && !TOPIC.test(tidy(asked))) answer = "I can read English and Roman Urdu (Urdu typed in English letters), and the main subject words in Urdu script. Please ask again that way, for example: \"Karachi mein plastic kitna hai?\"\n\nبراہِ مہربانی اپنا سوال انگریزی یا رومن اردو میں لکھیں۔"; // mode: "data" = written from the database here, "model" = written by the language model
   /* Ready-made answers first: instant, and right by construction. They need no model, so they work when Ollama is unreachable too.
      With Claude as the provider every question goes to it: it reads the tools' output reliably and writes a fuller answer. */
   if (!answer && PROVIDER() !== "anthropic") {
@@ -317,6 +322,7 @@ export async function chat(rawMessages) {
     await query("insert into assistant_chat (id, question, answer, tools, model, input_tokens, output_tokens, ms, ok) values ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
       [id, question, answer, JSON.stringify(used), `${p.name}:${p.model}`, usage.in, usage.out, Date.now() - started, ok]);
   } catch (e) { console.warn(`assistant log: ${e.message}`); }
+  if (urdu && mode === "data" && used.length) answer = `(I read the subject of your question from the Urdu and answer in English.)\n\n${answer}`;
   return { status: 200, body: { ok, id, answer, tools: [...new Set(used)], mode } };
 }
 
