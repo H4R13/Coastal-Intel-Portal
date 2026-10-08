@@ -170,7 +170,10 @@ function Chat({ button, onClose }) {
     const rec = new Recognition();
     c.rec = rec; rec.lang = LANGS[c.lang][0]; rec.interimResults = true; rec.continuous = false;
     rec.onresult = (e) => { said = Array.from(e.results).map((r) => r[0].transcript).join(" "); setHeard(said); };
-    rec.onerror = (e) => { if (e.error === "not-allowed" || e.error === "service-not-allowed") { setNote("The microphone is blocked for this page. Allow it in the browser's address bar, then start the call again."); hangUp(); } else if (e.error === "network") { setNote("Speech recognition needs an internet connection."); hangUp(); } };
+    rec.onerror = (e) => { if (e.error === "not-allowed" || e.error === "service-not-allowed") { setNote("The microphone is blocked for this page. Allow it in the browser's address bar, then start the call again."); hangUp(); } else if (e.error === "network") { setNote("Speech recognition could not reach its service. Check the internet connection."); hangUp(); }
+      else if (e.error === "audio-capture") { setNote("No microphone was found. Plug one in or pick one in the browser's settings, then start the call again."); hangUp(); }
+      else if (e.error === "language-not-supported") { setNote(`This browser cannot listen in ${LANGS[c.lang][1]}. Switch the language button and try again.`); }
+      else if (e.error !== "no-speech" && e.error !== "aborted") setNote(`Listening stopped (${e.error}).`); };
     rec.onend = async () => {
       if (!c.on || c.rec !== rec) return;
       if (!said.trim()) return listen(); // silence: the browser stops listening after a few seconds, so start again
@@ -187,7 +190,8 @@ function Chat({ button, onClose }) {
   function startCall() {
     setNote("");
     if (!Recognition) return setNote("Voice calls need Microsoft Edge or Google Chrome: this browser cannot turn speech into text.");
-    live.current.on = true; setCall(true); listen();
+    live.current.on = true; setCall(true); setPhase("speaking");
+    say({ spoken: "Hello, I'm Hela. Go ahead." }).then(() => { if (live.current.on) listen(); }); // said at once, on the click: it shows the sound works, and browsers only let a page speak after a click
   }
   function hangUp() {
     const c = live.current;
