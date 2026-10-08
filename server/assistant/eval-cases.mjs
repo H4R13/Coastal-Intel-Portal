@@ -192,6 +192,8 @@ export const CASES = [
   { id: "d-what-data", q: "What data exists on salt water moving up the Indus river?", must: [64.2], not: [/The portal holds: mangrove area/] },
   { id: "d-species", q: "catch trends for major fish species", must: [/stocks/i], not: [/oyster/i] },
   { id: "d-where-got", q: "Where did you get the data on mangrove forests?", must: [/These figures come from/, /Global Mangrove Watch/] },
+  { id: "ch-third", before: ["How has mangrove area changed since 1990?", "what about plastics in karachi?"], q: "is that safe for the people there?", must: [42700], not: [/mangrove/i, /sampled once/i] },
+  { id: "ch-both", before: ["whats the salinity trend?", "How much land has been lost to coastal erosion?"], q: "give me a short answer to the last two questions", must: [64.2, 2084.98], maxWords: 110 },
   /* two things at once */
   { id: "mx-compare", q: "Compare plastics at Karachi and Thatta.", must: [38.4, 24.8] },
   { id: "mx-two", q: "Are mangroves and erosion both getting worse?", must: [847.61, 2084.98] },

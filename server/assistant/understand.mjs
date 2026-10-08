@@ -69,5 +69,7 @@ export function subject(question, earlier = []) {
   const leans = /\b(there|same|those|these|them|they)\b|^\s*(and|also|what about|how about)\b/.test(q);
   const brief = !own && BRIEF.test(q) && q.trim().split(/\s+/).length <= 4;
   const followUp = before.length > 0 && (own ? leans : REFERS.test(q) || brief);
-  return { q, s: followUp && !own ? `${[...before].reverse().join(" ")} ${q}` : q, followUp, back: followUp ? before : [] };
+  /* the subject is the last question that had one; both of the last two only when the user says so ("the last two answers", "both") */
+  const carried = /\b(last|previous) (two|2)\b|\bboth\b/.test(q) ? [...before].reverse() : [before.find((b) => TOPIC.test(b)) ?? before[0]].filter(Boolean);
+  return { q, s: followUp && !own ? `${carried.join(" ")} ${q}` : q, followUp, back: followUp ? before : [] };
 }

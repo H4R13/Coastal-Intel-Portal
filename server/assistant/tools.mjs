@@ -103,7 +103,7 @@ function seriesLine(metric, k, unit, asked = []) {
   const [u, d, note] = unitOf(unit), place = PLACES[k.zone] ?? String(k.zone ?? "").replace(/_/g, " ");
   const have = Object.keys(k.at), mine = asked.map(String).filter((y) => have.includes(y));
   const record = !/project/i.test(kind) && !/accord|current|degraded/i.test(sc);
-  const ys = have.filter((y, i, a) => (mine.length ? i === 0 || mine.includes(y) || (record && i === a.length - 1) : i === 0 || i === a.length - 1 || y === "2030" || y === "2050")); // a year that was asked about is shown beside the first one; otherwise the usual milestones
+  const ys = have.filter((y, i, a) => (mine.length ? i === 0 || mine.includes(y) || (record && i === a.length - 1) : i === 0 || i === a.length - 1 || y === "2050")); // a year that was asked about is shown beside the first one; otherwise the usual milestones
   const value = (y) => { // the likely range once the projection is far enough out to need it: 2050 and the last year
     const v = k.at[y], wide = typeof v === "object" && (y === "2050" || y === ys.at(-1));
     return `${round(v?.p50 ?? v, d)}${u ? ` ${u}` : ""} in ${y}${wide ? ` (likely ${round(v.low, d)} to ${round(v.high, d)})` : ""}`;
@@ -295,7 +295,7 @@ export const TOOLS = [
       const top = lines[0], v0 = (l) => { const y = Object.keys(l.k.at)[0], v = l.k.at[y]; return { y, v: round(v?.p50 ?? v, 1) }; };
       const now = lines.find((l) => /intrusion length L1/.test(l.metric) && /current/.test(l.tag)), accord = lines.find((l) => /intrusion length L1/.test(l.metric) && /accord/.test(l.tag));
       const driver = now && accord ? `River flow is the main driver in this data: in ${v0(now).y}, salt water reaches ${v0(now).v} km up the river with today's flow but ${v0(accord).v} km if the water accord's flow is delivered. Sea-level rise adds the slow increase after that.` : undefined;
-      return { source: keys.map((k) => `amib:series/${k}`).join(", "), topic, title: DELTA_TITLES[topic], note: DELTA_NOTES[topic], driver, matched: lines.some((l) => l.asked), core: lines.filter((l) => l.rank < (top?.rank ?? 0) + 5).length, statements: lines.slice(0, 8).map((l) => l.text) }; // core: how many lines are on the main measure at the place asked about
+      return { source: keys.map((k) => `amib:series/${k}`).join(", "), topic, title: DELTA_TITLES[topic], note: DELTA_NOTES[topic], driver, matched: lines.some((l) => l.asked), core: lines.filter((l) => l.rank < (top?.rank ?? 0) + 3).length, statements: lines.slice(0, 8).map((l) => l.text) }; // core: how many lines are on the main measure at the place asked about
     },
   },
   {

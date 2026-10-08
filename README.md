@@ -56,11 +56,14 @@ exports) is reported as not loaded.
    involved, so these are instant, repeatable, and work even when the model is unreachable.
 3. When a question's words match no topic ("are the trees along the coast disappearing?"), the language model is asked only which
    topic it is about (`route` in `chat.mjs`), and step 2 is tried again. This takes about two seconds.
-4. Otherwise the documents are searched for the question's main word; the model explains what was found, or Hela says the portal has
-   nothing on that.
+4. Otherwise the documents are searched for the question's main word, and Hela says where it turns up, or that the portal has nothing
+   on that.
 
-The model does not write figures. Measured on `hermes3:8b`, it moved numbers between scenarios and added effects that were not in the
-data whenever it rewrote facts, so the sentences that carry figures are written by `answers.mjs`.
+Answers are short by default: the sentence that answers, and a second one for comparisons and lists. Asking "in detail" or "tell me
+more" adds the context; "short" gives the answer alone. She reads English, Roman Urdu, and the main subject words in Urdu script.
+
+The local model writes none of the answer text. Measured on `hermes3:8b`, it moved numbers between scenarios and added effects that
+were not in the data whenever it rewrote facts, so every sentence is written by `answers.mjs` and the model only sorts questions.
 
 **The model.** No API key is needed: an open model runs through Ollama (https://ollama.com), on this machine or on another one named
 by `OLLAMA_URL` (`OLLAMA_MODEL`, default the best one installed; `OLLAMA_THREADS` for the processor threads it may use). With

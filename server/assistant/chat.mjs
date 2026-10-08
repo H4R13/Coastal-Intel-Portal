@@ -215,7 +215,7 @@ async function viaOllama(history, model, used, usage) {
   const asked = history.at(-1).content, earlier = history.slice(0, -1).filter((m) => m.role === "user").map((m) => m.content);
   const short = SHORT.test(asked);
   const redo = short && earlier.length && asked.length < 160; // "make that shorter": the real questions are the ones before it
-  const length = short ? "The user wants it short: at most 3 short sentences, the key figures only." : "Lead with the direct answer. At most 6 short sentences or \"-\" lines (about 110 words) unless the user asks for detail.";
+  const length = short ? "The user wants it short: at most 3 short sentences, the key figures only." : "Be concise: lead with the direct answer, at most 3 short sentences (about 60 words) unless the user asks for detail.";
   for (let i = 1; i < msgs.length - 1; i++) if (msgs[i].role === "assistant" && msgs[i].content.length > 500) msgs[i] = { ...msgs[i], content: `${msgs[i].content.slice(0, 500)}…` }; // old answers are context, not facts: keep them small
   /* the question's own words matched no ready-made answer (chat() tried): let the model say which topics it is about, and try again */
   const topics = await route(redo ? earlier.slice(-2).join(" ") : asked, model, usage).catch((e) => { console.warn(`assistant route: ${e.message}`); return ""; });
@@ -228,6 +228,11 @@ async function viaOllama(history, model, used, usage) {
     used.push("search_text");
     return { answer: `The portal's data has nothing on that (I searched its documents for "${found[0].input.text}"). ${SCOPE}`, ok: true, mode: "data" };
   }
+  if (found.length === 1 && found[0].name === "search_text") { // the word turns up somewhere, but there is no dataset on it. Say where, and no more: asked to explain such snippets, the model attached a neighbouring record's figure to the wrong thing
+    const where = [...new Set([...found[0].result.matchAll(/"source":"([^"]+)"/g)].map((m) => m[1]))].slice(0, 4);
+    used.push("search_text");
+    return { answer: `The portal has no dataset on that. The word "${found[0].input.text}" only turns up in passing in ${where.join(", ")}. ${SCOPE}`, ok: true, mode: "data" };
+  }
   if (found.length === 1 && found[0].name === "list_datasets") return { answer: `That is outside what I can answer: I only answer from the portal's data. ${SCOPE}`, ok: true, mode: "data" }; // no topic, and no word worth searching for ("tell me a joke")
   if (found.length) {
     for (const f of found) used.push(f.name);
@@ -237,7 +242,7 @@ async function viaOllama(history, model, used, usage) {
     const r = await fetch(`${OLLAMA_URL()}/api/chat`, {
       method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(LOCAL_TIMEOUT),
       // with the facts already looked up, the tool definitions are left out: a shorter prompt, and one pass instead of several
-      body: JSON.stringify({ model, messages: msgs, ...(found.length ? {} : { tools }), stream: false, think: false, options: { num_ctx: 6144, temperature: 0, num_predict: short ? 170 : 380, ...(THREADS() ? { num_thread: THREADS() } : {}) } }),
+      body: JSON.stringify({ model, messages: msgs, ...(found.length ? {} : { tools }), stream: false, think: false, options: { num_ctx: 6144, temperature: 0, num_predict: short ? 120 : 220, ...(THREADS() ? { num_thread: THREADS() } : {}) } }),
     });
     if (!r.ok) throw new Error(`Ollama ${r.status}: ${(await r.text()).slice(0, 200)}`);
     const j = await r.json(), m = j.message ?? {};
@@ -262,7 +267,7 @@ async function viaOllama(history, model, used, usage) {
   return null;
 }
 
-const SCOPE = "I can answer about mangroves, coastal erosion, plastics and seafood, the sea (heatwaves, temperature, acidity, oxygen, fish stocks), salt water, groundwater, sea level and river flow in the Indus Delta, and whether the portal is working. Earthquakes, sea-floor depth and raw Earth Engine exports are not loaded.";
+const SCOPE = "I can answer about mangroves, erosion, plastics and seafood, the sea (heat, acidity, oxygen, fish stocks), the Indus Delta (salt water, groundwater, sea level, river flow), and whether the portal is working.";
 
 /** A greeting or a thank-you is answered here, at once: there is nothing to look up, and a local model takes a minute to say so. */
 export function smallTalk(question) {

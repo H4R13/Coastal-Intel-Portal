@@ -55,10 +55,11 @@ async function mangroves({ s, q, ask, years }) {
   const measured = "Measured from satellite (Global Mangrove Watch).", whole = `${change(first, last, "Mapped mangrove area")} ${measured}`;
   /* The saltwater package holds a second mangrove dataset, by zone (GMW v3). It does not agree with the table above, and an honest answer says so. */
   const zones = (await doc("amib_doc", "series/F"))?.["mangrove extent (GMW v3)"]?.series ?? [], zy = zones[0]?.year ?? [], total = (i) => zones.reduce((t, z) => t + (z.p50?.[i] ?? 0), 0), delta = zones.find((z) => z.zone === "indus_delta");
-  const other = zones.length ? `The portal's second mangrove dataset (Global Mangrove Watch v3 by zone, in the saltwater package) ${(total(zy.length - 1) < total(0)) === (last.area_km2 < first.area_km2) ? "agrees in direction" : "points the other way"}: its zones total ${n(total(0), 1)} km² in ${zy[0]} and ${n(total(zy.length - 1), 1)} km² in ${zy.at(-1)}${delta ? `, with the Indus Delta going from ${n(delta.p50[0], 1)} to ${n(delta.p50.at(-1), 1)} km²` : ""}. The two datasets do not agree, and I cannot tell you which is right.` : null;
+  const opposite = (total(zy.length - 1) < total(0)) !== (last.area_km2 < first.area_km2);
+  const other = zones.length ? `The portal's other mangrove dataset (GMW v3 by zone) ${opposite ? "shows a fall instead" : "agrees in direction"}: ${n(total(0), 1)} km² in ${zy[0]} to ${n(total(zy.length - 1), 1)} km² in ${zy.at(-1)}${delta ? ` (Indus Delta ${n(delta.p50[0], 1)} to ${n(delta.p50.at(-1), 1)})` : ""}. The two do not agree, and I cannot tell you which is right.` : null;
   const here = MANGROVE_ZONES.filter(([re]) => re.test(q)).map(([, id, label]) => [zones.find((z) => z.zone === id), label]).filter(([z]) => z);
   for (const [z, label] of here) { const mid = z.year.indexOf(2010); say.push(`Mangroves at ${label} (Global Mangrove Watch v3, by zone): ${list([`${n(z.p50[0], 1)} km² in ${z.year[0]}`, ...(mid > 0 ? [`${n(z.p50[mid], 1)} km² in 2010`] : []), `${n(z.p50.at(-1), 1)} km² in ${z.year.at(-1)}`])}.`); }
-  if (here.length) also.push(`The mangrove layer's own table covers the whole coast, is not split by place, and shows a rise instead (${n(first.area_km2)} km² in ${first.year} to ${n(last.area_km2)} km² in ${last.year}). The two datasets do not agree, and I cannot tell you which is right.`);
+  if (here.length) also.push(`The mangrove layer's own table (whole coast, not split by place) shows a rise instead: ${n(first.area_km2)} km² in ${first.year} to ${n(last.area_km2)} km² in ${last.year}. The two do not agree.`);
   const since = ask(/since|\bfrom\b|after|over the (last|past)/), past = years.filter((v) => v <= last.year);
   const near = (y) => at(y) ?? [...seen].sort((a, b) => Math.abs(a.year - y) - Math.abs(b.year - y))[0]; // the map of that year, or the nearest one there is
   if (past.length >= 2 && ask(/between|\bfrom\b.*\bto\b|\bto\b|versus|\bvs\b|compare/)) { // "between 2005 and 2020": from the one to the other, not each to today
@@ -100,8 +101,12 @@ async function mangroves({ s, q, ask, years }) {
   }
   if (ask(SURE)) say.push(`No uncertainty is recorded with the mangrove areas: they are the mapped values as supplied.${other ? " The disagreement between the portal's two mangrove datasets is the best sign of how uncertain they are." : ""}`);
   if (!say.length) { say.push(whole); if (other) say.push(other); if (gaps.length) also.push(`No map exists for ${ranges(gaps)}.`); } // the gaps matter to someone reading the whole record, not to someone asking about one year
-  else if (!here.length) { if (!say.some((l) => /mapped mangrove area (rose|fell)/i.test(l))) also.push(whole); if (other && !say.includes(other)) also.push(other); }
-  return { title: "Mangroves", tool: "mangrove_area", covers: [], say, also, source: `mangrove_area (Global Mangrove Watch extracts supplied by the project team)${zones.length ? "; amib:series/F (GMW v3 by zone)" : ""}` };
+  else if (!here.length) { // a trend is only half the picture while the other dataset says the opposite; a single year's figure can stand alone
+    const trend = say.some((l) => /mapped mangrove area (rose|fell|grew|shrank)/i.test(l));
+    if (!trend) also.push(whole);
+    if (other && !say.includes(other)) (trend ? say : also).push(other);
+  }
+  return { title: "Mangroves", tool: "mangrove_area", covers: [], say, also, source: `mangrove_area (Global Mangrove Watch)${here.length || say.includes(other) ? "; amib:series/F (GMW v3 by zone)" : ""}` };
 }
 
 /* ---------- coastal erosion ---------- */
@@ -126,7 +131,7 @@ async function erosion({ s, q, ask, years }) {
   if (PLACE.test(q)) say.push("The erosion figures are for the whole coast: I have no breakdown by district or town.");
   if (ask(/how fast|how quick|\brate\b|per year|a year|each year|speed|faster|slower|accelerat|slowing/)) say.push(`Land was lost at about ${list(seen.map((p) => `${n(p.lost_km2 / (p.to - p.from), 1)} km² a year in ${span(p)}`))} (mapped).${targets.length ? ` The projection continues at about ${n((ahead[lastY] - total.running_total_km2) / (lastY - total.to), 1)} km² a year.` : ""}`);
   if (!say.length || say.every((l) => /whole coast|No uncertainty/.test(l))) say.push(mapped);
-  return { title: "Coastal erosion", tool: "erosion_summary", covers: [], say, also: [mapped, periods, projected].filter((l) => l && !say.includes(l)), source: "erosion_area (eroded-area polygons by period supplied by the project team; projection = CA-Markov run)" };
+  return { title: "Coastal erosion", tool: "erosion_summary", covers: [], say, also: [mapped, periods, projected].filter((l) => l && !say.includes(l)), source: "erosion_area (the team's mapped polygons; CA-Markov projection)" };
 }
 
 /* ---------- plastics: the sampling stations ---------- */
@@ -182,8 +187,8 @@ async function plastics({ s, q, ask, back }, anyway = false) { // anyway: a stat
   if (ask(SURE)) say.push("No uncertainty is recorded with the station figures: each is one sampling visit, as supplied by the project team.");
   const asked = say.length > 0; // a specific question was answered; otherwise the general picture is the answer
   if (!asked) for (const g of wide) say.push(g.rows.length > 1 ? overall(g) : detail(g.rows[0]));
-  if (!asked) for (const r of byPlastic.slice(0, groups.length > 1 ? 0 : groups.length ? 4 : 2)) { const line = detail(r); if (!say.includes(line)) (groups.length ? say : also).push(line); }
-  return { title: groups.length ? `Plastics at ${list(groups.map((g) => g.label))}` : "Plastics", tool: "plastics_stations", covers: ["solutions", "effects"], say, also, source: `dmjm:stations (field sampling, ${dates(scope.map((r) => r.Sampling_Date))}, supplied by the project team)` };
+  if (!asked) for (const r of byPlastic.slice(0, groups.length > 1 ? 0 : groups.length ? 4 : 2)) { const line = detail(r); if (!say.includes(line)) also.push(line); }
+  return { title: groups.length ? `Plastics at ${list(groups.map((g) => g.label))}` : "Plastics", tool: "plastics_stations", covers: ["solutions", "effects"], say, also, source: `dmjm:stations (field sampling, ${dates(scope.map((r) => r.Sampling_Date))})` };
 }
 
 /* ---------- plastics: what is in the seafood, and the hazards ---------- */
@@ -212,7 +217,7 @@ async function seafood({ s, ask }) {
   if (hazard && !about) for (const h of [...hazards].sort((a, b) => b.severity - a.severity).slice(0, ask(/biggest|worst|main|greatest|top|most/) ? 3 : 5)) say.push(danger(h)); else for (const h of people.slice(0, 2)) also.push(danger(h));
   if (say.length && ask(SURE)) say.unshift("No uncertainty is recorded with the seafood figures: they are averages per species as supplied by the project team.");
   if (!say.length) return null;
-  return { title: named.length ? `Plastics in ${list(named.map((r) => r.Common_Name))}` : "Plastics in seafood", tool: "plastics_food", covers: ["effects"], say, also, source: "dmjm:species, dmjm:hazards (supplied by the project team)" };
+  return { title: named.length ? `Plastics in ${list(named.map((r) => r.Common_Name))}` : "Plastics in seafood", tool: "plastics_food", covers: ["effects"], say, also, source: "dmjm:species, dmjm:hazards" };
 }
 
 /* ---------- ocean: heatwaves, temperature, acidity, oxygen, fish stocks, exposure ---------- */
@@ -260,10 +265,11 @@ async function ocean({ s, ask, years }, deltaWanted) {
   for (const t of topics) {
     const now = (await t.detail?.(ask)) ?? (await t.now(region)) ?? (region !== "Whole EEZ" ? await t.now("Whole EEZ") : null), later = t.later ? await t.later() : null;
     const found = findings.filter((f) => t.finding.test(f.headline)), ahead = found.filter((f) => /2050/.test(f.headline)).map(told), today = found.filter((f) => !/2050/.test(f.headline)).map(told);
-    const say = (future ? [ahead[0], later] : t.findingFirst || meaning || ask(SURE) || ask(SOURCES) ? [today[0], now] : [now, today[0]]).filter(Boolean), also = (future ? [now, today[0]] : [later ?? ahead[0], today[1]]).filter(Boolean); // "how sure is that?": the finding carries the confidence note, so it leads
+    const lead = t.findingFirst || meaning || ask(SURE) || ask(SOURCES); // the written finding leads when it is what was asked for (meaning, confidence, references)
+    const say = (future ? [ahead[0], later] : lead ? [today[0]] : [now]).filter(Boolean), also = (future ? [now, today[0]] : lead ? [now, later ?? ahead[0]] : [today[0], later ?? ahead[0]]).filter(Boolean); // "how sure is that?": the finding carries the confidence note, so it leads
     if (!say.length && also.length) say.push(also.shift());
-    if (town && say.length) say.push(t.topic === "fisheries" ? "The fish-stock figures are national: the portal has none by place." : `The ocean figures are not split by town: the ${region === "Whole EEZ" ? "whole EEZ" : region} is the nearest region to ${cap(town)} the data has.`);
-    if (say.length) sections.push({ title: t.title, tool: "ocean_summary", covers: ["matters", "effects"], say, also, source: "ocean:findings and the ocean package's summary tables" });
+    if (town && say.length) say.splice(1, 0, t.topic === "fisheries" ? "The fish-stock figures are national: the portal has none by place." : `The ocean figures are not split by town: the ${region === "Whole EEZ" ? "whole EEZ" : region} is the nearest region to ${cap(town)} the data has.`);
+    if (say.length) sections.push({ title: t.title, tool: "ocean_summary", covers: ["matters", "effects"], say, also, source: "ocean:findings and summary tables" });
   }
   return sections;
 }
@@ -306,7 +312,7 @@ async function delta({ s, years }, want) {
     const covers = [...(COVERS[topic] ?? [])];
     if (topic === "sea_level" && (effects(s) || /below (mean )?sea level|under ?water|drown|submerge|how much land|flood|inundat/.test(s))) { // what the rise does, as far as the data goes: land dropping below sea level
       const land = JSON.parse(await runTool("delta_series", { topic, measure: "newly below MSL", ...(scenarios[0] ? { scenario: `ssp${scenarios[0]}` } : {}), ...(zone ? { place: zone } : {}), years }, 100000));
-      if (land.matched && land.statements[0] && !say.includes(land.statements[0])) { say.push(land.statements[0]); covers.push("effects"); }
+      if (land.matched && land.statements[0] && !say.includes(land.statements[0])) { say.splice(1, 0, land.statements[0]); covers.push("effects"); }
     }
     if (SURE.test(s)) say.push(/project/i.test(say.join(" ")) ? "The \"likely\" range given with each projection (17th to 83rd percentile) is the uncertainty the data carries; a measured value has none recorded." : "No uncertainty is recorded with these measured values.");
     sections.push({ title: r.title, tool: "delta_series", covers, say, also: [], source: r.source, matched: r.matched });
@@ -338,7 +344,7 @@ async function health({ s, ask }) {
     const named = checks.filter((c) => c.name.toLowerCase().split(/[^a-z]+/).some((w) => w.length > 4 && new RegExp(`\\b${w.replace(/s$/, "")}`).test(s)) || (/database|postgres|\bdb\b/.test(s) && /postgres/i.test(c.name)) || (/redis|cache/.test(s) && /redis/i.test(c.name)));
     for (const c of named.slice(0, 3)) say.push(`${one(c)}.`);
     say.push(overall);
-    if (!named.length) { say.push(layers); also.push(services); } // asked about one thing (the database, a layer): that line and the overall verdict are the answer
+    if (!named.length) { if (ask(/\bwhich\b|\blist\b|each layer|every layer|what layers/)) say.push(layers); else also.push(layers); also.push(services); } // asked about one thing (the database, a layer): that line and the overall verdict are the answer
   }
   return { title: "Portal status", tool: "system_health", say, also, source: "the portal's own health report, run just now" };
 }
@@ -397,7 +403,9 @@ function notLoaded({ s }) {
 /** The answer, written from the data, or null when the question is not one of the kinds above. */
 export async function answerDirect(question, earlier = [], { short = false } = {}) {
   const { q, s, followUp, back } = subject(question, earlier);
-  const ctx = { q, s, followUp, back, ask: (re) => re.test(q) || (followUp && re.test(s)), years: yearsIn(q).length || !followUp ? yearsIn(q) : yearsIn(s) };
+  const redo = followUp && /\b(shorter|short|brief|concise|summar\w*|simpler|again|repeat|in detail|more detail|tell me more)\b/.test(q); // "make that shorter": what was asked is in the question before
+  const ctx = { q, s, followUp, back, ask: (re) => re.test(q) || (redo && re.test(s)), // otherwise a follow-up asks only what its own words ask: the topic is carried over, the earlier question's wording is not
+    years: yearsIn(q).length || !followUp ? yearsIn(q) : yearsIn(s) };
   let sections;
   const status = await health(ctx);
   if (status) sections = [status]; // "are the maps loading?" is about the portal, not about the data on the maps
@@ -411,10 +419,13 @@ export async function answerDirect(question, earlier = [], { short = false } = {
   if (!sections.length) return null;
   /* "where do these figures come from?": the source is the answer, not a footnote */
   if (SOURCES.test(q)) for (const sec of sections) if (sec.source) sec.say.unshift(`These figures come from ${sec.source}.`);
-  /* how much to show: everything that answers the question (within reason), and context only while the answer is brief */
-  const single = sections.length === 1, most = short ? 1 : single ? 5 : sections.length === 2 ? 3 : 2;
+  /* How much to show. Concise by default: the sentence that answers, and one more only when the question has two sides to it
+     (a comparison, a list, several scenarios). "In detail" / "tell me more" opens it up; "short" is the answer alone. */
+  const single = sections.length === 1, detail = !short && ctx.ask(/\b(details?|detailed|in depth|elaborate|everything|full (answer|picture|story)|tell me more|more (info|information|about)|explain (more|fully))\b/);
+  const listed = ctx.ask(/\bcompare|\bversus\b|\bvs\b|\ball\b|\blist\b|\beach\b|\bevery\b|\btop \d|\bwhich (stations?|sites?|fish|species|ones|stocks)\b|scenarios?\b|\bmetals\b|by (period|decade|status)|break ?down/);
+  const most = short ? 1 : detail ? (single ? 5 : 3) : single ? (listed ? 4 : 2) : sections.length === 2 ? 2 : 1;
   const body = sections.map((sec) => {
-    const said = sec.say.slice(0, most), more = short || !single ? [] : sec.also.slice(0, said.length >= 3 ? 0 : said.length === 2 ? 1 : 2), [head, ...rest] = [...said, ...more];
+    const said = sec.say.slice(0, most), more = detail && single ? sec.also.slice(0, said.length >= 3 ? 0 : 2) : [], [head, ...rest] = [...said, ...more];
     return `${single ? "" : `${sec.title}: `}${head}${rest.map((l) => `\n- ${l}`).join("")}`;
   }).join("\n\n");
   const missing = sections.map((sec) => sec.missing).filter(Boolean), sources = [...new Set(sections.map((sec) => sec.source).filter(Boolean))];
