@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plastic debris — Coastal Environmental Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* Frame around the DMJM team's three hardcoded pages (built by tools/build-plastics-pages.mjs). Colours follow css/styles.css. */
+    html, body { height: 100%; margin: 0; }
+    body { display: flex; flex-direction: column; background: #0b1820; color: #f1f5f3; font-family: Manrope, system-ui, sans-serif; }
+    .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 9px 16px; background: #10232b; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+    .back { color: #78c9c2; font-size: 13px; font-weight: 600; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+    .tab { padding: 7px 14px; font: 600 13px Manrope, system-ui, sans-serif; color: #b9c8c5; background: none; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 14px; cursor: pointer; }
+    .tab:hover { color: #fff; border-color: rgba(255, 255, 255, 0.3); }
+    .tab[aria-selected="true"] { color: #fff; border-color: transparent; background: rgba(69, 184, 176, 0.3); }
+    .tab:focus-visible, .back:focus-visible { outline: 2px solid #78c9c2; outline-offset: 2px; }
+    iframe { flex: 1; width: 100%; border: 0; background: #0b1820; }
+    @media (max-width: 640px) { .tabs { margin-left: 0; } }
+  </style>
+</head>
+<body>
+  <header class="bar">
+    <a class="back" href="../index.html">← Coastal portal</a>
+    <div class="tabs" role="tablist" aria-label="Plastic debris pages">
+      <button class="tab" role="tab" data-page="portal">Indus Delta Disaster Portal</button>
+      <button class="tab" role="tab" data-page="biomagnification">Indus Delta biomagnification</button>
+      <button class="tab" role="tab" data-page="simulation">Indus Delta plastic simulation</button>
+    </div>
+  </header>
+  <iframe id="view" title="Plastic debris page"></iframe>
+  <script>
+    const tabs = [...document.querySelectorAll(".tab")], view = document.getElementById("view");
+    function show() {
+      const page = tabs.some((t) => t.dataset.page === location.hash.slice(1)) ? location.hash.slice(1) : "portal";
+      tabs.forEach((t) => t.setAttribute("aria-selected", t.dataset.page === page));
+      if (view.dataset.page !== page) { view.dataset.page = page; view.src = `${page}.html`; }
+    }
+    tabs.forEach((t) => t.addEventListener("click", () => (location.hash = t.dataset.page)));
+    addEventListener("hashchange", show);
+    show();
+  </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "name": "coastal-hazards-2",
+  "private": true,
+  "type": "module",
+  "description": "React + Node version of the Coastal Environmental Intelligence portal. Same port (5173), same data API, same database and caches as the original.",
+  "scripts": {
+    "start": "vite build && node server.mjs",
+    "serve": "node server.mjs",
+    "build": "vite build",
+    "dev": "node dev.mjs",
+    "load:mangroves": "node run.mjs server/load-mangroves.mjs",
+    "load:erosion": "node run.mjs server/load-erosion.mjs",
+    "load:ocean": "node run.mjs server/load-ocean.mjs",
+    "load:amib": "node run.mjs server/load-amib.mjs",
+    "load:dmjm": "node run.mjs server/load-dmjm.mjs",
+    "warm:mangroves": "node run.mjs server/warm-mangroves.mjs",
+    "warm:amib": "node run.mjs server/warm-amib.mjs",
+    "push:cloud": "node run.mjs server/push-to-cloud.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "geotiff": "^2.1.3",
+    "ioredis": "^5.4.1",
+    "maplibre-gl": "5.6.0",
+    "pg": "^8.13.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "shapefile": "^0.6.6",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.0"
+  }
+}

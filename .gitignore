@@ -1,0 +1,17 @@
+node_modules/
+dist/
+
+# secrets and machine-specific settings: never commit these
+.env
+.env.*
+!.env.example
+
+# large data and caches: set up separately on each machine (see CLAUDE.md)
+Other Data/
+data/
+.tilecache/
+.amibcache/
+
+# scratch files
+_*.mjs
+*.log
