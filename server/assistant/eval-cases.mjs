@@ -194,6 +194,20 @@ export const CASES = [
   { id: "d-where-got", q: "Where did you get the data on mangrove forests?", must: [/These figures come from/, /Global Mangrove Watch/] },
   { id: "ch-third", before: ["How has mangrove area changed since 1990?", "what about plastics in karachi?"], q: "is that safe for the people there?", must: [42700], not: [/mangrove/i, /sampled once/i] },
   { id: "ch-both", before: ["whats the salinity trend?", "How much land has been lost to coastal erosion?"], q: "give me a short answer to the last two questions", must: [64.2, 2084.98], maxWords: 110 },
+  /* the published measurements (seawater, sediment, fish) */
+  { id: "lit-water", q: "How much microplastic is in the seawater?", must: [1096, 251, /manora/i] },
+  { id: "lit-clifton", q: "plastic pollution at Clifton beach", must: [778, 1710] },
+  { id: "lit-baloch", q: "microplastics in Balochistan", must: [941, /sonmiani/i] },
+  { id: "lit-tuna", q: "how many microplastics in skipjack tuna", must: [6.19] },
+  /* from the second round of generated questions */
+  { id: "e-shrimp", q: "Is there a risk of my shrimp ponds becoming saline due to the salt water moving up the Indus river?", must: [64.2], not: [/prawn/i] },
+  { id: "e-situation", q: "Can you provide information on the groundwater situation near the Karachi coast?", must: [71.8], not: [/pieces/i] },
+  { id: "e-sl-sujawal", q: "What is the sea-level rise in Sujawal?", must: [/Indus Delta/, 0.184], not: [/Bela/] },
+  { id: "e-mg-sujawal", q: "What is the state of mangrove forests in Sujawal district?", must: [765.9, /Indus Delta/] },
+  { id: "e-seafood-khi", q: "What is the risk of consuming seafood near Karachi due to microplastics?", must: [/microplastic/i], not: [/an explanation of what causes/i] },
+  { id: "e-explore", q: "Can you tell me about the mangrove forests near Karachi and how can I explore them?", must: [55.2], not: [/an explanation of what should be done/i] },
+  { id: "e-concern", q: "Why is plastic pollution in the creeks a concern?", not: [/what causes it/i], must: [/pieces|fisherfolk/i] },
+  { id: "e-ur-asar", q: "sea-level rise ka pakistan ke coastal areas per kya asar hai?", must: [0.184] },
   /* two things at once */
   { id: "mx-compare", q: "Compare plastics at Karachi and Thatta.", must: [38.4, 24.8] },
   { id: "mx-two", q: "Are mangroves and erosion both getting worse?", must: [847.61, 2084.98] },

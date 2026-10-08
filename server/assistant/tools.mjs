@@ -275,8 +275,10 @@ export const TOOLS = [
       if (!keys) return { error: `topic must be one of ${Object.keys(DELTA_TOPICS).join(", ")}` };
       const want = String(scenario).toLowerCase().replace(/[^a-z0-9]/g, ""), where = String(place ?? "indus").toLowerCase().replace(/[^a-z]/g, ""), lines = [];
       const first = /usable fresh-lens area|intrusion length L1|relative sea-level|\(annual\)|salt-affected area|shelf sea-surface salinity/; // the measure people mean by the topic
-      for (const key of keys) {
-        const body = (await query("select body from amib_doc where key = $1", [`series/${key}`])).rows[0]?.body ?? {};
+      const bodies = [];
+      for (const key of keys) bodies.push((await query("select body from amib_doc where key = $1", [`series/${key}`])).rows[0]?.body ?? {});
+      const known = bodies.some((body) => Object.values(body).some((m) => (m.series ?? []).some((x) => String(x.zone ?? "").toLowerCase().replace(/[^a-z]/g, "").includes(where)))), here = known ? where : "indus";
+      for (const body of bodies) {
         for (const [metric, m] of Object.entries(body)) {
           const fits = (s) => /observ|present/i.test(`${s.kind} ${s.scenario}`) || String(s.scenario ?? "").toLowerCase().replace(/[^a-z0-9]/g, "").includes(want);
           const series = (m.series ?? []).filter(fits);
@@ -284,7 +286,7 @@ export const TOOLS = [
             const tag = `${x.scenario} ${x.kind}`.toLowerCase(), zone = String(x.zone ?? "").toLowerCase().replace(/[^a-z]/g, "");
             // most relevant first: the topic's main measure, the place asked about, today's river flow before the alternatives, projections before reconstructions
             const asked = !!measure && metric.toLowerCase().includes(String(measure).toLowerCase());
-            const rank = (asked ? -30 : first.test(metric) ? 0 : 20) + (zone.includes(where) ? 0 : 6) + (/current/.test(tag) ? 0 : /accord/.test(tag) ? 1 : /degraded/.test(tag) ? 2 : /reconstruct/.test(tag) ? 4 : /present state/.test(tag) ? 3 : 0);
+            const rank = (asked ? -30 : first.test(metric) ? 0 : 20) + (zone.includes(here) ? 0 : 6) + (/current/.test(tag) ? 0 : /accord/.test(tag) ? 1 : /degraded/.test(tag) ? 2 : /reconstruct/.test(tag) ? 4 : /present state/.test(tag) ? 3 : 0);
             const k = keyYears(x, years);
             lines.push({ rank, k, metric, tag, asked, text: seriesLine(metric, k, m.unit, years) }); // one whole sentence per series: a figure never leaves its scenario
           }

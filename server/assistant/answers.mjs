@@ -22,9 +22,9 @@ const yearsIn = (text) => [...text.matchAll(/\b(19[5-9]\d|20\d\d|2100)\b/g)].map
 const SURE = /how sure|confiden|reliab|certain|accura|\btrust|error (margin|bar)|margin of error|how (good|exact|precise)/; // asking how far a figure can be trusted
 /* What a question can ask for beyond the figures themselves. A topic lists the ones its data can answer (covers); for the rest Hela says plainly that the portal does not explain it. */
 const INTENTS = [
-  ["matters", /\bimportan|\brole\b|benefit|significan|why .*\b(matter|need|care)|what (do|does) .* do for/, "why it matters or what role it plays"],
-  ["solutions", /solution|\bsolve|prevent|\bstop\b|control|reduc|protect|manag|strateg|adapt|polic|what (can|should|could|to) (we |be |i )?(do|done)|how (can|do|should) (we|i)\b|mitigat|restor|conserv|\bmeasures?\b|resilien|preserv|\baddress|tackle|\bfix\b/, "what should be done about it"],
-  ["causes", /\bcauses?\b|\breasons?\b|\bfactors?\b|responsible|\bwhy (is|are|does|do|did|has|have)\b|how does (it|this|that) happen|due to|because|contribut|sources? of/, "what causes it"],
+  ["matters", /\bimportan|\brole\b|benefit|significan|why (is|are) .*\b(concern|problem|issue|worry|bad|dangerous)\b|why .*\b(matter|need|care)|what (do|does) .* do for/, "why it matters or what role it plays"],
+  ["solutions", /solution|\bsolve|prevent|\bstop\b|control|reduc|protect|manag|strateg|adapt|polic|what (can|should|could|to) (we |be |i )?(do|done)|mitigat|restor|conserv|\bmeasures?\b|resilien|preserv|\baddress|tackle|\bfix\b/, "what should be done about it"],
+  ["causes", /\bcauses?\b|\breasons?\b|\bfactors?\b|responsible|\bwhy (is|are|does|do|did|has|have)\b(?!.*\b(concern|problem|important|significant|issue|worry|bad|dangerous|matter)\b)|how does (it|this|that) happen|contribut|sources? of/, "what causes it"],
   ["effects", /impact|effects?\b|affect|\bharm|\bhurt|consequence|implication|risk to|danger|threat|livelihood|\bhealth\b|what happens/, "what it does to people and nature"],
 ];
 const wants = (name) => INTENTS.find(([id]) => id === name)[1];
@@ -44,7 +44,7 @@ function dates(all) {
 }
 
 /* ---------- mangroves ---------- */
-const MANGROVE_ZONES = [[/karachi/, "karachi", "Karachi"], [/indus delta|\bdelta\b/, "indus_delta", "the Indus Delta"], [/sonmiani|miani hor/, "sonmiani_miani_hor", "Sonmiani (Miani Hor)"], [/jiwani|dasht/, "jiwani_dasht", "Jiwani (Dasht)"], [/ormara|kalmat/, "ormara_kalmat", "Ormara (Kalmat)"], [/pasni|gwadar/, "pasni_gwadar", "Pasni to Gwadar"]];
+const MANGROVE_ZONES = [[/karachi/, "karachi", "Karachi"], [/indus delta|\bdelta\b|thatta|sujawal|badin|keti ?bandar/, "indus_delta", "the Indus Delta (the zone that takes in Thatta, Sujawal and Badin)"], [/sonmiani|miani hor/, "sonmiani_miani_hor", "Sonmiani (Miani Hor)"], [/jiwani|dasht/, "jiwani_dasht", "Jiwani (Dasht)"], [/ormara|kalmat/, "ormara_kalmat", "Ormara (Kalmat)"], [/pasni|gwadar/, "pasni_gwadar", "Pasni to Gwadar"]];
 async function mangroves({ s, q, ask, years }) {
   if (!/mangrove/.test(s)) return null;
   const rows = (await query("select scenario, year, area_km2 from mangrove_area order by year")).rows, seen = rows.filter((r) => r.scenario === "observed");
@@ -191,15 +191,38 @@ async function plastics({ s, q, ask, back }, anyway = false) { // anyway: a stat
   return { title: groups.length ? `Plastics at ${list(groups.map((g) => g.label))}` : "Plastics", tool: "plastics_stations", covers: ["solutions", "effects"], say, also, source: `dmjm:stations (field sampling, ${dates(scope.map((r) => r.Sampling_Date))})` };
 }
 
+/* ---------- plastics: measurements published by others (seawater, sediment, fish), kept in the literature table ---------- */
+async function published({ s, q, ask }) {
+  const lit = await doc("dmjm_doc", "literature"), sites = lit?.sites ?? [], biota = lit?.biota ?? [];
+  if (!sites.length) return null;
+  const names = sites.map((r) => r.site.toLowerCase().replace(/\s*\(.*\)/, "")), place = names.find((name) => q.includes(name)) ?? (/hawks ?bay/.test(q) ? "hawks bay" : null);
+  const fish = biota.filter((r) => r.common_name.toLowerCase().split(/[^a-z]+/).some((w) => w.length > 4 && !/indian|spanish|pacific|arabian|narrow|barred|spot/.test(w) && new RegExp(`\\b${w}`).test(q)));
+  const water = /sea ?water|in the (sea|water)|\bwater\b.*(plastic|particle)|(plastic|particle)s?\b.*\bwater\b|per lit(re|er)|sediment|\bbeach(es)?\b|published|literature/.test(s) && /plastic|particle|pollut|debris/.test(s);
+  const province = /balochistan|makran|gwadar|pasni|ormara/.test(q) ? "Balochistan" : null; // the stations are all in Sindh; these published sites reach further west
+  if (!place && !fish.length && !water && !(province && POLLUTION.test(s))) return null;
+  const say = [], one = (r) => `${r.site} (${r.province}), published: ${n(r.seawater_particles_per_l, 0)} microplastic particles per litre of seawater and ${n(r.sediment_particles_per_kg, 0)} per kg of sediment (${r.source}).`;
+  const ends = (rows, field) => { const have = [...rows].sort((a, b) => a[field] - b[field]); return [have[0], have.at(-1)]; };
+  for (const r of fish.slice(0, 4)) say.push(`${r.common_name} (${r.species}), ${r.area}, published: ${r.value} ${r.unit === "items/ind" ? "microplastic items per fish" : r.unit} in the ${r.tissue === "GIT" ? "gut" : r.tissue.replace("GIT", "gut").toLowerCase()} (${r.source}).`);
+  if (place) say.push(one(sites[names.indexOf(place)]));
+  if (!place && (water || province) && !fish.length) {
+    const wanted = province ?? (/karachi/.test(q) ? "Karachi" : /sindh|delta|thatta|sujawal/.test(q) ? "Sindh" : null), rows = wanted ? sites.filter((r) => r.province === wanted) : sites, [lo, hi] = ends(rows, "seawater_particles_per_l"), [slo, shi] = ends(rows, "sediment_particles_per_kg");
+    say.push(`Published measurements at ${rows.length} ${wanted ?? "coastal"} sites: seawater holds ${n(lo.seawater_particles_per_l, 0)} (${lo.site}) to ${n(hi.seawater_particles_per_l, 0)} (${hi.site}) microplastic particles per litre, and sediment ${n(slo.sediment_particles_per_kg, 0)} to ${n(shi.sediment_particles_per_kg, 0)} (${shi.site}) per kg (${rows[0].source}).`);
+    if (ask(/\ball\b|\blist\b|each|every|which (sites?|places?|beach)/)) for (const r of [...rows].sort((a, b) => b.seawater_particles_per_l - a.seawater_particles_per_l).slice(0, 4)) say.push(one(r));
+  }
+  return say.length ? { title: "Published microplastic measurements", tool: "plastics_literature", covers: [], say, also: [], source: "dmjm:literature (published studies, as compiled by the project team)" } : null;
+}
+
 /* ---------- plastics: what is in the seafood, and the hazards ---------- */
 const SPECIES = [[/oyster/, /oyster/i], [/crab/, /crab/i], [/prawn|shrimp/, /prawn/i], [/mullet|\bboi\b/, /mullet/i], [/hilsa|palla|shad/, /hilsa/i], [/grunter|dhotar/, /grunter/i], [/snapper|\bhira\b/, /snapper/i], [/sea ?bass|dangri|barramundi/, /seabass/i]];
 async function seafood({ s, ask }) {
   const about = /oyster|crab|prawn|shrimp|mullet|hilsa|palla|grunter|snapper|sea ?bass|seafood|shellfish|food web|biomagnif|safe to eat|which species|species (with|that|have|has|contain)|\beat(ing)? (the |local |delta )?(fish|catch)|\b(fish|animals?)\b .*(microplastic|plastic|metal)|(microplastic|plastic|metal)s? .*\b(fish|animals?)\b/.test(s), hazard = /hazard|toxic|human health|health risk|danger/.test(s) && /plastic|debris|seafood|oyster|fish/.test(s);
   if (!about && !hazard) return null;
+  if (!hazard && !/microplastic|plastic|metals?\b|contamin|pollut|toxic|\bsafe|\beat|burden|seafood|food web|biomagnif|species/.test(s) && s.trim().split(/\s+/).length > 4) return null;
   const species = (await doc("dmjm_doc", "species"))?.rows ?? [], hazards = (await doc("dmjm_doc", "hazards"))?.rows ?? [], say = [], also = [];
   const line = (r) => `${r.Common_Name} (${r.Species}): on average ${r.Microplastic_ingested_avg} microplastic particles per animal and a heavy-metal burden of ${r.Heavy_Metal_Burden_ug_g} µg/g; human risk rated "${r.Human_Risk}".`;
   const danger = (h) => `Hazard, ${h.hazard.toLowerCase()}: ${h.metric} (severity ${h.severity} of 10, ${h.severity_label.toLowerCase()}).`;
-  const named = SPECIES.filter(([re]) => re.test(s)).map(([, name]) => species.find((r) => name.test(r.Common_Name))).filter(Boolean);
+  const inside = /microplastic|plastic|metals?\b|contamin|pollut|toxic|\bsafe|\beat|burden/.test(s) || s.trim().split(/\s+/).length <= 4; // an animal's name alone is about the animal only in a few words, or beside plastic, metal, safety
+  const named = inside ? SPECIES.filter(([re]) => re.test(s)).map(([, name]) => species.find((r) => name.test(r.Common_Name))).filter(Boolean) : [];
   if (about) {
     for (const r of named) say.push(ask(/safe|\beat/) ? `The portal has no official food-safety advice, but its plastics data rates the human risk from eating ${r.Common_Name} as "${r.Human_Risk}": on average ${r.Microplastic_ingested_avg} microplastic particles per animal and a heavy-metal burden of ${r.Heavy_Metal_Burden_ug_g} µg/g.` : line(r));
     if (!named.length && species.length && ask(/\bmost\b|\bleast\b|highest|lowest|worst|safest|cleanest|which (fish|species|animal|seafood)/)) { // "which fish has the most microplastic"
@@ -412,8 +435,9 @@ export async function answerDirect(question, earlier = [], { short = false } = {
   else {
     const want = deltaTopics(s);
     const food = await seafood(ctx), atStations = !food || /station|debris|litter|sediment|sampling|creek|sites?\b|karachi|korangi|thatta|sujawal|badin/.test(s); // "microplastics in crabs" is about the animals, not the stations
-    sections = [glossary(ctx), await mangroves(ctx), await erosion(ctx), atStations ? await plastics(ctx) : null, food, ...(await delta(ctx, want)), ...(await ocean(ctx, want.size > 0)), notLoaded(ctx)].filter(Boolean);
+    sections = [glossary(ctx), await mangroves(ctx), await erosion(ctx), atStations ? await plastics(ctx) : null, await published(ctx), food, ...(await delta(ctx, want)), ...(await ocean(ctx, want.size > 0)), notLoaded(ctx)].filter(Boolean);
   }
+  if (sections.some((sec) => sec.tool === "plastics_literature")) sections = sections.filter((sec) => !(sec.tool === "plastics_stations" && /^All \d+ stations/.test(sec.say[0] ?? ""))); // the published figure answers; the stations' general picture would only pad it
   if (!sections.length && /korangi|phitti|kadiro|gharo|waddi|khuddi|hajamro|turshian|khobar|kharak|shah bandar|thatta|sujawal|badin/.test(q)) sections = [await plastics(ctx, true)].filter(Boolean); // only the sampling stations are known by these names
   if (!sections.length) sections = [holdings(ctx)].filter(Boolean); // "what data do you have?", when the question names no dataset of its own
   if (!sections.length) return null;
