@@ -43,16 +43,21 @@ export function tidy(text) {
 }
 
 /* Words that point back at what was just said. Without one of them, a question with no topic is a new, unknown subject, not a follow-up. */
-const REFERS = /\b(it|its|this|that|these|those|they|them|there|same|above|previous|earlier|last (one|two|answers?|questions?)|the (change|increase|decrease|rise|fall|trend|reason|cause|effects?)|shorter|short|brief|concise|summar\w*|simpler|again|more detail|what about|how about|what else|else)\b|^\s*(and|why|so|then|but|ok|okay|also)\b/;
+const REFERS = /\b(it|its|this|that|these|those|they|them|there|same|above|previous|earlier|last (one|two|answers?|questions?)|the (change|increase|decrease|rise|fall|trend|reason|cause|effects?)|shorter|short|brief|concise|summar\w*|simpler|again|more detail|what about|how about|what else|else|which ones?|ones)\b|^\s*(and|why|so|then|but|ok|okay|also)\b/;
+/* A few words led by a question word, with no topic ("who is affected?", "how sure?"): in the middle of a chat that is about what came before. */
+const BRIEF = /^\s*(who|whom|whose|where|when|why|how|which|what|is|are|was|were|does|do|did|can|will|should)\b/;
 
 /**
- * { q, s, followUp }: q is this question (tidied); s is what to match topics on. A follow-up ("why is that?", "and by 2050?",
- * "make it shorter") names no topic of its own and points back, so s also carries the two questions before it.
+ * { q, s, followUp, back }: q is this question (tidied); s is what to match topics on; back holds the questions before it
+ * (latest first) when this one leans on them, for the details it leaves out (the place, the year).
+ *   "why is that?", "and by 2050?", "make it shorter"   no topic of its own: s also carries the two questions before it
+ *   "and the metals there?", "what about erosion?"      its own topic: s is the question alone, back supplies the place
+ *   "what is the capital of France?"                    no topic and nothing pointing back: a new subject, not a follow-up
  */
 export function subject(question, earlier = []) {
-  const q = tidy(question), back = earlier.slice(-2).map(tidy).reverse(); // back: the questions before this one, the latest first
-  /* "and the metals there?" names a topic and still leans on the question before; "is it safe to eat oysters?" does not */
+  const q = tidy(question), before = earlier.slice(-2).map(tidy).reverse(), own = TOPIC.test(q);
   const leans = /\b(there|same|those|these|them|they)\b|^\s*(and|also|what about|how about)\b/.test(q);
-  const followUp = back.length > 0 && REFERS.test(q) && (!TOPIC.test(q) || leans);
-  return { q, s: followUp ? `${[...back].reverse().join(" ")} ${q}` : q, followUp, back: followUp ? back : [] };
+  const brief = !own && BRIEF.test(q) && q.trim().split(/\s+/).length <= 4;
+  const followUp = before.length > 0 && (own ? leans : REFERS.test(q) || brief);
+  return { q, s: followUp && !own ? `${[...before].reverse().join(" ")} ${q}` : q, followUp, back: followUp ? before : [] };
 }

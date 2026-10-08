@@ -156,6 +156,17 @@ export const CASES = [
   { id: "c-er-karachi", q: "erosion in karachi", must: [/whole coast/i, 2084.98] },
   { id: "c-pl-gwadar", q: "plastic in gwadar", must: [/none of the 10/i], not: [38.4] },
   { id: "c-sl-gwadar", q: "sea level rise at gwadar", must: [/none for gwadar/i] },
+  /* longer chats: each question leans on the ones before in a different way */
+  { id: "ch-switch", before: ["How has mangrove area changed since 1990?"], q: "what about erosion?", must: [2084.98], not: [/mangrove/i] },
+  { id: "ch-lead", before: ["What are the plastics levels at the Karachi stations?"], q: "and lead?", must: [14.2, 11.8] },
+  { id: "ch-place", before: ["How much will sea level rise at the Indus Delta by 2050?"], q: "and karachi?", must: [0.057] },
+  { id: "ch-scenario", before: ["How much will sea level rise at Karachi by 2050?"], q: "what about under high emissions?", must: [/ssp585/i] },
+  { id: "ch-future", before: ["How many marine heatwave days are there now?"], q: "will that get worse in the future?", must: [2050] },
+  { id: "ch-which", before: ["Are fish stocks overexploited?"], q: "which ones?", must: [/hairtail/i] },
+  { id: "ch-who", before: ["What are the plastics levels at the Karachi stations?"], q: "who is affected?", must: [42700] },
+  { id: "ch-action", before: ["What are the plastics levels at the Karachi stations?"], q: "what should be done?", must: [/boom/i] },
+  { id: "ch-sure", before: ["How much land has been lost to coastal erosion?"], q: "how sure is that?", must: [/no uncertainty is recorded/i] },
+  { id: "ch-sure-ph", before: ["Is the ocean becoming more acidic?"], q: "how reliable is that?", must: [/how sure/i] },
   /* two things at once */
   { id: "mx-compare", q: "Compare plastics at Karachi and Thatta.", must: [38.4, 24.8] },
   { id: "mx-two", q: "Are mangroves and erosion both getting worse?", must: [847.61, 2084.98] },

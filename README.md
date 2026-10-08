@@ -42,16 +42,50 @@ creates the map once and updates it whenever the state changes.
 - Vercel hosting is not set up here (`api/index.mjs` is copied, but there is no `vercel.json` for the built app).
 - `server/` and `public/plastics/` are copies: a later change to the originals has to be copied again.
 
-## The assistant (chat under the map)
+## Hela, the assistant (chat under the map)
 
-The robot button opens a chat that answers from the portal's own database, not from the model's memory. The server first looks up
-the facts the question needs (mangrove area, erosion, ocean / saltwater-intrusion / plastics documents, the health report, the API
-access log; `server/assistant/tools.mjs`), then the model explains them and must say where each figure came from. Anything not in the
-database (earthquake records, shelf depth change, raw Google Earth Engine exports) is reported as not loaded.
+The robot button opens a chat with Hela. Every figure she gives comes from the portal's own database, with its source, its year and
+whether it is measured or projected. Anything not in the database (earthquake records, sea-floor depth change, raw Google Earth Engine
+exports) is reported as not loaded.
 
-**No API key needed.** By default it runs an open model on this machine through Ollama (https://ollama.com): install Ollama, then
-`ollama pull qwen3:4b` and restart the portal. Nothing leaves your computer and there is no per-question cost. Bigger models answer
-better (`OLLAMA_MODEL=qwen3:8b` needs about 8 GB free RAM; a server or VPS with more RAM and no other load is ideal). `OLLAMA_URL` points
-it at Ollama on another machine. Optionally, with `ANTHROPIC_API_KEY` in .env it uses Claude instead (stronger, paid per question;
-force either with `ASSISTANT_PROVIDER=ollama|anthropic`). Questions are limited to 8 per minute per visitor. Chats and ratings are
-stored in `assistant_chat` / `assistant_feedback` (queries in `server/schema.sql`).
+**How a question is answered** (`server/assistant/`):
+
+1. Greetings and "who are you" are answered at once (`smallTalk` in `chat.mjs`).
+2. Questions the data can answer directly get a ready-made answer written from the database (`answers.mjs`): mangroves, erosion,
+   plastics and seafood, the ocean topics, the Indus Delta series, the portal's own status, and a small glossary. No language model is
+   involved, so these are instant, repeatable, and work even when the model is unreachable.
+3. When a question's words match no topic ("are the trees along the coast disappearing?"), the language model is asked only which
+   topic it is about (`route` in `chat.mjs`), and step 2 is tried again. This takes about two seconds.
+4. Otherwise the documents are searched for the question's main word; the model explains what was found, or Hela says the portal has
+   nothing on that.
+
+The model does not write figures. Measured on `hermes3:8b`, it moved numbers between scenarios and added effects that were not in the
+data whenever it rewrote facts, so the sentences that carry figures are written by `answers.mjs`.
+
+**The model.** No API key is needed: an open model runs through Ollama (https://ollama.com), on this machine or on another one named
+by `OLLAMA_URL` (`OLLAMA_MODEL`, default the best one installed; `OLLAMA_THREADS` for the processor threads it may use). With
+`ANTHROPIC_API_KEY` in `.env` Claude is used instead and calls the tools in `tools.mjs` itself (`ASSISTANT_PROVIDER=ollama|anthropic`
+forces either). Questions are limited to 8 per minute per visitor (`ASSISTANT_PER_MINUTE`). Chats and ratings are stored in
+`assistant_chat` / `assistant_feedback`.
+
+**Checking and teaching her.**
+
+- `npm run hela:eval` asks Hela the questions in `eval-cases.mjs` against the running portal and reports how many she got right (each
+  case lists the figures that must appear; a model-written answer also fails on any figure that is not in the looked-up facts).
+  `-- --direct` checks only the ready-made answers, with no server and no model; `-- --only=id,id` runs some cases.
+- `npm run hela:review` lists the answers people marked unhelpful and the questions that had to go to the model: the ones worth a
+  sentence in `answers.mjs`. Add the sentence, add a case to `eval-cases.mjs`, run the evaluation.
+- Words the look-up should understand (spelling slips, Roman Urdu question words) live in `understand.mjs`; worked examples for the
+  topic sorter are `ROUTE_EXAMPLES` in `chat.mjs`.
+
+**Moving Hela to another computer.** She is this project plus the database; the model is a stock download.
+
+1. On the new machine install Node.js, PostgreSQL with PostGIS, and Ollama (Memurai / Redis is optional).
+2. Copy or clone this project there and run `npm install`.
+3. Restore the database from a backup made on the old machine:
+   `pg_dump -Fc -f pakcoast.dump` (old) → `createdb pakcoast` then `pg_restore -d pakcoast pakcoast.dump` (new).
+   The settings are read from `.env` (`PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`).
+4. Copy `.env` by hand (it is not in git). If the model runs on the same machine, remove the `OLLAMA_URL` line.
+5. `ollama pull hermes3:8b`, then `npm start`.
+
+The raw team data (`Other Data/`) is needed only to reload a dataset with the `load:*` scripts, not to run the portal.

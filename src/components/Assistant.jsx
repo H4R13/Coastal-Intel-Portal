@@ -80,8 +80,13 @@ function Answer({ text }) {
   return String(text).split(/\n{2,}/).map((block, i) => {
     const lines = block.split("\n"), items = lines.filter((l) => l.startsWith("- ")), head = lines.filter((l) => !l.startsWith("- ")).join("\n");
     const kind = /^Source:/.test(head) ? "src" : /^Not loaded in the portal:/.test(head) ? "none" : "";
-    return <div key={i} className={`bc-par ${kind}`}>{head}{items.length ? <ul>{items.map((l, j) => <li key={j}>{l.slice(2)}</li>)}</ul> : null}</div>;
+    return <div key={i} className={`bc-par ${kind}`}>{kind ? head : <Labelled text={head} />}{items.length ? <ul>{items.map((l, j) => <li key={j}><Labelled text={l.slice(2)} /></li>)}</ul> : null}</div>;
   });
+}
+/** "Karachi (2 stations): plastic debris is ..." → the label before the colon in bold, so a long answer can be scanned. */
+function Labelled({ text }) {
+  const at = text.indexOf(": ");
+  return at > 2 && at <= 40 && !/[.?!]/.test(text.slice(0, at)) ? <><b>{text.slice(0, at + 1)}</b>{text.slice(at + 1)}</> : text;
 }
 
 /** The chat: each answer comes from the portal's own datasets (server/assistant) and can be rated; ratings are stored. */

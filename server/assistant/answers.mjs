@@ -4,7 +4,7 @@
  * the data when it rewrites facts (measured on hermes3:8b), so it is not asked to. It still answers what is not covered
  * here (see chat.mjs).
  *   answerDirect(question, earlier, { short }) → { answer, tools } | null   (null = not a question this file knows)
- * Each topic below returns a section: { title, tool, say, also, source, extra?, missing? }.
+ * Each topic below returns a section: { title, tool, say, also, source, missing? }.
  *   say   whole sentences that answer what was asked, the most direct first
  *   also  a line or two of context, shown only when the answer itself is brief
  * A figure never leaves the words that say what it is. To teach Hela a new kind of question, add the sentence here.
@@ -19,6 +19,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const list = (items) => (items.length < 3 ? items.join(" and ") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`);
 const doc = async (table, key) => (await query(`select body from ${table} where key = $1`, [key])).rows[0]?.body;
 const yearsIn = (text) => [...text.matchAll(/\b(19[5-9]\d|20\d\d|2100)\b/g)].map((m) => +m[1]);
+const SURE = /how sure|confiden|reliab|certain|accura|\btrust|error (margin|bar)|margin of error|how (good|exact|precise)/; // asking how far a figure can be trusted
 const FUTURE = /project|forecast|future|scenario|outlook|expect|\bwill\b|going to|\bnext\b|by 20[3-9]\d|in 20[3-9]\d/;
 /** Runs of years as text: [1995, 1997, 1998, 1999] → "1995 and 1997–1999". */
 function ranges(years) {
@@ -87,6 +88,7 @@ async function mangroves({ s, q, ask, years }) {
     }
   }
   if (ask(WHY)) say.push("The portal records the mangrove area, not the reasons it changed: it holds no data on planting, protection or cutting.");
+  if (ask(SURE)) say.push(`No uncertainty is recorded with the mangrove areas: they are the mapped values as supplied.${other ? " The disagreement between the portal's two mangrove datasets is the best sign of how uncertain they are." : ""}`);
   if (!say.length) { say.push(whole); if (other) say.push(other); if (gaps.length) also.push(`No map exists for ${ranges(gaps)}.`); } // the gaps matter to someone reading the whole record, not to someone asking about one year
   else if (!here.length) { if (!say.some((l) => /mapped mangrove area (rose|fell)/i.test(l))) also.push(whole); if (other && !say.includes(other)) also.push(other); }
   return { title: "Mangroves", tool: "mangrove_area", say, also, source: `mangrove_area (Global Mangrove Watch extracts supplied by the project team)${zones.length ? "; amib:series/F (GMW v3 by zone)" : ""}` };
@@ -111,6 +113,7 @@ async function erosion({ s, q, ask, years }) {
     say.push(p ? `${y} falls in the mapped period ${span(p)}, when ${n(p.lost_km2)} km² of land was lost: about ${n(p.lost_km2 / (p.to - p.from), 1)} km² a year. The portal has no figure for a single year.` : `The erosion record starts in ${seen[0].from}; there is nothing mapped for ${y}.`);
   }
   if (ask(WHY)) say.push("The portal maps where land was lost, not why: it holds no analysis of the causes of the erosion.");
+  if (ask(SURE)) say.push("No uncertainty is recorded with the erosion areas: the mapped figures are as supplied, and the projection is one model run with no range.");
   if (PLACE.test(q)) say.push("The erosion figures are for the whole coast: I have no breakdown by district or town.");
   if (ask(/how fast|how quick|\brate\b|per year|a year|each year|speed|faster|slower|accelerat|slowing/)) say.push(`Land was lost at about ${list(seen.map((p) => `${n(p.lost_km2 / (p.to - p.from), 1)} km² a year in ${span(p)}`))} (mapped).${targets.length ? ` The projection continues at about ${n((ahead[lastY] - total.running_total_km2) / (lastY - total.to), 1)} km² a year.` : ""}`);
   if (!say.length || say.every((l) => /whole coast|not why/.test(l))) say.push(mapped);
@@ -132,7 +135,7 @@ async function plastics({ s, q, ask, back }, anyway = false) { // anyway: a stat
   const groups = named.map((w) => { const near = all.filter((r) => `${r.District} ${r.Tehsil_Taluka}`.toLowerCase().includes(w)), site = all.filter((r) => r.Site_Name.toLowerCase().includes(w) && (!near.length || q.includes(r.Site_Name.toLowerCase().split(" ").slice(0, 2).join(" ")))); return { // "korangi creek" is the station, "korangi" the district
     label: site.length === 1 ? site[0].Site_Name : cap(w), rows: site.length ? site : all.filter((r) => `${r.District} ${r.Tehsil_Taluka}`.toLowerCase().includes(w)) }; }).filter((g) => g.rows.length);
   const scope = groups.length ? [...new Set(groups.flatMap((g) => g.rows))] : all, say = [], also = [];
-  const span = (rows, field, unit) => { const have = [...rows].sort((a, b) => a[field] - b[field]), lo = have[0], hi = have.at(-1); return rows.length === 1 ? `${lo[field]} ${unit}` : `between ${lo[field]} ${unit} (${lo.Site_Name}) and ${hi[field]} ${unit} (${hi.Site_Name}), ${n(have.reduce((a, r) => a + r[field], 0) / have.length)} on average`; };
+  const span = (rows, field, unit) => { const have = [...rows].sort((a, b) => a[field] - b[field]), lo = have[0], hi = have.at(-1); return rows.length === 1 ? `${lo[field]} ${unit}` : `between ${lo[field]} ${unit} (${lo.Site_Name}) and ${hi[field]} ${unit} (${hi.Site_Name}), ${n(have.reduce((a, r) => a + r[field], 0) / have.length, 1)} on average`; };
   const ends = (rows, field) => { const have = [...rows].sort((a, b) => a[field] - b[field]); return [have[0], have.at(-1)]; };
   const where = (r) => `${r.Site_Name} (${r.District})`, wide = groups.length ? groups : [{ label: `All ${all.length} stations`, rows: all }];
   const metals = ask(/heavy metal|metals\b/) ? METALS : METALS.filter(([re]) => ask(re)), extreme = ask(/\bmost\b|\bleast\b|highest|lowest|worst|cleanest|dirtiest|maximum|minimum|where is|which (station|site|place)/);
@@ -143,7 +146,10 @@ async function plastics({ s, q, ask, back }, anyway = false) { // anyway: a stat
     say.push(`The portal has ${all.length} plastic-debris sampling stations, all in ${[...new Set(all.map((r) => r.Province))].join(" and ")}: ${per.map(([d, c]) => `${c} in ${d}`).join(", ")}. They were sampled on ${dates(all.map((r) => r.Sampling_Date))}.`);
   }
   if (ask(/polymer|kind of plastic|type of plastic|types of plastic|what plastic|made of|common/)) for (const r of scope.slice(0, 5)) say.push(`At ${where(r)} the most common plastic is ${r.Primary_Polymer}.`);
-  for (const [, name, field] of metals) {
+  const brief = (rows, field) => { const [lo, hi] = ends(rows, field); return rows.length === 1 ? `${lo[field]} ppm` : `${lo[field]} to ${hi[field]} ppm (${n(rows.reduce((t, r) => t + r[field], 0) / rows.length, 1)} on average)`; };
+  if (metals.length > 1 && !(extreme && !groups.length)) // several metals: one sentence per place, so none is cut off the end of the answer
+    for (const g of wide) say.push(`${g.label}${groups.length && g.rows.length > 1 ? ` (${g.rows.length} stations)` : ""}, in sediment: ${metals.map(([, name, field]) => `${name} ${brief(g.rows, field)}`).join("; ")}. The highest are at ${ends(g.rows, metals[0][2])[1].Site_Name}.`);
+  else for (const [, name, field] of metals) {
     if (extreme && !groups.length) { const [lo, hi] = ends(all, field); say.push(`${cap(name)} is highest at ${where(hi)}: ${hi[field]} ppm in sediment. It is lowest at ${where(lo)}: ${lo[field]} ppm.`); continue; }
     for (const g of wide) say.push(`${g.label}${groups.length && g.rows.length > 1 ? ` (${g.rows.length} stations)` : ""}: ${name} in sediment is ${span(g.rows, field, "ppm")}.`);
   }
@@ -151,7 +157,7 @@ async function plastics({ s, q, ask, back }, anyway = false) { // anyway: a stat
   if (ask(/risk|alert|danger|severe|emergency|how bad/)) for (const r of scope.slice(0, 5)) say.push(`${where(r)}: risk ${r.Risk_Level}, alert ${r.Emergency_Alert_Level}; ${r.Plastic_Count_per_m2} pieces of plastic per m².`);
   const byPlastic = [...scope].sort((a, b) => b.Plastic_Count_per_m2 - a.Plastic_Count_per_m2), count = +(q.match(/\btop (\d+)|\b(\d+) (most|worst|highest|dirtiest|least|cleanest|lowest)|\bbottom (\d+)/)?.slice(1).find((v) => /^\d+$/.test(v ?? "")) ?? 0);
   if (count) for (const r of (/least|cleanest|lowest|bottom/.test(q) ? [...byPlastic].reverse() : byPlastic).slice(0, Math.min(count, 5))) say.push(detail(r)); // "top 3 most polluted stations"
-  if (ask(/fisher(men|man|folk)|\bpeople\b|population|communit(y|ies)|villagers|how many (are )?(affected|exposed)/)) {
+  if (ask(/fisher(men|man|folk)|\bpeople\b|population|communit(y|ies)|villagers|how many (are )?(affected|exposed)|\bwho\b.*(affected|exposed|at risk|harmed|suffer)/)) {
     const [, most] = ends(scope, "Exposed_Fisherfolk_Pop");
     say.push(`${n(scope.reduce((t, r) => t + (r.Exposed_Fisherfolk_Pop ?? 0), 0), 0)} fisherfolk are recorded as exposed at ${scope.length === all.length ? `the ${all.length} stations` : list(groups.map((g) => g.label))}; the most at ${where(most)}: ${n(most.Exposed_Fisherfolk_Pop, 0)}.`);
   }
@@ -160,6 +166,7 @@ async function plastics({ s, q, ask, back }, anyway = false) { // anyway: a stat
   if (!say.length && groups.length && ask(/\ball\b|every|each\b|\blist\b|details?|\bfull\b|break ?down|numbers for/)) for (const r of byPlastic.slice(0, 6)) say.push(detail(r));
   const elsewhere = !groups.length && q.match(/gwadar|pasni|ormara|jiwani|sonmiani|makran|balochistan|lasbela|gadani|clifton|manora|hawks ?bay|sea ?view|port qasim|bin qasim|keti ?bandar|hyderabad|lahore|islamabad/)?.[0];
   if (elsewhere) say.unshift(`None of the ${all.length} sampling stations is at ${cap(elsewhere)}: they are in ${list([...new Set(all.map((r) => r.District.split(" / ")[0]))])}.`); // not the figures of somewhere else, passed off as this place
+  if (ask(SURE)) say.push("No uncertainty is recorded with the station figures: each is one sampling visit, as supplied by the project team.");
   const asked = say.length > 0; // a specific question was answered; otherwise the general picture is the answer
   if (!asked) for (const g of wide) say.push(g.rows.length > 1 ? overall(g) : detail(g.rows[0]));
   if (!asked) for (const r of byPlastic.slice(0, groups.length > 1 ? 0 : groups.length ? 4 : 2)) { const line = detail(r); if (!say.includes(line)) (groups.length ? say : also).push(line); }
@@ -237,7 +244,7 @@ async function ocean({ s, ask, years }, deltaWanted) {
   for (const t of topics) {
     const now = (await t.detail?.(ask)) ?? (await t.now(region)) ?? (region !== "Whole EEZ" ? await t.now("Whole EEZ") : null), later = t.later ? await t.later() : null;
     const found = findings.filter((f) => t.finding.test(f.headline)), ahead = found.filter((f) => /2050/.test(f.headline)).map(told), today = found.filter((f) => !/2050/.test(f.headline)).map(told);
-    const say = (future ? [ahead[0], later] : t.findingFirst ? [today[0], now] : [now, today[0]]).filter(Boolean), also = (future ? [now, today[0]] : [later ?? ahead[0], today[1]]).filter(Boolean);
+    const say = (future ? [ahead[0], later] : t.findingFirst || ask(SURE) ? [today[0], now] : [now, today[0]]).filter(Boolean), also = (future ? [now, today[0]] : [later ?? ahead[0], today[1]]).filter(Boolean); // "how sure is that?": the finding carries the confidence note, so it leads
     if (!say.length && also.length) say.push(also.shift());
     if (say.length) sections.push({ title: t.title, tool: "ocean_summary", say, also, source: "ocean:findings and the ocean package's summary tables" });
   }
