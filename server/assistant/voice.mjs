@@ -19,6 +19,7 @@ const SAID = [
   [/\(I read the subject of your question from the Urdu and answer in English\.\)\s*/g, ""],
   [/Not loaded in the portal: /g, "The portal does not hold "], [/What the data does show:\s*/g, "What it does show: "],
   [/\s*\(MAF = million acre-feet\.\)/g, ""], [/\bMAF\b/g, "million acre-feet"],
+  [/Projected \(ssp245\)/g, "Projected"], [/Projected \(ssp126\)/g, "Projected with low emissions"], [/Projected \(ssp585\)/g, "Projected with high emissions"],
   [/\((projected|measured)?,? ?ssp126\)/gi, "(projected, low emissions)"], [/\((projected)?,? ?ssp245\)/gi, "(projected)"], [/\((projected)?,? ?ssp585\)/gi, "(projected, high emissions)"],
   [/\bssp126\b/gi, "low emissions"], [/\bssp245\b/gi, "medium emissions"], [/\bssp585\b/gi, "high emissions"],
   [/\((IND-\d+), /g, "("], [/\s*\((CMEMS-LSCE|GMW v3 by zone)\)/g, ""], [/\bGMW v3\b/g, "Global Mangrove Watch"], [/\(whole EEZ\)/g, ""], [/\bEEZ\b/g, "economic zone"],
