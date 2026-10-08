@@ -92,6 +92,10 @@ function Labelled({ text }) {
 /* Call mode: speak to Hela and hear the answer. Hearing is the browser's own speech recognition (Edge, Chrome); her voice is
    ElevenLabs through the portal server when a key is set there, and the browser's built-in voice otherwise. */
 const Recognition = typeof window !== "undefined" ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
+/* Names of the browsers' built-in English voices, by who is speaking (the browser does not say which are women's). Used when no ElevenLabs key is set. */
+const WOMEN = /Sonia|Libby|Neerja|Aria|Jenny|Michelle|Ava|Emma|Maisie|Natasha|Clara|Zira|Hazel|Susan|Heera|Samantha|Female/i;
+const MEN = /Ryan|Thomas|Guy|Davis|Christopher|Eric|Roger|Steffan|Andrew|Brian|Prabhat|William|Liam|David|Mark|George|Ravi|James|Daniel|\bMale\b/i;
+if (typeof window !== "undefined") window.speechSynthesis?.getVoices(); // asks the browser to load its voice list early: the first call otherwise finds it empty
 const LANGS = [["en-IN", "English"], ["ur-PK", "اردو"]]; // what the user speaks; Hela answers in English either way
 const PHONE = '<path d="M21.5 16.6v2.9a2 2 0 0 1-2.2 2 19.5 19.5 0 0 1-8.5-3 19.2 19.2 0 0 1-5.9-5.9A19.5 19.5 0 0 1 1.9 4 2 2 0 0 1 3.9 1.8h2.9a2 2 0 0 1 2 1.7c.1.9.4 1.9.7 2.7a2 2 0 0 1-.5 2.1L7.8 9.5a16 16 0 0 0 6.7 6.7l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>';
 
@@ -138,7 +142,9 @@ function Chat({ button, onClose }) {
         const synth = window.speechSynthesis;
         if (!synth) { setNote("This browser has no voice of its own, so the answer is shown but not spoken."); return resolve(); }
         const u = new SpeechSynthesisUtterance(words), voices = synth.getVoices();
-        const voice = ["en-GB", "en-IN", "en-US", "en"].map((l) => voices.find((v) => v.lang.startsWith(l))).find(Boolean); // an English voice that is installed; none named = the browser's default
+        /* a woman's English voice: Edge's natural voices first, then any other known female voice, then any English voice that is not a known male one */
+        const english = voices.filter((v) => /^en/i.test(v.lang)), natural = (v) => /natural/i.test(v.name);
+        const voice = english.find((v) => WOMEN.test(v.name) && natural(v)) ?? english.find((v) => WOMEN.test(v.name)) ?? english.find((v) => !MEN.test(v.name)) ?? english[0];
         if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = "en-US";
         u.rate = 1.03; u.onend = u.onerror = () => { clearTimeout(giveUp); resolve(); };
         const giveUp = setTimeout(resolve, 4000 + words.length * 95); // some browsers never report the end of a long sentence: do not wait for ever
