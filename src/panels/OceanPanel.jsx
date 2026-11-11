@@ -37,21 +37,18 @@ function NationalSection({ layer, view, onMap }) {
       <p className="about">{def.label}. This is one number for the whole of Pakistan, so the map shows it in a balloon over the sea; the colour of the number follows this scale.</p>
       <div className="oramp" style={{ background: NATIONAL_RAMP }} />
       <div className="oramp-scale"><span>0</span><span>{def.unit}</span><span>{def.max}</span></div>
-      <p className="caveat">{def.period ? `The colour changes with the year on the timeline. Measured data covers ${def.period}. After that the colour follows the trend forecast to 2030 (chart below) and the balloon says so; beyond 2030 it stays at the 2030 forecast.` : "One fixed value: it does not change with the timeline."}</p>
+      <p className="caveat">{def.period ? `The colour changes with the year on the timeline. Measured data covers ${def.period}. After that the colour follows the trend projection to 2030 (chart below) and the balloon says so; beyond 2030 it stays at the 2030 projection.` : "One fixed value: it does not change with the timeline."}</p>
       <p className="caveat">A national figure from reported catch: where the balloon sits says nothing about where in the sea anything happens.</p>
     </section>
   );
 }
 
-/** The SSP keys at the top of the panel: live for outlook maps, shown disabled for maps without scenarios. */
+/** The SSP keys at the top of the panel, for outlook maps only (the 2050 outlook); maps without scenarios show none. */
 export function OceanSsp({ layer, catalog }) {
   const chosen = useStore((s) => s.oceanView[layer.id]), view = chosen ?? { step: layer.ocean.steps[0], variable: null }, scenario = useStore((s) => s.oceanScenario);
   const vars = mapVariables(catalog, view.step), L = vars.length && resolveLayer(catalog, view, scenario);
   const current = L && vars.find((v) => v.id === variableOf(L));
-  if (current?.scenarios) return <SspKeys layer={layer} />;
-  // from a map without scenarios a key opens the outlook map: this topic's if it has one, else the first topic that does
-  const target = [view.step, ...layer.ocean.steps].map((step) => ({ step, v: mapVariables(catalog, step).find((x) => x.scenarios) })).find((x) => x.v);
-  return <SspKeys layer={layer} avail={null} none="This map has no emissions scenarios." jump={target && { title: target.v.title }} onJump={() => setView(layer, { step: target.step, variable: target.v.id })} />;
+  return current?.scenarios ? <SspKeys layer={layer} /> : null;
 }
 
 function MapSection({ layer, catalog, view, scenario, onMap }) {

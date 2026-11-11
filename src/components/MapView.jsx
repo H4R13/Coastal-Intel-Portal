@@ -1,6 +1,10 @@
 /**
  * The map area: the MapLibre map, the title plate, the tool buttons with their two pop-overs (map layers, settings),
- * the legend, the timeline and the cursor coordinates.
+ * the legend with Hela's button beside it, the timeline and the cursor coordinates.
+ * While the Ocean or Fisheries layer is open (OM mode) the ocean monitoring package takes the legend's and the
+ * timeline's places: its layer list and legend on the left, its year slider at the bottom, its title card and tools at
+ * the top (src/oceanMonitoring/OceanMonitoring.jsx). Nutrients & Plankton does the same with its own parts and a month
+ * slider (src/nutrients/Nutrients.jsx).
  * The map itself is not drawn by React. It is created once (useEffect below) and then driven from the store: every
  * state change calls sync(), which applies the basemap, the overlays and the layer renderers (src/map/renderers.js).
  */
@@ -11,12 +15,16 @@ import { BASEMAPS, OVERLAYS } from "../config/basemaps.js";
 import { renderersOf } from "../map/renderers.js";
 import { prefetch, setBusyCheck } from "../map/prefetch.js";
 import { registerDemProtocol } from "../map/demProtocol.js";
-import { getState, setState, subscribe, useStore } from "../state.js";
+import { getState, setState, subscribe, useStore, clearLayers } from "../state.js";
 import { loadAmibCatalog, currentMap } from "../amib/amibData.js";
 import { Icon } from "../lib.jsx";
 import { Timeline } from "./Timeline.jsx";
 import { TerminalButton } from "./Terminal.jsx";
 import { TourButton } from "./Tour.jsx";
+import { ShowcaseButton } from "./Showcase.jsx";
+import { AssistantButton } from "./Assistant.jsx";
+import { OmLeft, OmTop, OmDock, OmFree, OmFloats, isOmLayer, useOmTab } from "../oceanMonitoring/OceanMonitoring.jsx";
+import { NpLeft, NpTop, NpDock, isNpLayer, useNpStart } from "../nutrients/Nutrients.jsx";
 
 const DEM_TILES = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
 const GLOBE_VIEW = { center: [66, 20], zoom: 1.75 };
@@ -64,8 +72,9 @@ function createMap(host, root, onStatus, onCoords) {
   /* The panels are glass overlays above the map, so account for whichever ones are open. */
   const insets = () => {
     if (!window.matchMedia(WIDE).matches) return { l: 0, r: 0 };
+    const omLeft = shell.classList.contains("om-mode") && shell.querySelector(".om-left"); // OM mode: the package's layer list is on the left
     return {
-      l: shell.classList.contains("left-closed") ? 0 : shell.querySelector(".sidebar").offsetWidth,
+      l: shell.classList.contains("left-closed") ? 0 : omLeft ? omLeft.offsetWidth + 16 : shell.querySelector(".sidebar").offsetWidth,
       r: shell.classList.contains("right-closed") ? 0 : shell.querySelector(".analysis").offsetWidth,
     };
   };
@@ -78,6 +87,43 @@ function createMap(host, root, onStatus, onCoords) {
   const showGlobe = () => map.flyTo({ center: GLOBE_VIEW.center, zoom: GLOBE_VIEW.zoom, pitch: 0, bearing: 0, padding: globePad(), duration: 2000, essential: true });
 
   let vectorLayers = []; // the dark vector map's layers and their default visibility
+  /* The dark style's vector source, read from its water layer: CARTO renamed it ("carto" → "protomaps", seen 2026-10-22),
+     and a hard-coded name left the navy water fill over the satellite pictures, where it covered the Indus Delta. */
+  const vectorSource = () => map.getStyle().layers.find((l) => l.id === "water")?.source ?? "carto";
+  /* Pakistan's border as officially drawn (Jammu and Kashmir inside Pakistan; public/boundaries/pakistan.geojson from
+     server/build-boundaries.mjs, split into land and coast). The basemap's own borders (OpenStreetMap: the Line of
+     Control and India's claim) are switched off, state and district lines with them, since India's draw through Kashmir.
+     Bold black on land. The coastal stretch steps back so it does not sit on the coastal data being watched: bold with
+     no layer on the map, a faint hairline once a layer is on (the map has flown to it), and gone once the scale bar
+     reads less than 100 km (50 km and closer). The land border always stays. Not basemap layers, so they stay over imagery too. */
+  const COAST_GONE_KM = 100;
+  const SCALE_PX = 110; // the scale bar's width (ScaleControl maxWidth below): it shows the largest round distance that fits
+  const BORDER_W = ["interpolate", ["linear"], ["zoom"], 3, 2.2, 8, 3.5, 12, 4.5];
+  let coastLook = null;
+  function addBorders() {
+    ["boundary_country_outline", "boundary_country_inner", "boundary_state", "boundary_county"].forEach((id) => map.getLayer(id) && map.setLayoutProperty(id, "visibility", "none"));
+    map.addSource("pakistan-border", { type: "geojson", data: "boundaries/pakistan.geojson" });
+    // a faint light edge under the black line, so it still reads on the dark map
+    map.addLayer({ id: "pakistan-border-edge", type: "line", source: "pakistan-border", filter: ["==", ["get", "kind"], "land"], layout: { "line-join": "round" }, paint: { "line-color": "#c9d6d6", "line-opacity": 0.35, "line-width": ["interpolate", ["linear"], ["zoom"], 3, 4.2, 8, 5.5, 12, 6.5] } });
+    map.addLayer({ id: "pakistan-border", type: "line", source: "pakistan-border", filter: ["==", ["get", "kind"], "land"], layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#000000", "line-width": BORDER_W } });
+    map.addLayer({ id: "pakistan-coast", type: "line", source: "pakistan-border", filter: ["==", ["get", "kind"], "coast"], layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#000000", "line-width": BORDER_W, "line-width-transition": { duration: 300, delay: 0 }, "line-opacity-transition": { duration: 300, delay: 0 } } });
+    map.on("move", styleCoast);
+    styleCoast();
+  }
+  /** The distance the scale bar can span, in km, measured the way MapLibre's scale control does (across the middle). */
+  function scaleKm() {
+    const y = map.getContainer().clientHeight / 2;
+    return map.unproject([0, y]).distanceTo(map.unproject([SCALE_PX, y])) / 1000;
+  }
+  function styleCoast() {
+    if (!map.getLayer("pakistan-coast")) return;
+    const look = scaleKm() < COAST_GONE_KM ? "gone" : getState().activeLayers.length ? "faint" : "bold";
+    if (look === coastLook) return;
+    coastLook = look;
+    map.setPaintProperty("pakistan-coast", "line-width", look === "bold" ? BORDER_W : 0.6);
+    map.setPaintProperty("pakistan-coast", "line-opacity", look === "bold" ? 1 : look === "faint" ? 0.18 : 0);
+  }
+
   /* Re-tint the stock dark style: navy sea, slate land, luminous coastline; drop road/building clutter. */
   function tintBasemap() {
     const set = (id, prop, v) => map.getLayer(id) && map.setPaintProperty(id, prop, v);
@@ -99,8 +145,9 @@ function createMap(host, root, onStatus, onCoords) {
     map.addSource("dem-hs", { type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 11, tiles: ["demhs://{z}/{x}/{y}"] });
     map.addLayer({ id: "hillshade", type: "hillshade", source: "dem-hs", paint: { "hillshade-shadow-color": "#050f14", "hillshade-highlight-color": "#4a6e74", "hillshade-accent-color": "#0a1d2a", "hillshade-exaggeration": 0.45 } }, "waterway");
     try { map.setSky({ "sky-color": "#0b1820", "horizon-color": "#2a5560", "fog-color": "#0b1820", "sky-horizon-blend": 0.6, "horizon-fog-blend": 0.6, "fog-ground-blend": 0.9, "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 8, 0] }); } catch {}
-    map.addLayer({ id: "coast-line", type: "line", source: "carto", "source-layer": "water", paint: { "line-color": "#5a9e9c", "line-opacity": 0.7, "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.7, 10, 1.3] } }, "water_shadow");
-    vectorLayers = map.getStyle().layers.filter((l) => l.source === "carto").map((l) => ({ id: l.id, vis: l.layout?.visibility ?? "visible" }));
+    map.addLayer({ id: "coast-line", type: "line", source: vectorSource(), "source-layer": "water", paint: { "line-color": "#5a9e9c", "line-opacity": 0.7, "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.7, 10, 1.3] } }, "water_shadow");
+    addBorders();
+    vectorLayers = map.getStyle().layers.filter((l) => l.source === vectorSource()).map((l) => ({ id: l.id, vis: l.layout?.visibility ?? "visible" }));
   }
 
   map.on("load", () => {
@@ -252,8 +299,8 @@ function createMap(host, root, onStatus, onCoords) {
   /* Warm the persistent tile cache (sw.js) for the study area: terrain, vector coast and the active imagery. */
   function warmCache(bm) {
     prefetch("dem", DEM_TILES);
-    prefetch("vector", map.getSource("carto")?.tiles?.[0]);
-    if (bm?.type === "raster") prefetch(bm.id, bm.tiles[0], { maxZ: bm.maxzoom < 9 ? bm.maxzoom : 9 });
+    prefetch("vector", map.getSource(vectorSource())?.tiles?.[0]);
+    if (bm?.type === "raster" && !bm.noPrefetch) prefetch(bm.id, bm.tiles[0], { maxZ: bm.maxzoom < 9 ? bm.maxzoom : 9 });
   }
 
   /* Live ocean overlays (e.g. sea surface temperature) above the basemap, below the coastline. */
@@ -280,6 +327,7 @@ function createMap(host, root, onStatus, onCoords) {
   function sync(s) {
     applyBasemap(s);
     syncLayers(s);
+    styleCoast(); // a layer coming on or off changes how much of the coast border shows
     markers.forEach((m) => (m.getElement().style.display = s.showPlaces ? "" : "none"));
   }
   const unsubscribe = subscribe((s) => { if (map.getSource("dem")) sync(s); }); // style is ready once the 3D sources exist; don't gate on tile loading
@@ -293,8 +341,8 @@ function createMap(host, root, onStatus, onCoords) {
   const act = (name) => {
     if (name === "in") map.zoomIn();
     if (name === "out") map.zoomOut();
-    if (name === "reset") fit();
-    if (name === "globe") showGlobe();
+    if (name === "reset") { clearLayers(); fit(); } // both start the map clean: every layer off
+    if (name === "globe") { clearLayers(); showGlobe(); }
     if (name === "tilt") map.easeTo({ pitch: map.getPitch() > 5 ? 0 : 55, duration: 700 });
     if (name === "full") document.fullscreenElement ? document.exitFullscreen() : shell.requestFullscreen?.();
   };
@@ -390,7 +438,10 @@ const Tool = ({ tip, label = tip, paths, ...rest }) => <button className="tool" 
 
 /** `handles` are the two panel handles (src/App.jsx), which sit on the map's edges. */
 export function MapView({ onAbout, handles }) {
-  const showCoords = useStore((s) => s.showCoords);
+  const showCoords = useStore((s) => s.showCoords), primary = useStore((s) => s.primaryLayer);
+  const open = LAYERS.find((l) => l.id === primary), omMode = isOmLayer(open), npMode = isNpLayer(open);
+  useOmTab(omMode ? open : null);
+  useNpStart(npMode ? open : null);
   const root = useRef(null), host = useRef(null), api = useRef(null), coords = useRef(null);
   const [status, setStatus] = useState(null);
   const [pop, setPop] = useState(null); // "layers" | "settings" | null: the two pop-overs close each other
@@ -416,8 +467,15 @@ export function MapView({ onAbout, handles }) {
     <main id="map-area" className="map-area" ref={root}>
       <div id="map" className="map" aria-label="Pakistan coastline base map" ref={host} />
       <div className="map-vignette" />
+      <div className="coin" aria-label="NDMA Pakistan" role="img">
+        <div className="coin-spin">
+          {[1, 2, 3, 4].map((i) => <span key={i} className="coin-edge" style={{ "--z": `${-i * 0.7}px` }} />)}
+          <span className="coin-face"><img src="/brand/ndma.png" alt="" /></span>
+          <span className="coin-face coin-back"><img src="/brand/ndma.png" alt="" /></span>
+        </div>
+      </div>
       <div className="brand brand-float">
-        <div><h1>Coastal Environmental Intelligence</h1><p>Pakistan Coastal Environmental Monitoring</p></div>
+        <div><h1>Coastal Inteligence</h1><p>Pakistan Coastal Environmental Monitoring</p></div>
       </div>
       <div className="map-tools">
         {TOOLS.map((t, i) => (t ? <Tool key={t.act} tip={t.tip} label={t.label} paths={t.paths} data-act={t.act} onClick={() => api.current?.act(t.act)} /> : <span className="tool-sep" key={i} />))}
@@ -428,13 +486,16 @@ export function MapView({ onAbout, handles }) {
       </div>
       {pop === "layers" ? <LayersPopover /> : null}
       {pop === "settings" ? <SettingsPopover /> : null}
-      <Legend />
-      <Timeline />
+      {omMode ? <OmLeft /> : npMode ? <NpLeft /> : <Legend />}
+      <div className="bot-dock"><AssistantButton /></div>
+      {omMode ? <><OmDock /><OmTop /><OmFree /></> : npMode ? <><NpDock /><NpTop /></> : <Timeline />}
+      <OmFloats />
       <div className="coords" id="coords" ref={coords} style={{ display: showCoords ? "" : "none" }}>— °N &nbsp; — °E</div>
       {status ? <div className="map-status" id="mapStatus">{status}</div> : null}
       {handles}
       <TerminalButton />
       <TourButton />
+      <ShowcaseButton />
     </main>
   );
 }

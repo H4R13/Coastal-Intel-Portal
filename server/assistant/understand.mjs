@@ -1,6 +1,6 @@
 /**
  * Reading the question before anything is looked up:
- *   tidy(text)                 lower case, with near-miss spellings of the portal's own words put right ("mangroov" → "mangrove")
+ *   tidy(text)                 lower case, with near-miss spellings of the portal's own words put right ("mangroov" → "mangrove"), and the speech recognition's mishearings ("serenity" → "salinity")
  *   subject(question, earlier) the text to match topics against: the question, plus the questions before it when it is a follow-up
  * Shared by the look-up for the model (tools.mjs retrieve) and by the ready-made answers (answers.mjs).
  */
@@ -39,12 +39,16 @@ const SCRIPT = [["سمندر کی سطح", "sea level"], ["سطح سمندر", "
   ["کراچی", "karachi"], ["ٹھٹھہ", "thatta"], ["ٹھٹہ", "thatta"], ["سجاول", "sujawal"], ["کورنگی", "korangi"], ["کوٹری", "kotri"], ["کٹاؤ", "erosion"], ["کٹاو", "erosion"], ["زلزلہ", "earthquake"], ["زلزلے", "earthquake"],
   ["آکسیجن", "oxygen"], ["تیزابیت", "acidity"], ["دھاتیں", "metals"], ["دھاتوں", "metals"], ["دھات", "metals"], ["نمک", "salt"], ["کھارا", "salt"], ["گرمی", "warmer"], ["گرم", "warmer"], ["سمندر", "sea"], ["دریا", "river flow"],
   ["کتنا", "how much"], ["کتنی", "how much"], ["کتنے", "how much"], ["کیوں", "why"], ["کہاں", "where"], ["کب", "when"], ["سب سے زیادہ", "most"], ["سب سے کم", "least"]];
+/* What the browser's speech recognition writes for the portal's words when it mishears them: too far off for the one-slip rule
+   ("serenity" is three letters from "salinity"). Ordinary words, but in a question to this portal they mean the portal's. */
+const HEARD = [[/\b(serenity|serinity|celinity|selinity|solinity)\b/g, "salinity"], [/\bman groves?\b|\bmango groves?\b/g, (w) => (/s$/.test(w) ? "mangroves" : "mangrove")]];
+
 /** True when the text is written in Urdu (Arabic) script. */
 export const inUrduScript = (text) => /[؀-ۿ]/.test(String(text));
 
 export function tidy(text) {
   const latin = SCRIPT.reduce((t, [word, english]) => t.split(word).join(` ${english} `), String(text)).replace(/[؀-ۿ‌‍؟،۔]+/g, " ");
-  const english = URDU.reduce((t, [re, word]) => t.replace(re, word), latin.toLowerCase());
+  const english = [...URDU, ...HEARD].reduce((t, [re, word]) => t.replace(re, word), latin.toLowerCase());
   return english.replace(/[a-z]{5,}/g, (w) => {
     if (KNOWN.has(w)) return w;
     /* one slip; two only in a long word of the same length ("mangroov"). Looser than that and "situation" becomes "station". */

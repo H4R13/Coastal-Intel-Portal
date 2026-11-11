@@ -50,7 +50,7 @@ export async function diagnostics() {
     let flood = null; try { flood = JSON.parse(fs.readFileSync("data/sealevel/index.json", "utf8")).levels; } catch { /* not built on this machine */ }
     amib("Sea Level Rise", ["D"]);
     add("Layer data", "Sea Level Rise · terrain exposure", flood?.length ? "ok" : "warn", flood?.length ? `${flood.length} water levels (${flood.map((l) => `+${l.level_m} m`).join(", ")})` : "no exposure tiles in data/sealevel");
-    amib("Saltwater Intrusion", ["C", "B", "GH"]);
+    amib("Saline Water Intrusion", ["C", "B", "GH"]);
     amib("Salinity Index", ["A", "G", "H"]);
     amib("Coastal Hazards", Object.keys(products));
     add("Layer data", "Mangroves", +n.mg ? "ok" : "fail", +n.mg ? `${n.mgsets} yearly extents from ${FIRST_YEAR} · ${(+n.mg).toLocaleString("en")} shapes` : "not loaded (npm run load:mangroves)");
@@ -58,6 +58,8 @@ export async function diagnostics() {
     add("Layer data", "Plastics", +n.dm ? "ok" : "fail", +n.dm ? `${n.dm} sampling stations, with the published measurements, food web and hazards` : "not loaded (npm run load:dmjm)");
     add("Layer data", "Fisheries", +n.oc ? "ok" : "fail", +n.oc ? "national indicators loaded" : "not loaded (npm run load:ocean)");
     add("Layer data", "Ocean", +n.ocr ? "ok" : "fail", +n.ocr ? `${n.ocr} grids · ${n.oc} documents` : "not loaded (npm run load:ocean)");
+    const np = await one("select jsonb_array_length(body->'points') n, jsonb_array_length(body->'months') m from nutrients_doc where key = 'points'").catch(() => null); // no table until the first load
+    add("Layer data", "Nutrients & Plankton", np?.n ? "ok" : "fail", np?.n ? `${np.n} monitoring points × ${np.m} months of satellite chlorophyll, the chlorophyll map and surface nutrients` : "not loaded (npm run load:nutrients)");
 
     /* ---- cache ---- */
     if (!rd.error) {

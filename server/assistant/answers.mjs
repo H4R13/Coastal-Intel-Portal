@@ -9,6 +9,7 @@
  *   also  a line or two of context, shown only when the answer itself is brief
  * A figure never leaves the words that say what it is. To teach Hela a new kind of question, add the sentence here.
  */
+import fs from "node:fs"; import { fileURLToPath } from "node:url";
 import { query } from "../db.mjs";
 import { diagnostics } from "../diagnostics.mjs";
 import { runTool } from "./tools.mjs";
@@ -259,7 +260,7 @@ const OCEAN = [
   { topic: "aragonite", title: "Shell-building conditions (aragonite)", ask: /aragonite|omega|shell.?build|saturation/, finding: /shell-building conditions|boundary/i,
     now: async (reg) => { const r = (await doc("ocean_doc", "data/omega_summary_regions"))?.find((x) => x.region === reg && /LSCE/.test(x.product)), [a, b] = String(r?.first_last ?? "").split("/").map(Number); return r && `Reconstructed from observations (${r.product}) for ${waters(reg)}: aragonite saturation fell from ${n(a, 2)} to ${n(b, 2)} between the first and last year of the record, ${n(Math.abs(r.ols_per_decade), 3)} per decade. Below 3 is stressful for shell-builders; below 1 shells dissolve.`; },
     later: async () => { const o = await outlook(); return o.length ? `Projected aragonite saturation in 2050: ${list(o.map((x) => `${n(x.omega_2050, 2)} under ${x.scenario}`))}.` : null; } },
-  { topic: "oxygen", title: "Oxygen", ask: /oxygen|hypoxi|dead zone|plankton/, finding: /oxygen/i, findingFirst: true,
+  { topic: "oxygen", title: "Oxygen", ask: /oxygen|hypoxi|dead zone/, finding: /oxygen/i, findingFirst: true,
     now: async (reg) => {
       const rows = ((await doc("ocean_doc", "data/o2_trends")) ?? []).filter((x) => x.region === reg && x.product === "GOBAI-O2 v2.3" && x.years === "2004-2024"), m = (id) => rows.find((x) => x.metric === id);
       const part = (id, label) => (m(id) ? `${label} averages ${n(m(id).mean, 1)} µmol/kg, changing by ${m(id).trend > 0 ? "+" : ""}${n(m(id).trend, 1)} µmol/kg per decade${m(id).significant ? "" : " (not significant)"}` : null);
@@ -298,7 +299,7 @@ async function ocean({ s, ask, years }, deltaWanted) {
 }
 
 /* ---------- the Indus Delta: salt water, groundwater, sea level, river flow ---------- */
-const DELTA = [[/saltwater|salt water|intrusion|salt wedge/, "saltwater"], [/groundwater|aquifer|fresh ?water|\blens\b|tube ?wells?/, "groundwater"], [/sea.?level|tide gauge|inundat|subsid|sinking|flood/, "sea_level"],
+const DELTA = [[/saltwater|salt water|saline water|intrusion|salt wedge/, "saltwater"], [/groundwater|aquifer|fresh ?water|\blens\b|tube ?wells?/, "groundwater"], [/sea.?level|tide gauge|inundat|subsid|sinking|flood/, "sea_level"],
   [/salt.affected|saline (soil|land)|tidal flat|soil salinity/, "salt_land"], [/shelf salinity|plume|turbid/, "shelf"], [/kotri|river flow|indus flow|discharge|barrage/, "river_flow"]];
 const EFFECTS = /effect|impact|consequence|exposure|exposed|affect|harm|damage|threat|\bdo(es)? to\b|crops?\b|livestock|farm|agricultur|drinking|incomes?\b|livelihood|people/;
 const WHY = /\bwhy\b|reason|cause|driver|due to|because|behind|connection|\blink|relationship|related to|depends? on/;
@@ -346,6 +347,18 @@ async function delta({ s, years }, want) {
 }
 
 /* ---------- the portal itself ---------- */
+/* "what's your opinion on how the data could be arranged?": a view on the portal's design, which no dataset holds. The model gives it
+   (opinion.mjs, before this file is reached); this answer is only seen when the model is unreachable. Before health(), which would read "displayed" as "is it working?" */
+function design({ q }) {
+  const view = /\b(opinions?|think|thoughts?|views?|suggest\w*|ideas?|recommend\w*|advi[cs]e|should|would you)\b|how (can|could) (it|this|they|the \w+( \w+)?) be\b|can be (arranged|organi[sz]ed|laid out|improved)/.test(q);
+  const shape = /\b(arrang\w*|rearrang\w*|layout|laid out|lay ?out|organi[sz]\w*|re-?design\w*|design|improve\w*|better|presentation|presented|display(ed|s)?|look(s)? (better|nicer|cleaner))\b/.test(q);
+  const thing = /\b(data|layers?|maps?|portal|site|website|pages?|panels?|sidebar|charts?|graphs?|timeline|dashboard|interface|screen|menus?)\b/.test(q);
+  if (!(view && shape && thing)) return null;
+  return { title: "The portal's design", tool: "portal_design", also: [], say: [
+    "My views come from the language model, and it is not reachable just now, so I can't give you my opinion on the portal's design at the moment.",
+    "Your question is saved with this chat, so the team can read it as a suggestion. I can still tell you what each layer shows, what data the portal holds, or whether the maps are loading.",
+  ] };
+}
 async function health({ s, ask }) {
   const thing = /\b(layers?|maps?|portal|site|website|web ?page|pages?|section|server|system|database|postgres|redis|cache|app|timeline|images?|pictures?|graphs?|charts?)\b/.test(s), state = /\b(accessible|functioning|displaying|displayed|display|showing|presents?|presenting|storing|retrieving|up.to.date|updated|real.time|properly|correctly|accurately|work|works|working|health|healthy|status|broken|fail|fails|failed|failing|down|online|running|ok|okay|fine|up|load|loading|loaded|slow|stuck|frozen|hang(s|ing)?|crash(ed|es|ing)?|errors?|problems?|issues?|doing)\b/.test(s);
   const errors = /\b(errors?|failures?|failed|crash(es|ed)?)\b/.test(s) && /\b(any|today|recent|recently|now|lately|logs?|this week)\b/.test(s); // "any errors today?" names no part of the portal and still means it
@@ -364,7 +377,7 @@ async function health({ s, ask }) {
     say.push(img.length ? `In the last ${a.hours} hours there were ${n(img.reduce((t, r) => t + r.requests, 0), 0)} year-map picture requests; ${img.reduce((t, r) => t + r.errors, 0)} failed, and the slowest took ${n(Math.max(...img.map((r) => r.slowest_ms)) / 1000, 1)} seconds.` : "No year-map picture requests are in the access log for the last 24 hours.");
     also.push(overall);
   } else {
-    const named = checks.filter((c) => c.name.toLowerCase().split(/[^a-z]+/).some((w) => w.length > 4 && new RegExp(`\\b${w.replace(/s$/, "")}`).test(s)) || (/database|postgres|\bdb\b/.test(s) && /postgres/i.test(c.name)) || (/redis|cache/.test(s) && /redis/i.test(c.name)));
+    const named = checks.filter((c) => c.name.toLowerCase().split(/[^a-z]+/).some((w) => w.length > 4 && new RegExp(`\\b${w.replace(/s$/, "")}`).test(s)) || (/database|postgres|\bdb\b/.test(s) && /postgres/i.test(c.name)) || (/redis|cache/.test(s) && /redis/i.test(c.name)) || (/salt ?water/.test(s) && /saline water/i.test(c.name)));
     for (const c of named.slice(0, 3)) say.push(`${one(c)}.`);
     say.push(overall);
     if (!named.length) { if (ask(/\bwhich\b|\blist\b|each layer|every layer|what layers/)) say.push(layers); else also.push(layers); also.push(services); } // asked about one thing (the database, a layer): that line and the overall verdict are the answer
@@ -376,7 +389,7 @@ async function health({ s, ask }) {
 function holdings({ q }) {
   if (!/what (data|datasets|layers|topics)|which (data|datasets|layers|topics)|what (do|can) you (have|know|cover|answer)|what('?s| is) in the portal|list (the |your |all )*(data|datasets|layers)|what can i ask/.test(q)) return null;
   return { title: "What the portal holds", tool: "list_datasets", also: [], say: [
-    "The portal holds: mangrove area year by year, with projections to 2050; land lost to coastal erosion by period, with a projection; plastic debris and heavy metals at the sampling stations, with what was found in seafood and the hazards; for Pakistan's sea: marine heatwaves, temperature, acidity, shell-building conditions, oxygen, fish stocks and climate exposure; and for the Indus Delta: salt water in the river, fresh groundwater, sea level, salt-affected land and the river flow below Kotri.",
+    "The portal holds: mangrove area year by year, with projections to 2050; land lost to coastal erosion by period, with a projection; plastic debris and heavy metals at the sampling stations, with what was found in seafood and the hazards; for Pakistan's sea: marine heatwaves, temperature, acidity, shell-building conditions, oxygen, fish stocks and climate exposure; and for the Indus Delta: saline water in the river, fresh groundwater, sea level, salt-affected land and the river flow below Kotri. For nutrients and plankton: satellite chlorophyll and sea temperature month by month (1998–2025), and field records from open databases: plankton species records, measured phosphate, nitrate, oxygen, salinity and temperature from ships and floats, and laboratory chlorophyll.",
     "Not loaded: earthquake and seismic records, sea-floor depth (bathymetry) change, and raw Google Earth Engine exports.",
     "I can also tell you whether the portal, its database and each layer are working.",
   ] };
@@ -402,11 +415,11 @@ const defines = (term) => new RegExp(`(what(?:'s| is| are)|whats|explain(?: what
 const DEFINITIONS = [
   ["mangroves?(?: forests?| trees?)?", "Mangroves are salt-tolerant trees and shrubs that grow between the tide marks on sheltered coasts and creeks. On Pakistan's coast most of them are in the Indus Delta."],
   ["micro ?plastics?", "Microplastics are pieces of plastic smaller than 5 mm, from broken-down litter, fishing gear and fibres. Animals swallow them with their food, so they pass up the food web."],
-  ["ground ?water", "Groundwater is the water held underground in sand and rock. Near the coast a lens of fresh groundwater floats on denser salt water, and it is what wells pump."],
+  ["ground ?water", "Groundwater is the water held underground in sand and rock. Near the coast a lens of fresh groundwater floats on denser saline water, and it is what wells pump."],
   ["(?:coastal )?erosion", "Coastal erosion is the loss of land to the sea, as waves, tides and currents carry the shore away faster than rivers and the sea bring sediment back."],
   ["sea.?level rise", "Sea-level rise is the sea standing higher against the land. On a delta two things add up: the ocean rising as it warms and ice melts, and the land itself sinking."],
   ["ocean (?:acidification|acidity)", "Ocean acidification is sea water becoming more acidic (lower pH) as it takes up carbon dioxide from the air. It makes it harder for shellfish and corals to build shells."],
-  ["(?:salt ?water|sea ?water|saline) intrusion", "Saltwater intrusion is sea water pushing inland: up a river when too little fresh water flows down it, and underground into fresh groundwater."],
+  ["(?:salt ?water|sea ?water|saline(?: water)?) intrusion", "Saline water intrusion is sea water pushing inland: up a river when too little fresh water flows down it, and underground into fresh groundwater."],
   ["heavy metals?", "Heavy metals such as cadmium, lead and chromium are toxic elements from industry and waste. They settle in creek mud and build up in the animals living there."],
   ["fish stocks?", "A fish stock is the population of one kind of fish in an area that fishing draws on. It is over-exploited when more is caught than the population can replace."],
 ];
@@ -418,8 +431,111 @@ function glossary({ q }) {
   return found.length ? { title: "What it means", tool: "glossary", say: found.slice(0, 3), also: [], source: "the portal's glossary (definitions, not measurements)" } : null;
 }
 
-function notLoaded({ s }) {
-  const what = [[/earthquake|seismic|tsunami|tremor|quake/, "earthquake, seismic and tsunami records"], [/shelf depth|continental shelf|bathymetr|seabed depth|sea ?floor depth/, "continental-shelf depth (bathymetry) change"], [/earth engine|\bgee\b/, "raw Google Earth Engine exports"]].filter(([re]) => re.test(s)).map(([, name]) => name);
+/* ---------- field data: water samples, floats and ship casts from open databases (data/ndma/insitu.json, npm run load:insitu) ---------- */
+let fieldCache = null;
+function fieldData() { // re-read when the loader has written a new file
+  const f = fileURLToPath(new URL("../../data/ndma/insitu.json", import.meta.url));
+  try { const t = fs.statSync(f).mtimeMs; if (fieldCache?.t !== t) fieldCache = { t, d: JSON.parse(fs.readFileSync(f, "utf8")) }; return fieldCache.d; } catch { return null; }
+}
+const BAND = { surface: "at the surface (0–10 m)", upper: "at 10–200 m", deep: "below 200 m" };
+const FIELD_WORDS = /measured|measurements?|samples?|sampled|bottles?|ships?|cruises?|floats?|argo|casts?|in.?situ|field|readings?|depths?|deep|profiles?|observations?/;
+const NUTRIENTS = [["phosphate", /phosphate/], ["nitrate", /nitrate|nitrogen/], ["silicate", /silicate|silica/]];
+/** "phosphate: 25 readings at the surface (0–10 m), middle 0.68 µmol/kg (1995)" for each depth band that has readings */
+function bands(D, v, unit) {
+  const rows = D.stats.filter((s) => s.v === v && (!unit || s.unit === unit)).sort((a, b) => ["surface", "upper", "deep"].indexOf(a.band) - ["surface", "upper", "deep"].indexOf(b.band));
+  return rows.map((s) => `${n(s.n, 0)} reading${s.n === 1 ? "" : "s"} ${BAND[s.band]}, middle value ${n(s.median, s.median < 1 ? 3 : 2)} ${s.unit} (${s.years ? (s.years[0] === s.years[1] ? s.years[0] : `${s.years[0]}–${s.years[1]}`) : "dates unknown"})`);
+}
+const coastOf = (D, v) => D.stats.filter((s) => s.v === v).reduce((a, s) => a + s.coastal, 0);
+const fromWhere = (D, v, unit) => list([...new Set(D.stats.filter((s) => s.v === v && (!unit || s.unit === unit)).flatMap((s) => s.sources))]);
+async function field({ s, ask }) {
+  const D = fieldData(); if (!D) return [];
+  const sections = [], source = "field records from open databases (OBIS, GBIF, Argo, GLODAP, NASA SeaBASS, NCEI, PANGAEA), screened for the NDMA package";
+  /* nutrients */
+  const askedN = NUTRIENTS.filter(([, re]) => re.test(s)), allN = /nutrients?/.test(s) && !askedN.length ? NUTRIENTS : askedN;
+  if (allN.length) {
+    const say = [];
+    for (const [v] of allN) {
+      const b = bands(D, v, "µmol/kg");
+      say.push(b.length ? `Measured ${v} in the sea off Pakistan: ${list(b)}. From ${fromWhere(D, v, "µmol/kg")}; ${coastOf(D, v) ? `${n(coastOf(D, v), 0)} of the readings are within 100 km of the shore` : "none of them is within 100 km of the Pakistan shore, so they describe the open sea, not the coast"}.` : `No measured ${v} is loaded yet.`);
+    }
+    sections.push({ title: "Measured nutrients", tool: "field_data", covers: [], say, also: ["The map's World Ocean Atlas layers show long-term nitrate and phosphate averages for comparison; those are averages, not single samples. More ship samples (World Ocean Database) are being screened."], source });
+  }
+  /* chlorophyll / algae: lab, sensor, satellite */
+  if (/chlorophyll|\bchl\b|algae|algal|blooms?|hplc|phytoplankton biomass/.test(s)) {
+    const lab = D.stats.find((x) => x.v === "chlorophyll_a_hplc" && x.band === "surface"), sensor = D.stats.find((x) => x.v === "chlorophyll_a_insitu" && x.band === "surface"), labAll = D.stats.filter((x) => x.v === "chlorophyll_a_hplc").reduce((a, x) => a + x.n, 0);
+    const say = [];
+    if (lab) say.push(`Chlorophyll measured in a laboratory (HPLC) on water samples: ${n(labAll, 0)} samples from the Tara Oceans expedition in March 2010, ${n(lab.n, 0)} of them at the surface with a middle value of ${n(lab.median, 2)} mg/m³. It is the most reliable chlorophyll held, but from one cruise only, and none of it within 100 km of the shore.`);
+    if (sensor) say.push(`Chlorophyll from instrument sensors (fluorescence; ${list(sensor.sources)}, ${sensor.years.join("–")}): ${n(sensor.n, 0)} surface readings, middle value ${n(sensor.median, 2)} mg/m³, ${n(sensor.coastal, 0)} within 100 km of the shore. A sensor reading is not a laboratory measurement.`);
+    const bottle = D.stats.find((x) => x.v === "chlorophyll_a_extracted" && x.band === "surface");
+    if (bottle) say.splice(lab ? 1 : 0, 0, `Chlorophyll extracted from ship water samples (${bottle.years.join("–")}, ${list(bottle.sources)}): ${n(bottle.n, 0)} surface samples, middle value ${n(bottle.median, 2)} mg/m³, ${n(bottle.coastal, 0)} within 100 km of the shore.`);
+    if (ask(/blooms?/)) say.unshift("No algal bloom or fish-kill events are recorded in the field data: none was found in the open databases.");
+    say.push("The map also shows satellite chlorophyll month by month from 1998 to 2025 (Nutrients & Plankton, \"Algae and sea heat\"); it is an estimate from ocean colour, not calibrated against these samples.");
+    sections.push({ title: "Chlorophyll (algae)", tool: "field_data", covers: [], say, also: [], source });
+  }
+  /* plankton species */
+  if (/plankton|diatoms?|dinoflagellates?|copepods?|zooplankton|phytoplankton(?! biomass)|species (recorded|seen|found)/.test(s)) {
+    const P = D.plankton, top = P.top_taxa.slice(0, 3).map(([t, k]) => `${t} (${n(k, 0)})`), ab = D.stats.filter((x) => x.v === "plankton_abundance").reduce((a, x) => a + x.n, 0), dec = Object.entries(P.decades).sort((a, b) => b[1] - a[1])[0];
+    sections.push({ title: "Plankton records", tool: "field_data", covers: [], source, also: [`Most records come from research ships, so the map shows where ships sampled more than where plankton lives.`], say: [
+      `${n(P.records, 0)} plankton records of ${n(P.taxa, 0)} named kinds lie in the box off Pakistan; ${n(P.coastal_records, 0)} of them within 100 km of the shore. A record says a species was seen, not how much of it.`,
+      `Most recorded: ${list(top)}.${dec ? ` ${Math.round((100 * dec[1]) / P.records)}% of the records are from the ${dec[0]}.` : ""}`,
+      ab ? `Actual counts (numbers per litre) exist for ${n(ab, 0)} samples from 1993–94 only, from published tables.` : null,
+    ].filter(Boolean) });
+  }
+  /* oxygen, salinity, temperature measured in the water (the satellite and model figures are in the ocean topics) */
+  if (FIELD_WORDS.test(s)) for (const [v, re, label, unit] of [["dissolved_oxygen", /oxygen/, "oxygen", "µmol/kg"], ["salinity", /salin|salt/, "salinity", "psu"], ["water_temperature", /temperature|warm/, "water temperature", "°C"]]) {
+    if (!re.test(s)) continue;
+    const b = bands(D, v, unit); if (!b.length) continue;
+    const say = [`Ship and float samples: ${list(b)}. From ${fromWhere(D, v, unit)}.`];
+    if (v === "dissolved_oxygen") { const low = D.stats.filter((x) => x.v === v && x.unit === unit).sort((a, b) => a.median - b.median)[0]; say.push(`The least oxygen is ${BAND[low.band]} (middle value ${n(low.median, 1)} µmol/kg): the Arabian Sea's naturally oxygen-poor layer. The 1992–94 NASEER ship-sensor oxygen readings and the ship-sensor (CTD) oxygen in the World Ocean Database are held back because their calibration is not verified.`); }
+    sections.push({ title: `Measured ${label}`, tool: "field_data", covers: [], say, also: [], source });
+  }
+  return sections;
+}
+
+/* ---------- earthquakes: external data (USGS), shown only once a person approved a batch (server/external.mjs) ---------- */
+const QUAKE = /earthquake|seismic|tremor|quake/;
+async function quakes({ s, q, years }) {
+  if (!QUAKE.test(s)) return null;
+  const held = (await query("select count(*)::int as n, min(at) as first, max(at) as last from ext_quake").catch(() => ({ rows: [{ n: 0 }] }))).rows[0];
+  if (!held.n) return null;
+  const fetched = (await query("select last_fetched from ext_source where id = 'usgs-earthquakes'")).rows[0]?.last_fetched;
+  const thisYear = new Date().getUTCFullYear(), rel = /\blast year\b/.test(q) ? [thisYear - 1] : /\bthis year\b/.test(q) ? [thisYear] : [];
+  const [from, to] = years.length || rel.length ? [Math.min(...years, ...rel), Math.max(...years, ...rel)] : [null, null], where = from ? "where extract(year from at) between $1 and $2" : "", args = from ? [from, to] : [];
+  const top = (await query(`select at, magnitude, depth_km, place from ext_quake ${where} order by magnitude desc, at desc limit 3`, args)).rows;
+  const count = (await query(`select count(*)::int as n, count(*) filter (where magnitude >= 5)::int as m5, count(*) filter (where magnitude >= 6)::int as m6 from ext_quake ${where}`, args)).rows[0];
+  const latest = (await query("select at, magnitude, place from ext_quake order by at desc limit 1")).rows[0];
+  const span = from ? (from === to ? `in ${from}` : `from ${from} to ${to}`) : `from ${held.first.getUTCFullYear()} to ${held.last.getUTCFullYear()}`;
+  const day = (d) => d.toISOString().slice(0, 10);
+  const say = [`External data (USGS, not the team's): ${n(count.n, 0)} earthquakes of magnitude 4 or more were recorded ${span} in the box around the Pakistan coast, ${n(count.m5, 0)} of them magnitude 5 or more and ${n(count.m6, 0)} of magnitude 6 or more.`];
+  if (top.length) say.push(`The largest ${from ? "in that period" : "on record here"}: ${top.map((t) => `magnitude ${n(t.magnitude, 1)} on ${day(t.at)}${t.place ? ` (${t.place})` : ""}`).join("; ")}.`);
+  if (/latest|recent|last|newest/.test(q) && latest) say.unshift(`External data (USGS): the most recent earthquake held is magnitude ${n(latest.magnitude, 1)} on ${day(latest.at)}${latest.place ? ` (${latest.place})` : ""}.`);
+  return { title: "Earthquakes (external)", tool: "external_earthquakes", say, also: [`Box: latitude 21 to 27.5, longitude 60 to 70; magnitudes are as revised by USGS.`], source: `USGS earthquake catalogue (external, public domain), fetched ${fetched ? day(fetched) : "on an unknown date"} and approved by a person before it was shown` };
+}
+
+/* ---------- tide gauge at Karachi: external data (PSMSL station 204), shown only once a person approved a batch ---------- */
+const TIDE = /tide gauge|tidal|\btides?\b|\bgauge\b|psmsl|(observed|measured|historical|historic|recorded|past|so far|actual)[\w\s]{0,20}sea[- ]?level|sea[- ]?level[\w\s]{0,20}(observed|measured|historical|recorded|record\b|so far)/;
+async function tide({ s, years }) {
+  if (!TIDE.test(s)) return null;
+  const rows = (await query("select month, mm from ext_tide where station = 204 order by month").catch(() => ({ rows: [] }))).rows;
+  if (rows.length < 24) return null;
+  const fetched = (await query("select last_fetched from ext_source where id = 'psmsl-karachi'")).rows[0]?.last_fetched;
+  const t = rows.map((r) => +r.month.slice(0, 4) + (+r.month.slice(5) - 0.5) / 12), mt = t.reduce((a, b) => a + b, 0) / t.length, my = rows.reduce((a, r) => a + r.mm, 0) / rows.length;
+  const slope = rows.reduce((a, r, i) => a + (t[i] - mt) * (r.mm - my), 0) / t.reduce((a, x) => a + (x - mt) ** 2, 0); // mm per year, least squares on the monthly values
+  const byYear = new Map(); for (const r of rows) { const y = +r.month.slice(0, 4), v = byYear.get(y) ?? []; v.push(r.mm); byYear.set(y, v); }
+  const full = [...byYear].filter(([, v]) => v.length >= 10).map(([y, v]) => [y, v.reduce((a, b) => a + b, 0) / v.length]), first = full.slice(0, 10), last = full.slice(-10);
+  const avg = (a) => a.reduce((x, [, v]) => x + v, 0) / a.length, span = (a) => `${a[0][0]} to ${a.at(-1)[0]}`;
+  const say = [`External data (PSMSL tide gauge at Karachi, not the team's): sea level relative to the land rose by about ${n(slope, 1)} mm a year between ${rows[0].month.slice(0, 4)} and ${rows.at(-1).month.slice(0, 4)} (a straight line through ${n(rows.length, 0)} monthly values).`];
+  if (first.length >= 5 && last.length >= 5) say.push(`The yearly averages of ${span(last)} are ${n(avg(last) - avg(first), 0)} mm higher than those of ${span(first)}.`);
+  const asked = years.length ? years.filter((y) => byYear.has(y) && byYear.get(y).length >= 6) : [];
+  for (const y of asked.slice(0, 3)) say.unshift(`External data (PSMSL, Karachi): the average level in ${y} was ${n(byYear.get(y).reduce((a, b) => a + b, 0) / byYear.get(y).length, 0)} mm on the gauge's reference scale (${byYear.get(y).length} months with values).`);
+  const lacking = years.filter((y) => !asked.includes(y));
+  if (lacking.length) say.unshift(`The Karachi tide-gauge record held here covers ${rows[0].month.slice(0, 4)} to ${rows.at(-1).month.slice(0, 4)} with gaps, and has too few months (fewer than 6) for ${list(lacking.map(String))}.`);
+  say.push("The team's own notes on this gauge say a break in its reference level is suspected, so read the rate with care.");
+  return { title: "Tide gauge (external)", tool: "external_tide_gauge", say, also: [`This is relative sea level: it includes the land sinking or rising under the gauge, and is not the same as the projections on the sea-level layer. The record has gaps (${n(rows.length, 0)} months with a value out of ${n((+rows.at(-1).month.slice(0, 4) - +rows[0].month.slice(0, 4) + 1) * 12, 0)}).`], source: `PSMSL, Revised Local Reference monthly data, station 204 (external; Holgate et al. 2013), fetched ${fetched ? fetched.toISOString().slice(0, 10) : "on an unknown date"} and approved by a person before it was shown` };
+}
+
+function notLoaded({ s, quakes: haveQuakes }) {
+  const what = [[haveQuakes ? /(?!)/ : /earthquake|seismic|tremor|quake/, "earthquake and seismic records"], [/tsunami/, "tsunami records"], [/shelf depth|continental shelf|bathymetr|seabed depth|sea ?floor depth/, "continental-shelf depth (bathymetry) change"], [/earth engine|\bgee\b/, "raw Google Earth Engine exports"]].filter(([re]) => re.test(s)).map(([, name]) => name);
   return what.length ? { title: "Not in the portal", tool: "list_datasets", say: [`The portal has no data on ${list(what)}. ${what.length > 1 ? "They are" : "That is"} not loaded, so I can give no figures for ${what.length > 1 ? "them" : "it"}.`], also: [] } : null;
 }
 
@@ -430,12 +546,13 @@ export async function answerDirect(question, earlier = [], { short = false } = {
   const ctx = { q, s, followUp, back, ask: (re) => re.test(q) || (redo && re.test(s)), // otherwise a follow-up asks only what its own words ask: the topic is carried over, the earlier question's wording is not
     years: yearsIn(q).length || !followUp ? yearsIn(q) : yearsIn(s) };
   let sections;
-  const status = await health(ctx);
+  const status = design(ctx) ?? await health(ctx);
   if (status) sections = [status]; // "are the maps loading?" is about the portal, not about the data on the maps
   else {
     const want = deltaTopics(s);
     const food = await seafood(ctx), atStations = !food || /station|debris|litter|sediment|sampling|creek|sites?\b|karachi|korangi|thatta|sujawal|badin/.test(s); // "microplastics in crabs" is about the animals, not the stations
-    sections = [glossary(ctx), await mangroves(ctx), await erosion(ctx), atStations ? await plastics(ctx) : null, await published(ctx), food, ...(await delta(ctx, want)), ...(await ocean(ctx, want.size > 0)), notLoaded(ctx)].filter(Boolean);
+    const quake = await quakes(ctx); // tsunami questions still fall through to notLoaded
+    sections = [glossary(ctx), await mangroves(ctx), await erosion(ctx), atStations ? await plastics(ctx) : null, await published(ctx), food, ...(await delta(ctx, want)), ...(await ocean(ctx, want.size > 0)), ...(await field(ctx)), quake, await tide(ctx), notLoaded({ ...ctx, quakes: !!quake })].filter(Boolean);
   }
   if (sections.some((sec) => sec.tool === "plastics_literature")) sections = sections.filter((sec) => !(sec.tool === "plastics_stations" && /^All \d+ stations/.test(sec.say[0] ?? ""))); // the published figure answers; the stations' general picture would only pad it
   if (!sections.length && /korangi|phitti|kadiro|gharo|waddi|khuddi|hajamro|turshian|khobar|kharak|shah bandar|thatta|sujawal|badin/.test(q)) sections = [await plastics(ctx, true)].filter(Boolean); // only the sampling stations are known by these names

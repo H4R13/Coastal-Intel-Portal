@@ -68,19 +68,23 @@ function Above({ button, gap, children, ...rest }) {
 const STARTERS = [
   "How has mangrove area changed since 1990?",
   "Are all the portal's layers working?",
-  "Which saltwater intrusion maps failed to load recently?",
+  "Which saline water intrusion maps failed to load recently?",
   "What does the data say about plastics at Karachi stations?",
 ];
 const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
   .then((r) => r.json().catch(() => ({ ok: false, error: "The server sent something unreadable." })))
   .catch(() => ({ ok: false, error: "Could not reach the portal server." }));
 
+/** A line with web addresses in it (news headlines): each address becomes a link that opens in a new tab. */
+function Linked({ text }) {
+  return String(text).split(/(https?:\/\/\S+)/).map((part, i) => (/^https?:\/\//.test(part) ? <a key={i} href={part} target="_blank" rel="noreferrer">open story</a> : part));
+}
 /** An answer as paragraphs: "- " lines become a list, the "Source:" line is set small, and what is not loaded is set apart. */
 function Answer({ text }) {
   return String(text).split(/\n{2,}/).map((block, i) => {
     const lines = block.split("\n"), items = lines.filter((l) => l.startsWith("- ")), head = lines.filter((l) => !l.startsWith("- ")).join("\n");
     const kind = /^Source:/.test(head) ? "src" : /^Not loaded in the portal:/.test(head) ? "none" : "";
-    return <div key={i} className={`bc-par ${kind}`}>{kind ? head : <Labelled text={head} />}{items.length ? <ul>{items.map((l, j) => <li key={j}><Labelled text={l.slice(2)} /></li>)}</ul> : null}</div>;
+    return <div key={i} className={`bc-par ${kind}`}>{kind ? head : <Labelled text={head} />}{items.length ? <ul>{items.map((l, j) => <li key={j}>{/https?:\/\//.test(l) ? <Linked text={l.slice(2)} /> : <Labelled text={l.slice(2)} />}</li>)}</ul> : null}</div>;
   });
 }
 /** "Karachi (2 stations): plastic debris is ..." → the label before the colon in bold, so a long answer can be scanned. */
@@ -97,6 +101,10 @@ const WOMEN = /Sonia|Libby|Neerja|Aria|Jenny|Michelle|Ava|Emma|Maisie|Natasha|Cl
 const MEN = /Ryan|Thomas|Guy|Davis|Christopher|Eric|Roger|Steffan|Andrew|Brian|Prabhat|William|Liam|David|Mark|George|Ravi|James|Daniel|\bMale\b/i;
 if (typeof window !== "undefined") window.speechSynthesis?.getVoices(); // asks the browser to load its voice list early: the first call otherwise finds it empty
 const LANGS = [["en-IN", "English"], ["ur-PK", "اردو"]]; // what the user speaks; Hela answers in English either way
+/* The portal's own words. Of the browser's guesses at what was said, the first one holding one of these wins ("salinity" over "serenity"). */
+const PORTAL_WORDS = /salin|salt|mangrove|erosion|plastic|metal|cadmium|chromium|groundwater|sea level|heat ?wave|temperature|acid|aragonite|oxygen|fish|delta|indus|kotri|karachi|thatta|sujawal|korangi|station|layer|timeline/i;
+/** The best reading of one stretch of speech: the browser's first guess, unless a later one names something the portal holds. */
+const bestGuess = (result) => { const all = Array.from(result); return (all.find((a) => PORTAL_WORDS.test(a.transcript)) ?? all[0]).transcript; };
 const PHONE = '<path d="M21.5 16.6v2.9a2 2 0 0 1-2.2 2 19.5 19.5 0 0 1-8.5-3 19.2 19.2 0 0 1-5.9-5.9A19.5 19.5 0 0 1 1.9 4 2 2 0 0 1 3.9 1.8h2.9a2 2 0 0 1 2 1.7c.1.9.4 1.9.7 2.7a2 2 0 0 1-.5 2.1L7.8 9.5a16 16 0 0 0 6.7 6.7l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>';
 
 /** The chat: each answer comes from the portal's own datasets (server/assistant) and can be rated; ratings are stored. */
@@ -175,8 +183,8 @@ function Chat({ button, onClose }) {
     if (!c.on) return;
     let said = "";
     const rec = new Recognition();
-    c.rec = rec; rec.lang = LANGS[c.lang][0]; rec.interimResults = true; rec.continuous = false;
-    rec.onresult = (e) => { said = Array.from(e.results).map((r) => r[0].transcript).join(" "); setHeard(said); };
+    c.rec = rec; rec.lang = LANGS[c.lang][0]; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 5;
+    rec.onresult = (e) => { said = Array.from(e.results).map(bestGuess).join(" "); setHeard(said); };
     rec.onerror = (e) => { if (e.error === "not-allowed" || e.error === "service-not-allowed") { setNote("The microphone is blocked for this page. Allow it in the browser's address bar, then start the call again."); hangUp(); } else if (e.error === "network") { setNote("Speech recognition could not reach its service. Check the internet connection."); hangUp(); }
       else if (e.error === "audio-capture") { setNote("No microphone was found. Plug one in or pick one in the browser's settings, then start the call again."); hangUp(); }
       else if (e.error === "language-not-supported") { setNote(`This browser cannot listen in ${LANGS[c.lang][1]}. Switch the language button and try again.`); }
@@ -220,7 +228,7 @@ function Chat({ button, onClose }) {
       <div className="bc-log">
         {!msgs.length ? (
           <div className="bc-start">
-            {ready === false ? <p className="bc-warn">Hela isn't switched on yet. {hint}</p> : <p>I'm Hela. Ask me about mangroves, erosion, ocean health, saltwater intrusion or plastics, or whether a layer is working. Press the phone to talk instead of typing.</p>}
+            {ready === false ? <p className="bc-warn">Hela isn't switched on yet. {hint}</p> : <p>I'm Hela. Ask me about mangroves, erosion, ocean health, saline water intrusion or plastics, or whether a layer is working. Press the phone to talk instead of typing.</p>}
             {modelOff ? <p className="bc-warn">The language model is not reachable, so I can only answer questions the portal's data covers directly. {hint}</p> : null}
             {STARTERS.map((s) => <button key={s} className="bc-chip" disabled={ready === false} onClick={() => ask(s)}>{s}</button>)}
           </div>

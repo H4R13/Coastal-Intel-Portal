@@ -16,6 +16,8 @@ import fs from "node:fs"; import path from "node:path"; import os from "node:os"
 import { Worker } from "node:worker_threads";
 import "sharp"; // load the native module on the main thread before any worker does
 import { query } from "./db.mjs";
+import { RAMPS } from "../src/amib/hazards.js";
+import { isInja, injaFile } from "./inja.mjs";
 
 const DIR = path.resolve(process.env.AMIB_DIR ?? "Other Data/AMIB");
 export const DISK_CACHE = path.resolve(".amibcache");
@@ -91,7 +93,22 @@ function writeDisk(key, png) {
 }
 
 export const hexToRgb = (h) => [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
-const keyOf = (id, step, opts) => JSON.stringify([id, +step, !!opts.clearBackground, opts.hideColors ?? []]);
+/** A named value ramp of src/amib/hazards.js as [[value, r, g, b, alpha 0-1], ...] for the renderer, or null. */
+export const rampStops = (name) => (Object.hasOwn(RAMPS, name ?? "") ? RAMPS[name].map((c) => [c.value, ...hexToRgb(c.color.slice(1)), c.alpha ?? 1]) : null);
+// the ramp's stops themselves are in the key, so changing a ramp draws the images afresh
+const keyOf = (id, step, opts) => JSON.stringify([id, +step, !!opts.clearBackground, opts.hideColors ?? [], ...(opts.clipSea ? ["sea2"] : []), ...(opts.softEdges ? ["soft"] : []), ...(opts.tints?.length ? [opts.tints, ...(opts.crisp ? ["crisp"] : [])] : []), ...(opts.ramp ? [opts.ramp] : [])]);
+
+/* The sea maps (sea-surface salinity, the future ocean) are cut to Pakistan's EEZ (?clip=sea): their rasters cover a box
+   that takes in land and the neighbours' waters. The EEZ comes from the ocean package (ocean_doc vector/eez, Marine
+   Regions); without it the maps are drawn whole. */
+let eezRings = null;
+async function seaRings() {
+  eezRings ??= query("select body from ocean_doc where key = 'vector/eez'").then(({ rows }) => {
+    const g = rows[0]?.body?.features?.[0]?.geometry;
+    return !g ? [] : g.type === "MultiPolygon" ? g.coordinates.flat() : g.coordinates;
+  }).catch(() => []);
+  return eezRings;
+}
 /** Whether this image is already on disk. */
 export const amibImageReady = (id, step, opts = {}) => fs.existsSync(diskPath(keyOf(id, step, opts)));
 
@@ -102,6 +119,10 @@ const inflight = new Map(), waiting = new Map(); // key → the drawing in progr
  * `signal` aborts when the caller stops waiting; the promise rejects with { dropped: true } if the drawing was then dropped.
  */
 export function amibImage(id, step, opts = {}, signal) {
+  if (isInja(id)) { // the INJA erosion maps are finished pictures (server/load-inja.mjs): sent as they are
+    const file = injaFile(id, step);
+    return Promise.resolve(file ? { body: fs.readFileSync(file), cache: "hit" } : null);
+  }
   const key = keyOf(id, step, opts);
   if (!inflight.has(key)) {
     inflight.set(key, (async () => {
@@ -109,7 +130,7 @@ export function amibImage(id, step, opts = {}, signal) {
       if (disk) return { body: disk, cache: "hit" };
       const file = await fileOf(id, step);
       if (!file) return null;
-      const png = await render(file, opts, key);
+      const png = await render(file, opts.clipSea ? { ...opts, clipRings: await seaRings() } : opts, key);
       writeDisk(key, png);
       return { body: png, cache: "miss" };
     })().finally(() => inflight.delete(key)));

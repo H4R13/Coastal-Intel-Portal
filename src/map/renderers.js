@@ -7,13 +7,13 @@
  * To plug in data, set layer.mapLayer.endpoint (GeoJSON URL, or tile URL template for rasters).
  */
 import { loadManifest, pickTiles } from "./manifest.js";
-import { loadCatalog, loadDoc, resolveLayer, pickYear } from "../ocean/oceanData.js";
-import { drawGrid, gradientCss, CLASS_COLORS } from "../ocean/colormaps.js";
-import { nationalAt, NATIONAL_RAMP } from "../ocean/national.js";
+import * as om from "../oceanMonitoring/om.js";
+import * as np from "../nutrients/np.js";
 import { loadPlastics, pointsGeojson, samplingPeriod, colorExpr, waterColorExpr, BIOTA_COLOR, SCALE_MAX, PLASTIC_RAMP, DENSITY_UNIT } from "../plastics/plastics.js";
 import maplibregl from "maplibre-gl";
-import { modeRange, getState } from "../state.js";
-import { loadAmibCatalog, currentMap, stepLabel, hiddenStops, clearsBackground, imageUrl } from "../amib/amibData.js";
+import { getState } from "../state.js";
+import { TIME_RANGE } from "../config/layers.js";
+import { loadAmibCatalog, currentMap, stepLabel, hiddenStops, clearsBackground, tintStops, shownColor, imageUrl, rampOf, legendOf, rampCss } from "../amib/amibData.js";
 
 const srcId = (l) => `env-${l.id}`;
 const lyrId = (l, s) => `env-${l.id}-${s}`;
@@ -133,93 +133,25 @@ const periodtiles = {
 };
 
 /**
- * Ocean package layers (js/ocean): one data grid at a time, coloured in the browser and stretched over its bounds,
- * with the EEZ outline and, for trend layers, dots where the trend is statistically significant.
- * Which grid is drawn comes from the panel's choice (state.oceanView), the scenario and, for yearly layers, the timeline.
+ * The ocean monitoring package (src/oceanMonitoring/om.js) for the Ocean and Fisheries layers: while one of them is on,
+ * the package adds its raster, outlines, significance dots and measurement points to the map and draws what its own
+ * layer list and year slider choose. Its legend sits in its own column (OmLeft); this one is only for the portal legend.
  */
-const oceanMap = { on: false, key: null, layer: null, year: null };
-const ocean = {
-  add(map, layer, s) { oceanMap.on = true; oceanMap.key = null; this.update(map, layer, s); },
-  async update(map, layer, s) {
-    const catalog = await loadCatalog();
-    if (!catalog || !oceanMap.on) return;
-    const L = resolveLayer(catalog, s.oceanView[layer.id] ?? { step: layer.ocean.steps[0], variable: null }, s.oceanScenario);
-    if (!L) return;
-    const year = L.type === "raster_series" ? pickYear(L, s.year) : null;
-    const key = `${L.id}/${year ?? ""}`;
-    if (key === oceanMap.key) return;
-    Object.assign(oceanMap, { key, layer: L, year });
-    const [grid, dots, eez] = await Promise.all([loadDoc(`raster/${L.id}${year ? `/${year}` : ""}`), L.overlay ? loadDoc(`overlay/${L.id}`) : null, loadDoc("vector/eez")]);
-    if (oceanMap.key !== key || !oceanMap.on || !grid) return; // superseded while loading
-    // everything is limited to the open sea inside the EEZ: the grid, and the dots by the same test
-    const { inside: seaward, ...img } = drawGrid(grid, L, eez), src = srcId(layer);
-    const inside = dots ? { ...dots, features: dots.features.filter((f) => seaward(...f.geometry.coordinates)) } : dots;
-    if (map.getSource(src)) map.getSource(src).updateImage(img);
-    else {
-      map.addSource(src, { type: "image", ...img });
-      map.addLayer({ id: lyrId(layer, "grid"), type: "raster", source: src, paint: { "raster-opacity": 0.88, "raster-fade-duration": 0 } });
-      map.addSource(`${src}-eez`, { type: "geojson", data: eez ?? { type: "FeatureCollection", features: [] } });
-      map.addLayer({ id: lyrId(layer, "eez"), type: "line", source: `${src}-eez`, paint: { "line-color": "#10232b", "line-width": 1, "line-opacity": 0.35 } }); // faint: the outline also traces every delta creek
-      map.addSource(`${src}-dots`, { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-      map.addLayer({ id: lyrId(layer, "dots"), type: "circle", source: `${src}-dots`, paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 1, 8, 2.2], "circle-color": "#000", "circle-opacity": 0.75 } });
-    }
-    map.setPaintProperty(lyrId(layer, "grid"), "raster-resampling", L.classes ? "nearest" : "linear"); // class maps keep hard edges
-    map.getSource(`${src}-dots`).setData(inside ?? { type: "FeatureCollection", features: [] });
-    window.dispatchEvent(new Event("layerdatachange"));
-  },
-  describe() {
-    const L = oceanMap.layer;
-    return L ? `${L.title}${oceanMap.year ? ` · ${oceanMap.year}` : ""}${L.units ? ` · ${L.units}` : ""}` : null;
-  },
-  legend() {
-    const L = oceanMap.layer;
-    if (!L) return null;
-    return L.classes ? { classes: Object.values(L.classes).map((label, i) => ({ color: CLASS_COLORS[i % CLASS_COLORS.length], label })) } : { ramp: gradientCss(L.colormap), min: L.vmin, max: L.vmax, unit: L.units };
-  },
-  remove(map, layer) {
-    Object.assign(oceanMap, { on: false, key: null, layer: null, year: null });
-    ["dots", "eez", "grid"].forEach((s) => map.getLayer(lyrId(layer, s)) && map.removeLayer(lyrId(layer, s)));
-    [`${srcId(layer)}-dots`, `${srcId(layer)}-eez`, srcId(layer)].forEach((s) => map.getSource(s) && map.removeSource(s));
-  },
+const oceanMonitoring = {
+  add(map, layer) { om.attach(map, layer.id); },
+  remove(map, layer) { om.detach(map, layer.id); },
+  describe() { const t = om.omState().title; return t ? `${t.v}${t.when ? ` · ${t.when}` : ""}` : null; },
 };
 
 /**
- * National numbers of the ocean package (js/ocean/national.js): a balloon over the sea that states the value of the
- * timeline year, coloured by it. Nothing is filled in on the map, so it never hides another layer. Used by Fisheries,
- * whose topics are one number for the whole country.
+ * Nutrients & Plankton (src/nutrients/np.js), laid out like the ocean package: while it is on, the five monitoring
+ * points (coloured by the month on its own slider), the April 2026 chlorophyll map or a nutrient average are drawn as
+ * its layer list chooses. Its legend sits in its own column.
  */
-const nat = { on: false, key: null, info: null, marker: null };
-const BALLOON_AT = [65.9, 24.1]; // open sea south-west of Karachi, inside the EEZ
-const national = {
-  add(map, layer, s) { nat.on = true; nat.key = null; this.update(map, layer, s); },
-  async update(map, layer, s) {
-    const step = s.oceanView[layer.id]?.step ?? layer.ocean.steps[0];
-    const info = await nationalAt(step, s.year);
-    if (!nat.on || !info) return;
-    const key = `${step}/${info.year ?? ""}`; // a year is either measured or forecast, never both
-    if (key === nat.key) return;
-    Object.assign(nat, { key, info });
-    if (!nat.marker) {
-      const el = Object.assign(document.createElement("div"), { className: "nat-balloon" });
-      nat.marker = new maplibregl.Marker({ element: el, anchor: "bottom", offset: [0, -6] }).setLngLat(BALLOON_AT).addTo(map);
-      if (!map.getBounds().contains(BALLOON_AT) && layer.focus) map.fitBounds(layer.focus, { padding: 90, pitch: 0, duration: 900 }); // out of view: go to it
-    }
-    const el = nat.marker.getElement(), v = +info.value.toPrecision(3);
-    const range = info.forecast ? `likely ${+info.lo.toPrecision(3)}–${+info.hi.toPrecision(3)}${info.def.unit}` : "";
-    el.style.setProperty("--c", info.color);
-    el.classList.toggle("forecast", !!info.forecast);
-    el.innerHTML = `<b>${info.forecast ? "≈ " : ""}${v}${info.def.unit}</b><span>${info.def.label}</span><small>${info.forecast ? `${info.year} · trend forecast, ${range}` : `${info.year ?? "one fixed value"} · whole country`}</small><i class="nat-pin"></i>`;
-    window.dispatchEvent(new Event("layerdatachange"));
-  },
-  describe() {
-    const i = nat.info;
-    return i ? `${i.def.label}${i.year ? ` · ${i.year}` : ""}${i.forecast ? " (trend forecast, not measured)" : ""} · ${+i.value.toPrecision(3)}${i.def.unit}` : null;
-  },
-  legend() { return nat.info ? { ramp: NATIONAL_RAMP, min: 0, max: nat.info.def.max, unit: nat.info.def.unit || "index" } : null; },
-  remove() {
-    nat.marker?.remove();
-    Object.assign(nat, { on: false, key: null, info: null, marker: null });
-  },
+const nutrients = {
+  add(map, layer) { np.attach(map, layer.id); },
+  remove(map, layer) { np.detach(map, layer.id); },
+  describe() { const s = np.npState(); return s.layer ? np.LAYERS[s.layer].title : null; },
 };
 
 /**
@@ -331,19 +263,33 @@ const FRAME_LIMIT = 300; // copies kept (about 250 kB each at most); the least r
 const wanted = new Map(); // portal layer id → image addresses still to download for its timeline range
 const BUFFER = 3; // background downloads at once: one less than the server's drawing pool (server/amib.mjs), so the year on screen never waits
 const buffering = new Map(); // image address → AbortController of a background download in progress
+const arrived = new Set(); // image addresses whose local copy is ready
 
 function frame(url, priority = "auto", signal) {
   let p = frames.get(url);
   if (p) { frames.delete(url); frames.set(url, p); return p; }
   p = fetch(url, { priority, signal }).then((r) => (r.ok ? r.blob() : null)).then((b) => b && URL.createObjectURL(b)).catch(() => null);
-  p.then((local) => { if (!local && frames.get(url) === p) frames.delete(url); }); // a failed download is tried again next time
+  p.then((local) => { if (local && frames.get(url) === p) arrived.add(url); else if (!local && frames.get(url) === p) frames.delete(url); }); // a failed download is tried again next time
   frames.set(url, p);
   for (const [old, q] of frames) {
     if (frames.size <= FRAME_LIMIT) break;
-    frames.delete(old);
+    frames.delete(old); arrived.delete(old);
     q.then((local) => local && URL.revokeObjectURL(local));
   }
   return p;
+}
+
+/**
+ * Whether the package map a portal layer shows for `year` has arrived; if not, it is asked for at once. The showcase's
+ * timeline waits on this (setPlayGate in src/components/Timeline.jsx), so no year goes by without its map.
+ */
+export function amibReady(catalog, layer, s, year) {
+  const { L, step } = currentMap(catalog, layer, s, year);
+  if (!L) return true;
+  const url = imageUrl(L, step);
+  if (arrived.has(url)) return true;
+  frame(url, "high");
+  return false;
 }
 
 function bufferNext() {
@@ -365,7 +311,7 @@ function dropUnwanted() {
 
 /** Queue the images of the timeline range: the years after this one first, then the earlier ones (for looping and scrubbing back). */
 function bufferRange(catalog, layer, s, key) {
-  const { from, to } = modeRange(s.mode), seen = new Set([key]), list = [];
+  const { from } = TIME_RANGE, to = s.yearTo, seen = new Set([key]), list = [];
   for (const y of [...Array(to - s.year).keys()].map((i) => s.year + 1 + i).concat([...Array(s.year - from).keys()].map((i) => from + i))) {
     const { L, step } = currentMap(catalog, layer, s, y), k = L && `${L.id}/${step}`;
     if (!k || seen.has(k)) continue;
@@ -384,9 +330,9 @@ const amib = {
     if (!catalog || !st) return;
     const { L, step } = currentMap(catalog, layer, s);
     const key = L ? `${L.id}/${step}` : "";
-    if (st.key === key && st.range === s.mode) return;
+    if (st.key === key) return;
     const moved = st.key !== key, other = st.layer !== L;
-    Object.assign(st, { key, layer: L, step, range: s.mode, url: L ? imageUrl(L, step) : null });
+    Object.assign(st, { key, layer: L, step, url: L ? imageUrl(L, step) : null });
     const src = `amib-${layer.id}`;
     if (!L) { wanted.delete(layer.id); dropUnwanted(); st.drawn = ++st.seq; map.getLayer(src) && map.setLayoutProperty(src, "visibility", "none"); }
     else {
@@ -403,8 +349,9 @@ const amib = {
             map.addSource(src, { type: "image", ...img });
             map.addLayer({ id: src, type: "raster", source: src, paint: { "raster-opacity": 0.85, "raster-fade-duration": 0 } });
           }
-          map.setPaintProperty(src, "raster-resampling", L.kind === "categorical" ? "nearest" : "linear"); // class maps keep hard edges
-          map.setPaintProperty(src, "raster-opacity", L.kind === "categorical" || clearsBackground(L) ? 0.85 : 0.6); // smooth fields cover their whole box, land included: let the map show through
+          const tinted = tintStops(L).length > 0 || !!rampOf(L); // a see-through tint (salt-affected soils) or a recoloured field: it carries its own opacity
+          map.setPaintProperty(src, "raster-resampling", L.kind === "categorical" && !tinted ? "nearest" : "linear"); // class maps keep hard edges
+          map.setPaintProperty(src, "raster-opacity", tinted ? 1 : L.kind === "categorical" || clearsBackground(L) ? 0.85 : 0.6); // smooth fields cover their whole box, land included: let the map show through
         });
       } else bufferRange(catalog, layer, s, key); // only the time range changed
     }
@@ -416,11 +363,11 @@ const amib = {
     return `${st.layer.name}${stepLabel(st.layer, st.step) ? ` · ${stepLabel(st.layer, st.step)}` : ""}${clearsBackground(st.layer) ? " · the most common value is left clear; colour marks where it differs" : ""}`;
   },
   legend(layer) {
-    const L = amibShown.get(layer.id)?.layer, stops = L?.legend ?? [];
+    const L = amibShown.get(layer.id)?.layer, stops = legendOf(L);
     if (!stops.length) return null;
     return L.kind === "categorical"
-      ? { classes: stops.filter((c) => !hiddenStops(L).includes(c)).map((c) => ({ color: c.color, label: c.label ?? L.classes?.[c.value] ?? c.value })) }
-      : { ramp: `linear-gradient(to right, ${stops.map((c) => c.color).join(", ")})`, min: stops[0].value, max: stops.at(-1).value, unit: L.units };
+      ? { classes: stops.filter((c) => !hiddenStops(L).includes(c)).map((c) => ({ color: shownColor(L, c), label: c.label ?? L.classes?.[c.value] ?? c.value })) }
+      : { ramp: rampCss(stops), min: stops[0].value, max: stops.at(-1).value, unit: L.units };
   },
   remove(map, layer) {
     amibShown.delete(layer.id); wanted.delete(layer.id); dropUnwanted();
@@ -433,8 +380,8 @@ const amib = {
 export const renderersOf = (layer) => [RENDERERS[layer.mapLayer.type], layer.amib && amib].filter(Boolean);
 
 export const RENDERERS = {
-  ocean,
-  national,
+  oceanMonitoring,
+  nutrients,
   mangrovechange,
   plastics,
   yeartiles,

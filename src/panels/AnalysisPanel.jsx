@@ -1,46 +1,24 @@
 /**
- * The right-hand analysis panel: the time-range tabs and the body of the layer whose dock icon is selected.
- * Layers backed by the ocean package or the plastics material have their own body (OceanPanel, PlasticsPanel); every
+ * The right-hand analysis panel: the body of the layer whose dock icon is selected.
+ * The Ocean and Fisheries layers show the ocean monitoring package's panel (src/oceanMonitoring/), Nutrients & Plankton
+ * its own in the same look (src/nutrients/), the plastics layer its own body (PlasticsPanel); every
  * other layer gets the standard body, with the package section (AmibPanel) in place of its charts when it has one.
  * When a layer's data is not available (the data API is not running) it falls back to the standard placeholders.
  */
-import { useEffect, useLayoutEffect, useRef } from "react";
-import { LAYERS, MODES } from "../config/layers.js";
-import { getState, setState, setMode, toggleLayer, selectLayer, setSsp, focusLayer, useStore, SSP_SCENARIO } from "../state.js";
+import { useEffect, useRef } from "react";
+import { LAYERS } from "../config/layers.js";
+import { getState, setState, toggleLayer, selectLayer, focusLayer, useStore } from "../state.js";
 import { loadManifest } from "../map/manifest.js";
-import { loadCatalog } from "../ocean/oceanData.js";
 import { loadAmibCatalog } from "../amib/amibData.js";
 import { loadPlastics } from "../plastics/plastics.js";
 import { Chart, loadChartData } from "../components/Chart.jsx";
 import { Markup, useAsync } from "../lib.jsx";
+import { Clip } from "../components/Clip.jsx";
 import { SspKeys, hasSsp } from "./SspKeys.jsx";
 import { AmibPanel, AmibSsp } from "./AmibPanel.jsx";
-import { OceanPanel, OceanSsp } from "./OceanPanel.jsx";
+import { OmPanelBody, isOmLayer } from "../oceanMonitoring/OceanMonitoring.jsx";
+import { NpPanelBody, isNpLayer } from "../nutrients/Nutrients.jsx";
 import { PlasticsPanel } from "./PlasticsPanel.jsx";
-
-/** Historical / Normal / Forecast segmented control with a sliding highlight; each tab is a year range. */
-function ModeTabs() {
-  const mode = useStore((s) => s.mode);
-  const root = useRef(null), ink = useRef(null);
-  useLayoutEffect(() => {
-    const place = () => {
-      const tab = root.current?.querySelector(".mode.active");
-      if (tab) { ink.current.style.width = `${tab.offsetWidth}px`; ink.current.style.transform = `translateX(${tab.offsetLeft}px)`; }
-    };
-    place();
-    document.fonts?.ready.then(place);
-    window.addEventListener("resize", place);
-    const seen = new ResizeObserver(place); // the panel can slide in after first paint, so re-measure when the control resizes
-    seen.observe(root.current);
-    return () => { window.removeEventListener("resize", place); seen.disconnect(); };
-  }, [mode]);
-  return (
-    <nav className="modes" id="modes" role="tablist" aria-label="Analysis mode" ref={root}>
-      {MODES.map((m) => <button key={m.id} role="tab" className={`mode ${m.id === mode ? "active" : ""}`} aria-selected={m.id === mode} title={`${m.from}–${m.to}`} onClick={() => setMode(m.id)}>{m.label}</button>)}
-      <span className="mode-ink" aria-hidden="true" ref={ink} />
-    </nav>
-  );
-}
 
 function Indicators({ layer, title }) {
   return (
@@ -90,35 +68,9 @@ function Exposure({ levels, selected }) {
   );
 }
 
-function Outlook({ layer, manifest, selected }) {
-  const scenarios = manifest?.scenarios ?? [];
-  const pick = (value) => { const ssp = Object.keys(SSP_SCENARIO).find((k) => SSP_SCENARIO[k] === value); ssp ? setSsp(ssp) : setState({ scenario: value }); };
-  return (
-    <section className="block outlook">
-      {hasSsp(layer) ? null : (
-        <div className="field">
-          <label className="field-label" htmlFor="scenario">Scenario</label>
-          <div className="select">
-            {scenarios.length
-              ? <select id="scenario" value={selected} onChange={(e) => pick(e.target.value)}>{scenarios.map((sc) => <option key={sc.id} value={sc.id}>{sc.label}</option>)}</select>
-              : <select id="scenario" disabled><option>Select scenario</option></select>}
-          </div>
-          <small className="muted">{scenarios.length ? manifest.note ?? "" : "Scenarios will be listed once projection data is connected."}</small>
-        </div>
-      )}
-      <div className="field"><span className="field-label">Selected layer</span><strong className="sel-layer" style={{ "--layer": layer.color }}>{layer.title}</strong></div>
-      <dl className="indicators one">
-        <div className="ind"><dt>Projected change</dt><dd className="empty">—</dd></div>
-        <div className="ind"><dt>Confidence</dt><dd className="empty">—</dd></div>
-        <div className="ind"><dt>Source</dt><dd className="empty">—</dd></div>
-      </dl>
-    </section>
-  );
-}
-
 const NoData = ({ children }) => <div className="empty-note"><b>No data connected yet</b>{children}</div>;
 
-/** The body of a layer without its own panel: scenario keys, outlook, exposure, charts or the package section, about. */
+/** The body of a layer without its own panel: scenario keys, exposure, charts or the package section, about. */
 function StandardBody({ layer, amibCatalog }) {
   const s = useStore();
   const chartCfg = layer.charts[s.chartIndex] ?? layer.charts[0];
@@ -129,7 +81,7 @@ function StandardBody({ layer, amibCatalog }) {
   const data = chart?.cfg === chartCfg ? chart.data : null;
   // a layer fed by the intrusion/salinity package shows that package's section in place of the placeholder charts
   const packageOnly = !!(layer.amib && amibCatalog);
-  const described = manifest ?? (packageOnly ? { meta: { source: "Saltwater intrusion and salinity package supplied by the project team", spatial: "Pakistan coast" } } : null);
+  const described = manifest ?? (packageOnly ? { meta: { source: "Saline water intrusion and salinity package supplied by the project team", spatial: "Pakistan coast" } } : null);
   const seeAlso = () => {
     const { layer: to, hazard } = layer.seeAlso;
     setState({ amibView: { ...getState().amibView, [to]: { ...getState().amibView[to], hazard, variant: 0, raw: null } } });
@@ -148,7 +100,6 @@ function StandardBody({ layer, amibCatalog }) {
       {manifest && !s.activeLayers.includes(layer.id) ? (
         <div className="show-on-map"><button className="xchip" onClick={() => toggleLayer(layer.id, true)}>Show on the map</button><small className="muted">The map then follows the year on the timeline.</small></div>
       ) : null}
-      {s.mode === "forecast" ? <Outlook layer={layer} manifest={manifest} selected={s.scenario} /> : null}
       {layer.id === "sealevel" ? <Exposure levels={levels} selected={s.floodId} /> : null}
       {packageOnly ? <AmibPanel layer={layer} catalog={amibCatalog} />
         : chartCfg ? (
@@ -161,7 +112,9 @@ function StandardBody({ layer, amibCatalog }) {
           </section>
         ) : <section className="block"><NoData><p>This layer's data is served by the portal's data API, which is not running.</p></NoData></section>}
       {layer.seeAlso ? <section className="block see-also"><Markup as="p" className="about" html={layer.seeAlso.text} /><button className="xchip" onClick={seeAlso}>Open Coastal Hazards</button></section> : null}
-      {layer.indicators.length && !packageOnly ? <Indicators layer={layer} title={s.mode === "forecast" ? "Forecast indicators" : "Key indicators"} /> : null}
+      {packageOnly ? null /* the package section shows the layer's video itself */
+        : layer.video ? <Clip video={layer.video} />
+        : layer.indicators.length ? <Indicators layer={layer} title="Key indicators" /> : null}
       <About layer={layer} manifest={described} />
     </>
   );
@@ -169,11 +122,11 @@ function StandardBody({ layer, amibCatalog }) {
 
 function Body({ layer }) {
   // each is undefined while loading and null when the data API is not running
-  const ocean = useAsync(() => (layer.ocean ? loadCatalog() : null), [layer.id]);
   const plastics = useAsync(() => (layer.plastics ? loadPlastics() : null), [layer.id]);
   const amib = useAsync(() => (layer.amib ? loadAmibCatalog() : null), [layer.id]);
-  if (ocean === undefined || plastics === undefined || amib === undefined) return null;
-  if (layer.ocean && ocean) return <>{hasSsp(layer) ? <OceanSsp layer={layer} catalog={ocean} /> : null}<OceanPanel layer={layer} catalog={ocean} /></>;
+  if (isOmLayer(layer)) return <OmPanelBody />;
+  if (isNpLayer(layer)) return <NpPanelBody />;
+  if (plastics === undefined || amib === undefined) return null;
   if (layer.plastics && plastics) return <PlasticsPanel layer={layer} d={plastics} />;
   return <StandardBody layer={layer} amibCatalog={amib} />;
 }
@@ -185,7 +138,6 @@ export function AnalysisPanel() {
   useEffect(() => { if (scroller.current) scroller.current.scrollTop = 0; }, [id]); // a new layer starts at the top; choices inside a panel keep the reader's place
   return (
     <aside id="analysis" className="analysis" aria-label="Analysis">
-      <div className="panel-head"><ModeTabs /></div>
       <div className="panel-scroll" id="panelBody" ref={scroller}>
         <div className="fade" key={id} style={{ "--layer": layer.color }}>
           <header className="layer-head">

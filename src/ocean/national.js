@@ -57,11 +57,11 @@ export async function forecastFigure(step) {
   const last = s.points.at(-1), ahead = [{ year: last.year, value: last.value, lo: last.value, hi: last.value }, ...s.forecast], col = (k) => ahead.map((f) => ({ year: f.year, value: f[k] }));
   return {
     l: {
-      id: `national_forecast_${step}`, title: `${s.def.label}: measured, and trend forecast to ${HORIZON}`, badges: ["statistical extrapolation", "not from the data package"],
-      shows: `The forecast continues the average yearly change of ${FIT_FROM}–${last.year} (random walk with drift); the range is where the value is expected to fall 8 times in 10. Tested on the past: forecasting ${s.test.from}–${s.test.to} from the years before was off by ${s.test.error.toFixed(1)} percentage points on average. It is not a stock assessment and says nothing beyond ${HORIZON}.`,
+      id: `national_forecast_${step}`, title: `${s.def.label}: measured, and trend projection to ${HORIZON}`, badges: ["statistical extrapolation", "not from the data package"],
+      shows: `The projection continues the average yearly change of ${FIT_FROM}–${last.year} (random walk with drift); the range is where the value is expected to fall 8 times in 10. Tested on the past: projecting ${s.test.from}–${s.test.to} from the years before was off by ${s.test.error.toFixed(1)} percentage points on average. It is not a stock assessment and says nothing beyond ${HORIZON}.`,
       chart: { type: "line_trend", x: "year", y: "value", y_label: `${s.def.label} (${s.def.unit})` },
     },
-    data: { Pakistan: { Measured: s.points, "Trend forecast": col("value"), "Likely range, low": col("lo"), "Likely range, high": col("hi") } },
+    data: { Pakistan: { Measured: s.points, "Trend projection": col("value"), "Likely range, low": col("lo"), "Likely range, high": col("hi") } },
   };
 }
 

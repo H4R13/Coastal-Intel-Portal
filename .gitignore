@@ -16,3 +16,4 @@ data/
 _*.mjs
 *.log
 eval-report.md
+.pg/

@@ -2,7 +2,11 @@
  * Load the ocean pH / warming / oxygen / fisheries package into PostgreSQL (ocean_doc in schema.sql) and clear
  * its cached answers.
  *
- *   node server/load-ocean.mjs ["Other Data/AMHK/ndma-ocean-portal-data-main"]
+ *   node server/load-ocean.mjs [<folder holding catalog.json>]
+ *
+ * Without a folder: the newest package's portal/ folder (ocean-package.mjs), else the first delivery
+ * (Other Data/AMHK/ndma-ocean-portal-data-main). Projections per scenario (path with {scenario}) are stored as
+ * raster/<id>/<scenario>/<year>.
  *
  * The package's catalog.json lists every layer; this reads each layer's file and stores it under the key the API
  * serves. GeoTIFFs are decoded here into plain grids (values row by row from the north, null = no data), so the
@@ -10,10 +14,13 @@
  */
 import fs from "node:fs"; import path from "node:path";
 import { fromFile } from "geotiff";
+import { oceanPackage } from "../ocean-package.mjs";
 try { process.loadEnvFile(path.join(process.cwd(), ".env")); } catch { /* settings may come from the environment */ }
 const { pool, clearCache, redis } = await import("./db.mjs");
 
-const dir = path.resolve(process.argv[2] ?? "Other Data/AMHK/ndma-ocean-portal-data-main");
+const pkg = oceanPackage(process.cwd()); // run.mjs has moved the process to the data folder
+const dir = path.resolve(process.argv[2] ?? (pkg ? path.join(pkg, "portal") : "Other Data/AMHK/ndma-ocean-portal-data-main"));
+console.log(`Loading ${path.relative(process.cwd(), dir)}`);
 if (!fs.existsSync(path.join(dir, "catalog.json"))) { console.error(`catalog.json not found in ${dir}`); process.exit(1); }
 const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(dir, rel), "utf8"));
 
@@ -32,7 +39,9 @@ const counts = { raster: 0, data: 0, overlay: 0, vector: 0 };
 
 for (const l of catalog.layers) {
   if (l.type === "raster") { docs.push([`raster/${l.id}`, await readGrid(l.path)]); counts.raster++; }
-  if (l.type === "raster_series") for (const y of l.years) { docs.push([`raster/${l.id}/${y}`, await readGrid(l.path.replace("{year}", y))]); counts.raster++; }
+  if (l.type === "raster_series") for (const sc of l.scenarios ?? [null]) for (const y of l.years) {
+    docs.push([`raster/${l.id}/${sc ? `${sc}/` : ""}${y}`, await readGrid(l.path.replace("{scenario}", sc).replace("{year}", y))]); counts.raster++;
+  }
   if (l.type === "vector") { docs.push([`vector/${l.id}`, readJson(l.path)]); counts.vector++; }
   if (l.type === "timeseries" || l.type === "table") { docs.push([`data/${l.id}`, readJson(l.path.replace(/\.csv$/, ".json"))]); counts.data++; }
   if (l.overlay) { docs.push([`overlay/${l.id}`, readJson(l.overlay.path)]); counts.overlay++; }

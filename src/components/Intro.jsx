@@ -1,9 +1,10 @@
 /**
  * Opening sequence, shown on every page load. It waits behind an "Enter" button, because browsers only allow sound
  * after a click or key press; then: the NGT mark with "powered by NDMA" and the NDMA logo, then the portal's name,
- * whose letters arrive one by one and then rush past the viewer as streaks of blue light. Sound: introSound.js.
+ * whose letters arrive one by one and then rush past the viewer as streaks of blue light. Sound: the start of the opening track (introSound.js).
  * Once it is running, any key or click skips it; the speaker button turns the sound off (remembered for next time).
- *   <Intro onDone />   onDone is called when the sequence is over and the overlay has faded
+ * Esc (on the Enter screen too) skips everything: the sequence, the system check and Hela's start-up warnings.
+ *   <Intro onDone />   onDone({ skipAll }) is called when the sequence is over and the overlay has faded
  *   skipsIntro()       true when it is not shown at all (?nointro, or the visitor prefers reduced motion)
  * The timings live in src/styles.css (.intro …); the numbers below must match them.
  */
@@ -11,8 +12,8 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { introSound } from "../introSound.js";
 import { Icon } from "../lib.jsx";
 
-const TITLE = "Coastal Environmental Intelligence Portal";
-const MARK_MS = 3600, TITLE_MS = 3900, RUSH_MS = 2300, OUT_MS = 450; // RUSH_MS: when the name starts to rush, from the moment it appears
+const TITLE = "Nereus Sentinel";
+const MARK_MS = 3600, TITLE_MS = 3900, OUT_MS = 450;
 const MUTED_KEY = "introMuted";
 const SPEAKER = '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/>', ON = '<path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11"/>', OFF = '<path d="m16 9.5 5 5M21 9.5l-5 5"/>';
 
@@ -25,25 +26,30 @@ export function Intro({ onDone }) {
 
   useEffect(() => { enter.current?.focus(); return () => { timers.current.forEach(clearTimeout); sound.current?.stop(0.25); }; }, []);
 
-  const finish = (fade = 1.4) => { // the last hit rings out as the portal appears
+  const finish = (fade = 1.4, all = false) => { // the last hit rings out as the portal appears
     if (over.current) return;
     over.current = true;
     timers.current.forEach(clearTimeout);
     sound.current?.stop(fade); sound.current = null;
     setOut(true);
-    setTimeout(onDone, OUT_MS);
+    setTimeout(() => onDone({ skipAll: all }), OUT_MS);
   };
+  useEffect(() => { // Esc, on the Enter screen or during the sequence, skips everything: the sequence, the system check and Hela's warnings
+    const esc = (e) => { if (e.key === "Escape") { e.preventDefault(); finish(0.25, true); } };
+    window.addEventListener("keydown", esc);
+    return () => window.removeEventListener("keydown", esc);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const start = (e) => {
     e.stopPropagation();
     setGate(false);
-    sound.current = introSound({ markMs: MARK_MS, rushMs: MARK_MS + RUSH_MS, muted });
+    sound.current = introSound({ muted });
     timers.current.push(setTimeout(() => setTitled(true), MARK_MS), setTimeout(() => finish(), MARK_MS + TITLE_MS));
     // from here on any key or click skips; not armed at once, so the entering click or key cannot skip it
     timers.current.push(setTimeout(() => setArmed(true), 500));
   };
   useEffect(() => {
     if (!armed) return undefined;
-    const skip = () => finish(0.25);
+    const skip = (e) => { if (e.key !== "Escape") finish(0.25); };
     window.addEventListener("keydown", skip);
     return () => window.removeEventListener("keydown", skip);
   }, [armed]); // eslint-disable-line react-hooks/exhaustive-deps

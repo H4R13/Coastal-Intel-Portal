@@ -5,10 +5,10 @@
  */
 import { useId } from "react";
 import { useStore } from "../state.js";
-import { MODES } from "../config/layers.js";
+import { TIME_RANGE } from "../config/layers.js";
 
 /** First year of the timeline. Yearly charts drop anything earlier and start their axis here, so they all line up with it. */
-export const FIRST_YEAR = Math.min(...MODES.map((m) => m.from));
+export const FIRST_YEAR = TIME_RANGE.from;
 
 const W = 340, H = 200, M = { l: 46, r: 12, t: 14, b: 30 };
 const PALETTE = ["var(--layer, var(--accent))", "#c9a3e6", "#7fd0c8", "#d8b77a", "#9fb4ff", "#e79ac0", "#b9d27a", "#f2c179"];

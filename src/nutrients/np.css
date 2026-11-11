@@ -1,0 +1,33 @@
+/* Nutrients & Plankton (src/nutrients/). Everything else it shows wears the ocean package's styles (om.css); these are
+   only its own pieces: the place names on the map, the nutrient cell values, the month slider's gap marks and the panel extras. */
+
+/* place names beside the monitoring points, with this month's value */
+.np-name { display: flex; flex-direction: column; gap: 1px; pointer-events: none; white-space: nowrap; color: #e2eef0; text-shadow: 0 1px 3px rgba(5, 14, 18, 0.95), 0 0 6px rgba(5, 14, 18, 0.85); }
+.np-name b { font-size: calc(11px * var(--fs)); font-weight: 700; letter-spacing: 0.02em; }
+.np-name span { font-size: calc(10.5px * var(--fs)); color: var(--muted); font-variant-numeric: tabular-nums; }
+.np-name.left { align-items: flex-end; }
+.np-name.on b { color: #fff; }
+.np-name.on span { color: var(--text); font-weight: 600; }
+/* nutrient value in the middle of each one-degree cell */
+.np-cell { font-size: calc(10.5px * var(--fs)); font-weight: 700; color: #0b1820; background: rgba(241, 245, 243, 0.82); border-radius: 6px; padding: 1px 5px; pointer-events: none; font-variant-numeric: tabular-nums; }
+
+/* legend marks: a hollow dot (no reading) and a dashed line (nearby pixel) */
+.legend-om .d i.hollow { background: transparent; box-shadow: 0 0 0 1.5px #9db4b7; width: 8px; height: 8px; }
+.legend-om .d i.dash { width: 16px; height: 0; border-radius: 0; background: none; box-shadow: none; border-top: 1.5px dashed #e6eef0; }
+
+/* the month slider */
+.om-year small.np-month { color: var(--muted); text-transform: none; letter-spacing: 0; font-size: calc(10.5px * var(--fs)); }
+.np-gaps { position: absolute; left: 0; right: 0; top: 19px; height: 4px; pointer-events: none; }
+.np-gaps i { position: absolute; width: 2px; height: 4px; margin-left: -1px; background: var(--sand); opacity: 0.7; border-radius: 1px; }
+.np-dock-note { flex: none; display: flex; flex-direction: column; gap: 1px; max-width: calc(190px * var(--fs)); font-size: calc(10.5px * var(--fs)); color: var(--muted); line-height: 1.3; }
+.np-dock-note b { color: var(--text-2); font-weight: 600; font-size: calc(11px * var(--fs)); }
+
+/* the panel */
+.om-panel .ccard.np-card { cursor: default; }
+.om-panel .ccard.np-card:hover { transform: none; }
+.om-panel .facts .cell.np-on { box-shadow: inset 0 0 0 1px var(--tc); background: color-mix(in srgb, var(--tc) 12%, transparent); }
+.np-bins { display: grid; gap: 6px; margin-top: 10px; }
+.np-bin { display: grid; grid-template-columns: calc(78px * var(--fs)) 1fr 40px; gap: 8px; align-items: center; font-size: calc(11.5px * var(--fs)); color: var(--text-2); }
+.np-bin div { height: 12px; border-radius: 6px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.np-bin i { display: block; height: 100%; border-radius: 6px; }
+.np-bin b { text-align: right; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }

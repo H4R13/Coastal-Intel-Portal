@@ -42,13 +42,13 @@ export const LAYERS = [
   },
   {
     id: "intrusion",
-    title: "Saltwater Intrusion",
+    title: "Saline Water Intrusion",
     descriptor: "Coastal groundwater exposure",
     color: "#4e9fc0",
     lead: "Groundwater conditions along the coast",
     availability: ["Groundwater samples","Intrusion evidence zones"],
     icon: icon('<path d="M12 3.5 6.5 10a6.2 6.2 0 1 0 11 0Z"/><path d="M9 14.5c.8.9 1.9 1.3 3 1.3"/>'),
-    about: "Saltwater intrusion describes the landward movement of saline water into coastal aquifers, affecting groundwater quality and freshwater availability.",
+    about: "Saline water intrusion describes the landward movement of saline water into coastal aquifers, affecting groundwater quality and freshwater availability.",
     mapLayer: { type: "points", label: "Groundwater sampling points", planned: ["Sampling points", "Intrusion evidence zones", "Coastal aquifer indicators"], endpoint: null },
     legend: { kind: "categorical", label: "Intrusion evidence", unit: null },
     charts: [
@@ -61,6 +61,7 @@ export const LAYERS = [
     endpoint: null,
     focus: [[67.1, 23.6], [68.95, 25.2]],
     amib: { hazards: ["groundwater", "river-salt", "saltwedge"] }, // fresh groundwater, salt moving up the river, salt-water boundary under the coast
+    video: { src: "media/saltwater.mp4", title: "How saline water moves inland" }, // shown under the hazard list (src/components/Clip.jsx)
   },
   {
     id: "salinity",
@@ -89,10 +90,10 @@ export const LAYERS = [
     title: "Coastal Hazards",
     descriptor: "Salt, sinking land & rising sea",
     color: "#d47fa6",
-    lead: "Every hazard of the saltwater intrusion package in one place, under each emissions scenario",
-    availability: ["Saltwater intrusion and salinity package"],
+    lead: "Every hazard of the saline water intrusion package in one place, under each emissions scenario",
+    availability: ["Saline water intrusion and salinity package"],
     icon: icon('<path d="M12 3.5 21 19.5H3Z"/><path d="M12 9.5v4.5"/><circle cx="12" cy="16.8" r=".5" fill="currentColor"/>'),
-    about: "The team's saltwater intrusion and salinity package, arranged by hazard: sea-level rise and land sinking, land falling below sea level, salt water under the coast and up the Indus, fresh groundwater, salty soils, sea conditions, mangroves and shoreline change. Each hazard opens on its main map; every raw layer of the package is listed at the bottom of the panel.",
+    about: "The team's saline water intrusion and salinity package, arranged by hazard: sea-level rise and land sinking, land falling below sea level, saline water under the coast and up the Indus, fresh groundwater, salty soils, sea conditions, mangroves and shoreline change. Each hazard opens on its main map; every raw layer of the package is listed at the bottom of the panel.",
     // no map of its own: what is drawn is the chosen hazard's package map (renderer "amib" in js/map/renderers.js)
     mapLayer: { type: "package", label: "Package hazard map", planned: [], endpoint: null },
     legend: { kind: "ramp", label: "Hazard", unit: null },
@@ -120,14 +121,14 @@ export const LAYERS = [
     focus: [[67.0, 23.95], [67.95, 24.95]], // the Indus Delta creeks, where most of the change is
     charts: [
       { id: "area", title: "Mangrove area through time", type: "line", xLabel: "Year", yLabel: "Area", unit: "km²", placeholder: "Historical extent will appear here", endpoint: "api/layers/mangroves/series" },
-      { id: "change", title: "Gain / loss", type: "bar", xLabel: "Period", yLabel: "Net change", unit: "ha", placeholder: "Gain and loss will appear here", endpoint: null },
-      { id: "compare", title: "Extent comparison", type: "bar", xLabel: "Region", yLabel: "Area", unit: "ha", placeholder: "Extent comparison will appear here", endpoint: null },
+      // gross gain above the line, gross loss below, each year against the one before; projected years follow the SSP keys
+      { id: "change", title: "Gain / loss", type: "gainloss", xLabel: "Year", yLabel: "Change", unit: "km²", placeholder: "Gain and loss will appear here", endpoint: "api/layers/mangroves/gainloss" },
     ],
     indicators: indicators([["area", "Current extent", "ha"], ["change", "Net change", "ha"], ["proj", "2050"], ["cov", "Coverage"]]),
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
-    // the package's raster mangrove cover moved to the Coastal Hazards button (owner request: this panel carried too much)
-    seeAlso: { layer: "hazards", hazard: "mangroves", text: "Raster mangrove cover by region (1996–2020) is under Coastal Hazards." },
+    // the package's own mangrove cover (AMIB product F, GMW v3 by region) is no longer shown anywhere (owner request, 2026-10-21)
+    video: { src: "media/mangroves.mp4", title: "Why mangrove forests matter" }, // in place of the key indicators (src/panels/AnalysisPanel.jsx)
   },
   {
     id: "erosion",
@@ -150,7 +151,8 @@ export const LAYERS = [
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
     focus: [[66.9, 23.6], [68.3, 24.95]],
-    seeAlso: { layer: "hazards", hazard: "shoreline", text: "Raster maps of land lost to or gained from the sea, by region, are under Coastal Hazards." },
+    seeAlso: { layer: "hazards", hazard: "erosion-accretion", text: "A second erosion and accretion dataset, from another team (Landsat waterline, 5-year steps since 1986 and to 2050 under each emissions scenario) is under Coastal Hazards." },
+    video: { src: "media/erosion.mp4", title: "How the coast erodes" }, // in place of the key indicators (src/panels/AnalysisPanel.jsx)
   },
   {
     id: "microplastics",
@@ -183,7 +185,8 @@ about: "Plastic debris at sampling stations in the Indus Delta creeks, published
     availability: ["Catch and activity records","Species distribution"],
     icon: icon('<path d="M3 12c2.5-4 6-5.5 10-5 3 .4 5.4 2.2 7 5-1.6 2.8-4 4.6-7 5-4 .5-7.5-1-10-5Z"/><circle cx="16.5" cy="11" r=".7" fill="currentColor"/><path d="M3 12 1.5 8.5M3 12l-1.5 3.5"/>'),
     about: "Fisheries information covers marine resources, fishing activity and species distribution along the coast.",
-    mapLayer: { type: "national", label: "National fisheries indicator", planned: ["Fishing activity", "Fishing grounds", "Species / distribution"], endpoint: null },
+    // the ocean monitoring package (src/oceanMonitoring/), opened on its fish-stocks tab
+    mapLayer: { type: "oceanMonitoring", tab: "fish", label: "Fish stocks & shell-builders", planned: [], endpoint: null },
     legend: { kind: "ramp", label: "National fisheries indicator", unit: "—", gradient: NATIONAL_RAMP },
     focus: [[61.4, 21.0], [68.8, 25.6]],
     charts: [
@@ -194,9 +197,6 @@ about: "Plastic debris at sampling stations in the Indus Delta creeks, published
     indicators: indicators([["catch", "Reported catch", "t"], ["trend", "Trend"], ["species", "Species recorded"], ["cov", "Coverage"]]),
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
-    // catch and stock status, shell-building animals, national index: topics 9-11 of the ocean package (charts and tables;
-    // on the map, a balloon stating the national value of the year)
-    ocean: { steps: [9, 10, 11] },
   },
   {
     id: "ocean",
@@ -207,27 +207,42 @@ about: "Plastic debris at sampling stations in the Indus Delta creeks, published
     availability: [],
     icon: icon('<path d="M12 3.5c-2.6 3-4 5.3-4 7.3a4 4 0 0 0 8 0c0-2-1.4-4.3-4-7.3Z"/><path d="M3 18c2.2 0 2.2-1.5 4.5-1.5S9.8 18 12 18s2.2-1.5 4.5-1.5S18.8 18 21 18"/>'),
     about: "Ocean conditions in Pakistan's Exclusive Economic Zone: surface pH, shell-building conditions, sea temperature and marine heatwaves, dissolved oxygen, combined climate exposure and the outlook to 2050.",
-    mapLayer: { type: "ocean", label: "Ocean conditions", planned: [], endpoint: "api/ocean/" },
+    // the ocean monitoring package (src/oceanMonitoring/), opened on its pH tab
+    mapLayer: { type: "oceanMonitoring", tab: "ph", label: "Ocean conditions", planned: [], endpoint: null },
     focus: [[61.4, 21.0], [68.8, 25.6]], // Pakistan's Exclusive Economic Zone
     legend: { kind: "categorical", label: "Ocean layer", unit: null },
     charts: [],
     indicators: [],
     meta: { source: null, temporal: null, spatial: null, updated: null },
     endpoint: null,
-    // topics of the ocean package (server/load-ocean.mjs); the panel is js/ocean/oceanPanel.js
-    ocean: { steps: [4, 5, 6, 7, 8, 13] },
+  },
+  {
+    id: "nutrients",
+    title: "Nutrients & Plankton",
+    descriptor: "Eutrophication & algal biomass",
+    color: "#a9c95a",
+    lead: "Algae in the delta's water month by month, and the nutrients that feed them",
+    availability: ["Monthly satellite chlorophyll, 2020-2026", "Chlorophyll map, April 2026", "Surface nutrient averages"],
+    icon: icon('<circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.3"/><path d="M12 4.5v5.2M12 14.3v5.2M4.5 12h5.2M14.3 12h5.2" opacity=".55"/>'),
+    about: "DMJM's Indus Delta Observatory: chlorophyll-a (how much algae is in the water) from satellites each month since January 2020 at five fixed points from the Karachi creeks to offshore, the April 2026 chlorophyll map of the delta, and long-term surface nitrate and phosphate. Nutrients feed algae; too much of both is eutrophication.",
+    // laid out like the ocean monitoring package (src/nutrients/, .om-mode): its own layer list, month slider and panel; data: server/load-nutrients.mjs
+    mapLayer: { type: "nutrients", label: "Chlorophyll and nutrients", planned: [], endpoint: "api/nutrients/" },
+    legend: { kind: "ramp", label: "Chlorophyll-a", unit: "mg/m³" },
+    focus: [[66.45, 23.0], [68.5, 25.05]], // the delta frame of the chlorophyll map
+    charts: [],
+    indicators: [],
+    meta: { source: null, temporal: null, spatial: null, updated: null },
+    endpoint: null,
   },
 ];
 
-/** Last observed year: everything after it on the timeline is forecast. */
+/** Last observed year: everything after it on the timeline is projection. */
 export const PRESENT_YEAR = 2026;
 
-/** Each mode is a year range on the one shared timeline. */
-export const MODES = [
-  { id: "historical", label: "Historical", from: 1990, to: 2025 },
-  { id: "normal", label: "Normal", from: 1990, to: 2050 },
-  { id: "forecast", label: "Forecast", from: 2027, to: 2050 },
-];
+/** The years the shared timeline covers. `to` is where it ends for most layers; a layer whose chosen data goes further
+ *  (the package's sea-level, below-sea-level, salt-water-depth and future-ocean hazards, to 2090-2100) runs it to that
+ *  year instead, up to `max` (state.yearTo, set by useTimeEnd in src/App.jsx). */
+export const TIME_RANGE = { from: 1990, to: 2050, max: 2100 };
 
 /** Reference places (locations only — no environmental values). */
 export const PLACES = [

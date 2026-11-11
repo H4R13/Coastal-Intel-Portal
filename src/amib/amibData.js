@@ -6,7 +6,7 @@
  * What is drawn is resolved here from the panel's choice (state.amibView[layer id]), the emissions scenario (state.ssp)
  * and the timeline year, so the map and the panel always agree. Everything resolves to null when the API is not running.
  */
-import { HAZARDS, PRODUCT_STYLE, SSPS } from "./hazards.js";
+import { HAZARDS, PRODUCT_STYLE, SSPS, RAMPS, LAYER_RAMPS } from "./hazards.js";
 
 const docs = new Map();
 export function loadAmibDoc(key) {
@@ -67,10 +67,13 @@ export function resolveHazard(catalog, layer, view = {}, ssp = "ssp245", year = 
   return { hazards, hazard, variant, measure, ssp, sspUsed, L, step: L ? pickStep(L, year) : 0 };
 }
 
+/** The package's maps that can be browsed: its mangrove cover is left out (the Mangroves button has the team's own extents). */
+export const browsable = (catalog) => catalog.layers.filter((l) => l.bounds && !/mangrove/i.test(l.id));
+
 /** Every raw map layer of the package under this portal layer's products (browse mode). */
 export function resolveBrowse(catalog, layer, view = {}) {
   const products = layer.amib.hazards === "all" ? null : productsOf(layer);
-  const all = catalog.layers.filter((l) => l.bounds && (!products || products.includes(l.product)));
+  const all = browsable(catalog).filter((l) => !products || products.includes(l.product));
   const topics = [...new Map(all.map((l) => [l.product, groupTitle(l)])).entries()].map(([id, title]) => ({ id, title })).sort((a, b) => a.id.localeCompare(b.id));
   const product = topics.find((p) => p.id === view.product)?.id ?? topics[0]?.id;
   const inProduct = all.filter((l) => l.product === product);
@@ -89,14 +92,73 @@ export function currentMap(catalog, layer, s, year = s.year) {
   return { L: h?.L ?? null, step: h?.step ?? 0 };
 }
 
+/**
+ * The last year a portal layer's chosen package data reaches (its maps in every scenario and measure, and its charts),
+ * or null when it has none. The timeline runs to this year when it is past 2050 (useTimeEnd in src/App.jsx).
+ */
+export async function lastYear(layer, s) {
+  if (!layer?.amib) return null;
+  const catalog = await loadAmibCatalog();
+  if (!catalog) return null;
+  const lastOf = (l) => (!l ? null : l.steps && l.time_step !== "month-of-year" ? Math.max(...l.steps.map((x) => x.t)) : l.year ?? null);
+  const view = s.amibView[layer.id] ?? {};
+  const raw = view.raw && layerById(catalog, view.raw);
+  if (raw) return lastOf(raw);
+  const hazards = hazardsOf(layer), hazard = hazards.find((h) => h.id === view.hazard) ?? hazards[0];
+  if (!hazard) return null;
+  const ids = hazard.variants.flatMap((v) => (v.ssp ? Object.values(v.ssp) : [v.layer])).flat();
+  const years = (hazard.measures ?? [{ id: "" }]).flatMap((m) => ids.map((id) => lastOf(layerById(catalog, id.replace("{m}", m.id)))));
+  for (const c of hazard.charts ?? []) {
+    const doc = await loadAmibDoc(`series/${c.product}`), v = doc?.[c.name];
+    if (v) years.push(...(v.series ?? v).flatMap((r) => [].concat(r.year)).map(Number));
+  }
+  const ok = years.filter(Number.isFinite);
+  return ok.length ? Math.max(...ok) : null;
+}
+
 /** Legend entries of a class map that are not drawn (PRODUCT_STYLE hideClasses). */
 export const hiddenStops = (L) => (L?.kind === "categorical" ? (L.legend ?? []).filter((c) => (styleOf(L).hideClasses ?? []).includes(c.label ?? L.classes?.[c.value])) : []);
 export const clearsBackground = (L) => !!styleOf(L).clearBackground && L.kind !== "categorical";
+/** Sea maps are drawn only inside Pakistan's EEZ (no land, no neighbours' waters). */
+export const clipsToSea = (L) => !!styleOf(L).clipToSea;
+/** Maps of a rectangular pilot area fade out along a wavy rim instead of ending in a hard box. */
+export const softensEdges = (L) => !!styleOf(L).softEdges;
+/**
+ * Class maps drawn as a see-through tint: [{ color: "rrggbb", alpha 0-1, shown: "rrggbb" | null }] by legend entry
+ * (PRODUCT_STYLE tints: an alpha, or { alpha, color } with a display colour), or [].
+ */
+export const tintStops = (L) => {
+  const t = styleOf(L).tints;
+  if (!t || L?.kind !== "categorical") return [];
+  return (L.legend ?? []).map((c) => {
+    const v = t[c.label ?? L.classes?.[c.value]], o = typeof v === "number" ? { alpha: v } : v;
+    return o && { color: c.color.replace("#", "").toLowerCase(), alpha: o.alpha, shown: o.color?.replace("#", "").toLowerCase() ?? null };
+  }).filter(Boolean);
+};
+/** The colour a legend entry is drawn in on the map: its display colour when the style gives one (tintStops), else its own. */
+export const shownColor = (L, c) => {
+  const t = tintStops(L).find((x) => x.color === c.color.replace("#", "").toLowerCase());
+  return t?.shown ? `#${t.shown}` : c.color;
+};
+/** Thin, often one-pixel class maps (the shoreline changes): no smoothing, an outline instead (server/amib-render.mjs). */
+export const drawsCrisp = (L) => !!styleOf(L).crisp && tintStops(L).length > 0;
+
+/** The name of the value ramp that recolours this map (hazards.js LAYER_RAMPS), or null for the package's own colours. */
+export const rampOf = (L) => (L?.kind === "categorical" ? null : LAYER_RAMPS.find((r) => r.match.test(L?.id ?? ""))?.ramp ?? null);
+/** Legend stops of a map as drawn: [{ value, color, alpha? }], the recolouring ramp's when there is one. */
+export const legendOf = (L) => (rampOf(L) ? RAMPS[rampOf(L)] : L?.legend ?? []);
+/** CSS gradient of a continuous legend, each colour at its value's position (a ramp's stops need not be evenly spaced). */
+export function rampCss(stops) {
+  const lo = stops[0].value, span = stops.at(-1).value - lo || 1;
+  const rgba = (c) => (c.alpha == null ? c.color : `rgba(${[1, 3, 5].map((i) => parseInt(c.color.slice(i, i + 2), 16)).join(",")},${c.alpha})`);
+  return `linear-gradient(to right, ${stops.map((c) => `${rgba(c)} ${(((c.value - lo) / span) * 100).toFixed(1)}%`).join(", ")})`;
+}
 
 /** URL of the PNG for one step of a package map (server/amib.mjs), relative to `base`. */
 export function imageUrl(L, step, base = location.href) {
   const hide = hiddenStops(L).map((c) => c.color.replace("#", "")).join(",");
-  const query = [clearsBackground(L) && "bg=clear", hide && `hide=${hide}`].filter(Boolean).join("&");
+  const tint = tintStops(L).map((c) => `${c.color}:${Math.round(c.alpha * 100)}${c.shown ? `:${c.shown}` : ""}`).join(",");
+  const query = [clearsBackground(L) && "bg=clear", hide && `hide=${hide}`, clipsToSea(L) && "clip=sea&v=2", softensEdges(L) && "edge=soft", tint && `tint=${tint}`, drawsCrisp(L) && "crisp=1", rampOf(L) && `ramp=${rampOf(L)}`].filter(Boolean).join("&");
   return `${new URL("api/amib/image/", base).href}${encodeURIComponent(L.id)}/${step}${query ? `?${query}` : ""}`;
 }
 

@@ -6,6 +6,12 @@
 const GIBS = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best";
 const daysAgo = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
 const modisDay = daysAgo(2); // latest daily mosaics lag by a day or so
+/* Mapbox needs a public token (VITE_MAPBOX_TOKEN in .env, built into the page); without one its backdrop is left out.
+   Fetched by the browser directly, not through the server's tile cache: the token is restricted to the portal's
+   addresses (the server's requests carry none) and Mapbox's terms limit storing their tiles. 512-px tiles: Mapbox
+   bills per tile, so these need a quarter of the requests. Only its satellite: its dark map draws its own borders,
+   which the portal must not show (Pakistan as officially drawn, MapView.jsx addBorders). */
+const MAPBOX = import.meta.env?.VITE_MAPBOX_TOKEN;
 
 export const BASEMAPS = [
   {
@@ -15,6 +21,14 @@ export const BASEMAPS = [
     thumb: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/7/54/87",
     paint: { "raster-saturation": -0.2, "raster-brightness-max": 0.88 }, water: 0.1, coast: "#8fd0cb",
   },
+  ...(MAPBOX ? [{
+    id: "mapbox-satellite", label: "Mapbox Satellite", sub: "High-resolution imagery", credit: "© Mapbox © Maxar",
+    type: "raster", tileSize: 512, maxzoom: 19,
+    tiles: [`https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=${MAPBOX}`],
+    thumb: `https://api.mapbox.com/v4/mapbox.satellite/7/87/54.jpg90?access_token=${MAPBOX}`,
+    paint: { "raster-saturation": -0.1, "raster-brightness-max": 0.92 }, water: 0, coast: "#8fd0cb",
+    noPrefetch: true, // warming the study area would fetch (and bill) hundreds of tiles per visitor
+  }] : []),
   {
     id: "sentinel", label: "Sentinel-2", sub: "Cloudless 10 m mosaic", credit: "Sentinel-2 cloudless © EOX (CC BY-NC-SA 4.0), contains modified Copernicus Sentinel data 2021",
     type: "raster", tileSize: 256, maxzoom: 13,

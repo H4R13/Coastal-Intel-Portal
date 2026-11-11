@@ -13,8 +13,9 @@
  */
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { getState, setState, selectLayer, setMode, setYear, setSsp, focusLayer } from "../state.js";
+import { getState, setState, selectLayer, setYear, setSsp, focusLayer } from "../state.js";
 import { Icon } from "../lib.jsx";
+import * as np from "../nutrients/np.js";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const tool = (act) => document.querySelector(`.map-tools [data-act="${act}"]`)?.click();
@@ -26,11 +27,11 @@ const hazard = (id, hz) => setState({ amibView: { ...getState().amibView, [id]: 
 const panels = () => document.querySelectorAll(".shell.left-closed .panel-handle.left, .shell.right-closed .panel-handle.right").forEach((b) => b.click()); // both panels open
 
 const STEPS = [
-  { title: "Coastal Environmental Intelligence", text: "One map of Pakistan's coast, from Jiwani to the Indus Delta, with every environmental layer the team has delivered, from 1990 to 2050.", ms: 7000,
-    run: () => { panels(); stop(); setMode("normal"); setSsp("ssp245"); setState({ year: 2026, activeLayers: [], floodId: null }); selectLayer("sealevel"); tool("globe"); } },
+  { title: "Nereus Sentinel", text: "One map of Pakistan's coast, from Jiwani to the Indus Delta, with every environmental layer the team has delivered, from 1990 to 2050.", ms: 7000,
+    run: () => { panels(); stop(); setSsp("ssp245"); setState({ year: 2026, activeLayers: [], floodId: null }); selectLayer("sealevel"); tool("globe"); } },
   { title: "The study area", text: "The portal opens on the globe and flies to the coast: about a thousand kilometres of shoreline in Balochistan and Sindh.", ms: 7000, run: () => tool("reset") },
-  { title: "Nine layers", text: "Each icon opens one subject in the analysis panel: sea level, saltwater intrusion, salinity, coastal hazards, mangroves, erosion, plastics, fisheries and the ocean.", target: ".dock", side: "right", ms: 8000 },
-  { title: "What is drawn on the map", text: "The switches under the dock decide which layers are on the map. Several can be on together.", target: ".layer-toggles", side: "right", ms: 6500 },
+  { title: "Ten layers", text: "Each icon opens one subject and puts it on the map: sea level, saline water intrusion, salinity, coastal hazards, mangroves, erosion, plastics, fisheries, the ocean, and nutrients and plankton.", target: ".dock", side: "right", ms: 8000 },
+  { title: "What is drawn on the map", text: "One layer is on the map at a time: another icon replaces it, and the same icon again takes it off. Earth view and Reset view clear the map.", target: ".dock", side: "right", ms: 7500 },
   { title: "Mangroves", text: "Mangrove forest of each year against 1990: still standing, gained and lost. The map goes to the Indus Delta, where most of the change is.", ms: 9000,
     run: () => { open("mangroves"); show("mangroves"); setYear(2025); } },
   { title: "One timeline for everything", text: "Map layers and charts all follow this year. Past the present the bar is hatched: those years are projections.", target: ".timeline", side: "top", ms: 15000,
@@ -41,13 +42,13 @@ const STEPS = [
     run: async () => { setYear(2050); setSsp("ssp126"); await sleep(3000); setSsp("ssp585"); await sleep(3000); setSsp("ssp245"); } },
   { title: "Coastal erosion", text: "Land lost to the sea, period by period since 1985, then the projected years. Projected areas are drawn fainter.", ms: 12000,
     run: () => { open("erosion"); show("erosion"); play(1995); } },
-  { title: "Coastal hazards", text: "The saltwater intrusion package arranged as eleven hazards in four groups, instead of hundreds of separate maps.", target: ".hz", side: "left", ms: 9000,
+  { title: "Coastal hazards", text: "The saline water intrusion package arranged as ten hazards in four groups, instead of hundreds of separate maps.", target: ".hz", side: "left", ms: 9000,
     run: () => { stop(); hazard("hazards", "sea-rise"); open("hazards", false); show("hazards"); setYear(2026); } },
   { title: "Sea-level rise at the coast", text: "Sea rising plus land sinking, year by year. Colour marks where the rise differs from the regional value.", ms: 12000,
     run: () => { setSsp("ssp585"); focusLayer("hazards"); play(2026, 1); } },
   { title: "Fresh groundwater", text: "The fresh water layer under the delta, modelled for each year under today's river flow.", ms: 12000,
     run: () => { stop(); hazard("hazards", "groundwater"); focusLayer("hazards"); play(1990); } },
-  { title: "Saltwater intrusion", text: "The same hazards sit under their own subject too: salt water under the coast, salt moving up the Indus, and the groundwater layer.", target: ".hz", side: "left", ms: 8000,
+  { title: "Saline water intrusion", text: "The same hazards sit under their own subject too: saline water under the coast, salt moving up the Indus, and the groundwater layer.", target: ".hz", side: "left", ms: 8000,
     run: () => { stop(); setYear(2050); open("intrusion"); show("intrusion"); } },
   { title: "The ocean", text: "Acidity, sea temperature, marine heatwaves and oxygen inside Pakistan's Exclusive Economic Zone, with the outlook to 2050.", ms: 12000,
     run: () => { setSsp("ssp245"); open("ocean"); show("ocean"); play(1990); } },
@@ -55,6 +56,10 @@ const STEPS = [
     run: () => { stop(); open("fisheries"); show("fisheries"); setYear(2020); } },
   { title: "Plastics", text: "Plastic density at the sampling stations in the Indus Delta creeks, beside published measurements along the coast. Any dot can be clicked for its numbers.", ms: 9000,
     run: () => { open("microplastics"); show("microplastics"); setYear(2026); } },
+  { title: "Nutrients and plankton", text: "Algae and sea heat from satellites, year by year since 1998: green and yellow water holds more algae. The layer has its own slider, like the ocean layers.", ms: 10000,
+    run: () => { open("nutrients"); show("nutrients"); np.start().then(() => { if (np.data()?.hist) { np.selectLayer("hist_chl_year"); np.setHi(0); np.play(); } }); } },
+  { title: "Seen and measured in the water", text: "Samples from ships, floats and laboratories found in open databases, one dot per reading. Depth buttons keep surface and deep water apart; any dot can be clicked for its value, date and source.", target: '[aria-label="Depth"]', side: "left", ms: 10000,
+    run: () => { np.start().then(() => { if (np.data()?.insitu?.measured.length) { np.selectLayer("ins_measured"); np.setInsVar("dissolved_oxygen"); np.setInsDepth("deep"); } }); } },
   { title: "Sea level and terrain", text: "Terrain exposure from the 12.5 m elevation model: which land lies below a chosen water level and is open to the sea.", target: ".exposure", side: "left", ms: 10000,
     run: async () => { open("sealevel"); show(); setYear(2026); await sleep(1500); const chips = document.querySelectorAll(".exposure [data-flood]"); chips[Math.min(2, chips.length - 1)]?.click(); } },
   { title: "System check", text: "The terminal checks the database, the cache and the data behind every layer whenever the portal starts.", target: ".term-btn", side: "left", ms: 6500, run: () => setState({ floodId: null }) },

@@ -7,6 +7,7 @@
 import { useStore } from "../state.js";
 import { PopBox, PopButton } from "../lib.jsx";
 import { TimeChart } from "./TimeChart.jsx";
+import { GainLossChart } from "./GainLossChart.jsx";
 
 const W = 340, H = 200, M = { l: 44, r: 12, t: 12, b: 34 };
 const X0 = M.l, X1 = W - M.r, Y0 = H - M.b, Y1 = M.t;
@@ -39,6 +40,7 @@ function Plotted({ cfg, data }) {
   const series = data.series ?? [];
   const pts = series.flatMap((s) => s.points);
   if (!pts.length) return <Pending cfg={cfg} />;
+  if (cfg.type === "gainloss") return <GainLossChart data={data} />;
   const cat = typeof pts[0].x === "string";
   if (!cat && cfg.type !== "bar") return <TimeChart groups={series} yLabel={cfg.yLabel} unit={data.unit ?? cfg.unit} />; // follows the timeline
   const xs = cat ? [...new Set(pts.map((p) => p.x))] : pts.map((p) => p.x);

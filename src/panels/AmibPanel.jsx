@@ -8,21 +8,22 @@
 import { Fragment, useState } from "react";
 import { getState, setState, toggleLayer, focusLayer, useStore } from "../state.js";
 import { HAZARD_GROUPS } from "../amib/hazards.js";
-import { loadAmibDoc, resolveHazard, resolveBrowse, layerById, scenarioName, hiddenStops, clearsBackground, sspAvailability, hazardsOf } from "../amib/amibData.js";
+import { loadAmibDoc, resolveHazard, resolveBrowse, browsable, layerById, scenarioName, hiddenStops, shownColor, clearsBackground, sspAvailability, hazardsOf, legendOf, rampCss } from "../amib/amibData.js";
 import { TimeChart, FIRST_YEAR } from "../components/TimeChart.jsx";
 import { PopBox, PopButton, useAsync } from "../lib.jsx";
 import { SspKeys } from "./SspKeys.jsx";
+import { Clip } from "../components/Clip.jsx";
 
 const viewOf = (layer, s) => s.amibView[layer.id] ?? {};
 const setView = (layer, patch) => setState({ amibView: { ...getState().amibView, [layer.id]: { ...viewOf(layer, getState()), ...patch } } });
 
 function Legend({ L }) {
-  const hidden = hiddenStops(L), stops = (L.legend ?? []).filter((c) => !hidden.includes(c));
+  const hidden = hiddenStops(L), stops = legendOf(L).filter((c) => !hidden.includes(c));
   if (!stops.length) return null;
-  if (L.kind === "categorical") return <ul className="oclasses">{stops.map((c, i) => <li key={i}><i style={{ background: c.color }} />{c.label ?? L.classes?.[c.value] ?? c.value}</li>)}</ul>;
+  if (L.kind === "categorical") return <ul className="oclasses">{stops.map((c, i) => <li key={i}><i style={{ background: shownColor(L, c) }} />{c.label ?? L.classes?.[c.value] ?? c.value}</li>)}</ul>;
   return (
     <>
-      <div className="oramp" style={{ background: `linear-gradient(to right, ${stops.map((c) => c.color).join(", ")})` }} />
+      <div className="oramp" style={{ background: rampCss(stops) }} />
       <div className="oramp-scale"><span>{stops[0].value}</span><span>{L.units ?? ""}</span><span>{stops.at(-1).value}</span></div>
     </>
   );
@@ -128,7 +129,7 @@ function IndicatorChart({ product, name, variant, open: startOpen }) {
 function Browse({ layer, catalog, view }) {
   const [open, setOpen] = useState(!!view.raw); // remembered while this layer's panel stays open
   const b = resolveBrowse(catalog, layer, view);
-  const count = catalog.layers.filter((l) => l.bounds).length;
+  const count = browsable(catalog).length;
   const rawLayer = view.raw && layerById(catalog, view.raw);
   return (
     <section className="block">
@@ -154,17 +155,14 @@ function Browse({ layer, catalog, view }) {
   );
 }
 
-/** The SSP keys for this layer's current hazard map; nothing when the package is not available. */
+/** The SSP keys for this layer's current hazard map; nothing when that map has no scenarios (observed maps, a raw package layer) or the package is not available. */
 export function AmibSsp({ layer, catalog }) {
   const s = useStore();
   if (!catalog || !hazardsOf(layer).length) return null;
   const view = viewOf(layer, s), raw = view.raw && layerById(catalog, view.raw);
   const h = resolveHazard(catalog, layer, view, s.ssp, s.year);
-  const target = h.variant.ssp ? h.hazard : h.hazards.find((x) => x.variants.some((v) => v.ssp)); // where a key goes from a map without scenarios
-  const jump = target && { title: target.title };
-  const onJump = () => setView(layer, { hazard: target.id, variant: 0, measure: undefined, raw: null });
-  if (raw) return <SspKeys layer={layer} avail={null} none="A raw package layer is chosen below." jump={jump} onJump={onJump} />;
-  return <SspKeys layer={layer} avail={sspAvailability(h.variant)} used={h.sspUsed} jump={jump} onJump={onJump} />;
+  if (raw || !h.variant.ssp) return null; // hazards with scenarios carry the "SSP" tag in the list below
+  return <SspKeys layer={layer} avail={sspAvailability(h.variant)} used={h.sspUsed} />;
 }
 
 /** The package section of a layer with layer.amib (the caller has checked that the catalog loaded). */
@@ -173,10 +171,11 @@ export function AmibPanel({ layer, catalog }) {
   const view = viewOf(layer, s), h = resolveHazard(catalog, layer, view, s.ssp, s.year);
   if (!h) return null;
   const raw = view.raw && layerById(catalog, view.raw);
-  const charts = [...h.hazard.charts, ...(h.measure?.chart ? [{ product: h.hazard.product, name: h.measure.chart }] : [])];
+  const charts = [...(h.variant.charts ?? h.hazard.charts), ...(h.measure?.chart ? [{ product: h.hazard.product, name: h.measure.chart }] : [])];
   return (
     <>
       <HazardList layer={layer} h={h} raw={raw} />
+      {layer.video ? <Clip video={layer.video} /> : null}
       {raw ? null : <HazardMap layer={layer} h={h} catalog={catalog} onMap={s.activeLayers.includes(layer.id)} />}
       {charts.length && !raw ? (
         <section className="block">

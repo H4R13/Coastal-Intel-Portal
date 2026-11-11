@@ -53,11 +53,30 @@ create table if not exists dmjm_doc (
   body jsonb not null
 );
 
+-- Nutrients and plankton (DMJM's Indus Delta Observatory): 'points' (monthly satellite chlorophyll at five places),
+-- 'chlorophyll' (the April 2026 map), 'nitrate' and 'phosphate' (World Ocean Atlas surface averages). See server/load-nutrients.mjs.
+create table if not exists nutrients_doc (
+  key  text primary key,
+  body jsonb not null
+);
+
 -- Mangrove area per year, exactly as delivered in the team's CSV files.
 create table if not exists mangrove_area (
   scenario text not null,
   year     int  not null,
   area_km2 double precision not null,
+  primary key (scenario, year)
+);
+
+-- Mangrove gross gain and loss per year (against the year before), as delivered in mangrove_by_year_1985_2050.csv.
+-- Mapped years come from raster transitions; projected years from the model's cell counts.
+create table if not exists mangrove_gainloss (
+  scenario  text not null,
+  year      int  not null,
+  gain_km2  double precision not null,
+  loss_km2  double precision not null,
+  net_km2   double precision,
+  method    text,
   primary key (scenario, year)
 );
 

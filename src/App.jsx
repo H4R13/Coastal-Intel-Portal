@@ -1,31 +1,52 @@
 /**
  * The page: the layers sidebar on the left, the map in the middle, the analysis panel on the right, and the pieces
- * that float over them (intro, terminal, tour, about).
+ * that float over them (intro, terminal, tour, about). With the Ocean or Fisheries layer open (om-mode) the layer dock
+ * lies above the year slider and the ocean package's layer list takes the left side (src/oceanMonitoring/); Nutrients &
+ * Plankton is laid out the same way, with its month slider (src/nutrients/).
  * On every page load: the opening sequence, the system check (which closes by itself), then the assistant's warnings.
  *   ?nointro skips all three;  ?tour then plays the guided tour (with ?nointro, as soon as the map is ready);
+ *   ?showcase likewise starts the showcase (standby mode, src/components/Showcase.jsx);
  *   ?perf shows the frame-time read-out (src/perf.js).
  */
 import { useEffect, useRef, useState } from "react";
-import { useStore } from "./state.js";
 import { Icon } from "./lib.jsx";
 import { Sidebar } from "./components/Sidebar.jsx";
 import { MapView } from "./components/MapView.jsx";
 import { AnalysisPanel } from "./panels/AnalysisPanel.jsx";
 import { useSspShortcuts } from "./panels/SspKeys.jsx";
 import { Intro, skipsIntro } from "./components/Intro.jsx";
-import { Terminal, openTerminal } from "./components/Terminal.jsx";
+import { Terminal, openTerminal, loadTerminalState } from "./components/Terminal.jsx";
 import { announce } from "./components/Assistant.jsx";
 import { Tour, startTour } from "./components/Tour.jsx";
+import { Showcase, startShowcase } from "./components/Showcase.jsx";
+import { LAYERS } from "./config/layers.js";
+import { useStore, setYearTo, getState } from "./state.js";
+import { lastYear } from "./amib/amibData.js";
+import { isOmLayer } from "./oceanMonitoring/OceanMonitoring.jsx";
+import { isNpLayer } from "./nutrients/Nutrients.jsx";
 
 const PANELS_KEY = "pakcoast.panels";
 const SIDE_LABEL = { left: "layers panel", right: "analysis panel" };
+/**
+ * Where the timeline ends: 2050 for most layers; for the open layer whose chosen package data goes further (sea-level
+ * rise, land below sea level, salt water under the coast to 2100, the future ocean to 2090) that layer's last year.
+ */
+function useTimeEnd() {
+  const primary = useStore((s) => s.primaryLayer), view = useStore((s) => s.amibView[s.primaryLayer]);
+  useEffect(() => {
+    let live = true;
+    lastYear(LAYERS.find((l) => l.id === primary), getState()).then((y) => { if (live) setYearTo(y ?? 0); }); // under 2050 is lifted to 2050
+    return () => { live = false; };
+  }, [primary, view]);
+}
+
 const whenMapReady = (fn) => { const wait = setInterval(() => { if (window.__map?.loaded()) { clearInterval(wait); fn(); } }, 300); };
 
 function AboutDialog({ dialog }) {
   return (
     <dialog id="aboutDialog" ref={dialog} onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}>
       <h2 className="eyebrow">About this portal</h2>
-      <h3>Coastal Environmental Intelligence</h3>
+      <h3>Nereus Sentinel</h3>
       <p>A monitoring portal for understanding how Pakistan's coastline is changing across seven environmental layers.</p>
       <p className="muted">This is the initial interface. No environmental datasets are connected yet, so no measurements, trends or projections are shown. Each layer is configured in <code>src/config/layers.js</code>; connecting data requires no interface redesign.</p>
       <button id="closeAbout" className="btn" onClick={() => dialog.current.close()}>Close</button>
@@ -34,15 +55,16 @@ function AboutDialog({ dialog }) {
 }
 
 export function App() {
-  const mode = useStore((s) => s.mode);
   const about = useRef(null);
+  // Ocean, Fisheries or Nutrients & Plankton open: the layer dock moves above that layer's own slider
+  const omMode = useStore((s) => { const l = LAYERS.find((x) => x.id === s.primaryLayer); return isOmLayer(l) || isNpLayer(l); });
   const [intro, setIntro] = useState(() => !skipsIntro());
   const [open, setOpen] = useState(() => { // which side panels are open, remembered between visits
     try { return { left: true, right: true, ...JSON.parse(localStorage.getItem(PANELS_KEY)) }; } catch { return { left: true, right: true }; }
   });
 
   useSspShortcuts(); // keys 1, 2, 3 pick the emissions scenario
-  useEffect(() => { document.body.dataset.mode = mode; }, [mode]);
+  useTimeEnd();
   useEffect(() => {
     try { localStorage.setItem(PANELS_KEY, JSON.stringify(open)); } catch { /* not remembered */ }
     window.dispatchEvent(new Event("panelschange")); // the map re-centres the globe between the open panels
@@ -50,13 +72,21 @@ export function App() {
   useEffect(() => {
     // persistent tile cache (public/sw.js); needs https or localhost, silently skipped otherwise
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+    loadTerminalState(); // layers hidden from the dock with the terminal's hide command
     const params = new URLSearchParams(location.search);
     if (params.has("perf")) import("./perf.js").then((m) => whenMapReady(() => m.initPerf(window.__map)));
     if (params.has("nointro") && params.has("tour")) whenMapReady(startTour);
+    if (params.has("nointro") && params.has("showcase")) whenMapReady(startShowcase);
   }, []);
-  const afterIntro = () => {
+  const afterIntro = ({ skipAll } = {}) => {
     setIntro(false);
-    openTerminal({ auto: true }).then(announce).then(() => { if (new URLSearchParams(location.search).has("tour")) whenMapReady(startTour); });
+    const tour = () => {
+      const params = new URLSearchParams(location.search);
+      if (params.has("tour")) whenMapReady(startTour);
+      else if (params.has("showcase")) whenMapReady(startShowcase);
+    };
+    if (skipAll) return tour(); // Esc: straight to the portal, no system check and no warnings
+    openTerminal({ auto: true }).then(announce).then(tour);
   };
 
   const handles = ["left", "right"].map((side) => {
@@ -70,7 +100,7 @@ export function App() {
 
   return (
     <>
-      <div className={`shell ${open.left ? "" : "left-closed"} ${open.right ? "" : "right-closed"}`}>
+      <div className={`shell ${open.left ? "" : "left-closed"} ${open.right ? "" : "right-closed"} ${omMode ? "om-mode" : ""}`}>
         <Sidebar />
         <MapView onAbout={() => about.current.showModal()} handles={handles} />
         <AnalysisPanel />
@@ -78,6 +108,7 @@ export function App() {
       <AboutDialog dialog={about} />
       <Terminal />
       <Tour />
+      <Showcase />
       {intro ? <Intro onDone={afterIntro} /> : null}
     </>
   );

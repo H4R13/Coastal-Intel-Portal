@@ -13,7 +13,7 @@ const COLORS = { ssp126: "#5fa8e8", ssp245: "#f79420", ssp585: "#e5534b" };
 const ALL = { ssp126: true, ssp245: true, ssp585: true };
 
 /** Layers whose maps change with the emissions scenario. */
-export const hasSsp = (layer) => !!(layer?.amib || layer?.id === "mangroves" || layer?.id === "ocean");
+export const hasSsp = (layer) => !!(layer?.amib || layer?.id === "mangroves"); // the ocean outlook has its keys on its own year slider (src/oceanMonitoring/)
 
 /**
  * avail: { ssp126: bool, ... } for which keys have a map, or null when the current map has no scenarios (`none` says
@@ -47,14 +47,14 @@ export function SspKeys({ layer, avail = ALL, used, note = "", none = "This map 
   );
 }
 
-/** Keys 1, 2, 3 press the key on screen. */
+/** Keys 1, 2, 3 press the key on screen (the panel's, or the ocean year slider's). */
 export function useSspShortcuts() {
   useEffect(() => {
     const onKey = (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
       if (e.target.closest?.("input, textarea, select, [contenteditable], dialog[open], .term")) return;
       const x = SSPS.find((k) => k.key === e.key);
-      if (x) document.querySelector(`#panelBody .ssp-key[data-ssp="${x.id}"]:not(:disabled)`)?.click();
+      if (x) document.querySelector(`#panelBody .ssp-key[data-ssp="${x.id}"]:not(:disabled), .om-dock .scen button[data-ssp="${x.id}"]`)?.click();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

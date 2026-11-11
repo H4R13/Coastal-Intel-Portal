@@ -29,9 +29,9 @@ const words = (s) => s.trim().split(/\s+/).filter(Boolean).length;
 const show = (w) => (w instanceof RegExp ? String(w) : w);
 
 async function ask(c) {
+  if (DIRECT && (c.opinion || c.research)) return { answer: "", tools: [], seconds: 0, mode: "skipped" }; // her own view needs the model
   if (DIRECT) { const d = await answerDirect(c.q.replace(/^\s*((hey|hi|hello)[\s,]+)?hela\b[\s,!.:;-]*/i, "") || c.q, c.before ?? [], { short: /\b(short(er)?|brief(ly)?|concise|summar\w*)\b/i.test(c.q) }); return { answer: d?.answer ?? "", tools: d?.tools ?? [], seconds: 0, mode: d ? "data" : "skipped" }; }
-  const messages = [...(c.before ?? []).flatMap((q) => [{ role: "user", content: q }, { role: "assistant", content: "(answered)" }]), { role: "user", content: c.q }];
-  const started = Date.now();
+  const messages = [...(c.before ?? []).flatMap((q) => [{ role: "user", content: q }, { role: "assistant", content: "(answered)" }]), { role: "user", content: c.q }];  const started = Date.now();
   try {
     const r = await fetch(`${URL_}/api/assistant/chat`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages }), signal: AbortSignal.timeout(330000) });
     const j = await r.json();
@@ -55,7 +55,11 @@ for (const c of cases) {
   if (c.any && !c.any.some((m) => holds(answer, m))) problems.push(`none of ${c.any.map(show).join(" | ")}`);
   for (const m of c.not ?? []) if (holds(answer, m)) problems.push(`has forbidden ${show(m)}`);
   if (c.maxWords && words(answer) > c.maxWords) problems.push(`${words(answer)} words, limit ${c.maxWords}`);
-  if (!c.loose && mode !== "data") { // a ready-made answer is written from the data itself; only the model can invent a figure
+  if (c.opinion && mode !== "opinion") problems.push(`answered as "${mode}", not as her view`);
+  if (mode === "opinion" && /\d/.test(answer.split("My view (not from the data):").at(-1))) problems.push("her view has a figure in it"); // figures come from the data only
+  if (c.research && mode !== "research") problems.push(`answered as "${mode}", not as an investigation`);
+  if (mode === "research" && answer.split("\n").some((l) => /^\d\.\s/.test(l) && /\d/.test(l.replace(/^\d\.\s/, "")))) problems.push("a hypothesis has a figure in it"); // hypotheses carry no numbers; figures and quotes come from the data and the papers
+  if (!c.loose && mode !== "data" && mode !== "opinion" && mode !== "research") { // a ready-made answer is written from the data itself; only the model can invent a figure (in a view it may write none: checked above)
     const invented = [...new Set(numbers(answer).filter((n) => { const v = Math.abs(parseFloat(n)); return !(Number.isInteger(v) && v <= 12) && !known.some((k) => same(n, k)); }))];
     if (invented.length) problems.push(`figures not in the looked-up facts: ${invented.join(", ")}`);
   }

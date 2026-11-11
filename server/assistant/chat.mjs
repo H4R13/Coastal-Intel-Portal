@@ -8,6 +8,7 @@
  *
  * How a question is answered with a local model, in order (chat → viaOllama):
  *   1. small talk (greetings, "who are you")                         at once, no look-up
+ *   1b. asked for her own view: the model writes it, no figures (opinion.mjs); mode "opinion"
  *   2. a ready-made answer written from the database (answers.mjs)   at once, no model: mode "data"
  *   3. the model names the topics of a question whose words matched nothing (route), and step 2 is tried again
  *   4. a text search of the documents; the model explains what it found, or "nothing on that" is said without it
@@ -26,6 +27,10 @@ import { toolDefs, runTool, retrieve } from "./tools.mjs";
 import { answerDirect } from "./answers.mjs";
 import { tidy, inUrduScript, TOPIC } from "./understand.mjs";
 import { speakable } from "./voice.mjs";
+import { wantsView, opinion } from "./opinion.mjs";
+import { wantsResearch, research } from "./research.mjs";
+import { wantsNews, news } from "./news.mjs";
+import { quick, converse } from "./converse.mjs";
 
 const hasKey = () => !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 const PROVIDER = () => process.env.ASSISTANT_PROVIDER || (hasKey() ? "anthropic" : "ollama");
@@ -42,7 +47,7 @@ const LOCAL_TOOL_CHARS = 6000; // a small model has a small context: keep each t
 const LOCAL_TIMEOUT = 5 * 60 * 1000;
 
 export const NAME = "Hela"; // what the assistant is called, in the portal and when it speaks of itself; "Hey Hela, ..." addresses it
-const SYSTEM = `Your name is ${NAME}. You are the assistant of the Coastal Environmental Intelligence portal for the coast of Pakistan (Indus Delta, Sindh and Balochistan coast, the Exclusive Economic Zone). You answer questions about its datasets, and you can tell whether the portal's layers are working.
+const SYSTEM = `Your name is ${NAME}. You are the assistant of the Nereus Sentinel portal for the coast of Pakistan (Indus Delta, Sindh and Balochistan coast, the Exclusive Economic Zone). You answer questions about its datasets, and you can tell whether the portal's layers are working.
 
 Rules:
 1. Facts come from tools only. Before stating any number, year, trend or finding about the Pakistan coast, call a tool and read the result. Never fill a gap from memory or invent a value. If tools return nothing relevant, say plainly that the portal's datasets do not hold it.
@@ -165,7 +170,7 @@ const ROUTES = {
   oxygen: ["oxygen in the sea, low-oxygen water", "oxygen"],
   fish_stocks: ["overfishing, the state of fish stocks and the catch", "fish stocks"],
   climate_exposure: ["the overall climate pressure on Pakistan's sea", "climate exposure"],
-  salt_in_river: ["salt water moving up the Indus, salinity", "saltwater intrusion"],
+  salt_in_river: ["saline water (saltwater) moving up the Indus, salinity", "saline water intrusion"],
   groundwater: ["fresh groundwater, wells, the aquifer under the delta", "fresh groundwater"],
   sea_level: ["sea-level rise, the land sinking, the sea flooding the land", "sea level"],
   salt_affected_land: ["salty soil, salt-affected land, tidal flats", "salt-affected land"],
@@ -226,16 +231,12 @@ async function viaOllama(history, model, used, usage, voice = false) {
     if (direct) { used.push(...direct.tools); return { answer: direct.answer, ok: true, mode: "data" }; }
   }
   const found = await retrieve(asked, LOCAL_TOOL_CHARS, earlier); // look up first: the model only has to read and explain
-  if (found.length === 1 && found[0].name === "search_text" && /"matches":\[\]/.test(found[0].result)) { // nothing in any document: say so, without asking the model to
-    used.push("search_text");
-    return { answer: `The portal's data has nothing on that (I searched its documents for "${found[0].input.text}"). ${SCOPE}`, ok: true, mode: "data" };
+  /* No dataset has the answer (owner, 2026-10-29: "no more 'it's not in my database'"): talk it through as an ordinary conversation, with no portal figures (converse.mjs) */
+  if (found.length === 1 && (found[0].name === "list_datasets" || found[0].name === "search_text")) {
+    used.push("conversation");
+    const text = await converse(history, model, usage);
+    if (text) return { answer: text, ok: true, mode: "model" };
   }
-  if (found.length === 1 && found[0].name === "search_text") { // the word turns up somewhere, but there is no dataset on it. Say where, and no more: asked to explain such snippets, the model attached a neighbouring record's figure to the wrong thing
-    const where = [...new Set([...found[0].result.matchAll(/"source":"([^"]+)"/g)].map((m) => m[1]))].slice(0, 4);
-    used.push("search_text");
-    return { answer: `The portal has no dataset on that. The word "${found[0].input.text}" only turns up in passing in ${where.join(", ")}. ${SCOPE}`, ok: true, mode: "data" };
-  }
-  if (found.length === 1 && found[0].name === "list_datasets") return { answer: `That is outside what I can answer: I only answer from the portal's data. ${SCOPE}`, ok: true, mode: "data" }; // no topic, and no word worth searching for ("tell me a joke")
   if (found.length) {
     for (const f of found) used.push(f.name);
     msgs[msgs.length - 1] = { role: "user", content: `${history.at(-1).content}\n\n[Facts just looked up in the portal's data. Answer only from these. Give the figures that bear on the question with their source, year and units exactly as written, and whether each is observed or projected. Use the ready-made lowest / highest / average values; do no arithmetic of your own. If the facts answer only part of the question, give that part and name what is missing. Every claim must come from a statement below: name no cause, effect or impact that is not written there. Where a statement is a full sentence, use its figures and its condition together, in your own short wording. Add no general background and no closing disclaimer. Do not repeat field names.${earlier.length ? " If this is a follow-up, it refers to the earlier questions in this chat; answer it from the facts below." : ""}]\n${found.map((f) => `# ${f.name} ${JSON.stringify(f.input)}\n${f.result}`).join("\n\n")}\n\n[Now answer${redo ? ` these earlier questions again, briefly: ${earlier.slice(-2).join(" / ")}` : `: ${asked}`}\n${length}]` }; // the question and the length limit come last: a small model follows what it read most recently
@@ -269,13 +270,13 @@ async function viaOllama(history, model, used, usage, voice = false) {
   return null;
 }
 
-const SCOPE = "I can answer about mangroves, erosion, plastics and seafood, the sea (heat, acidity, oxygen, fish stocks), the Indus Delta (salt water, groundwater, sea level, river flow), and whether the portal is working.";
+const SCOPE = "I can answer about mangroves, erosion, plastics and seafood, the sea (heat, acidity, oxygen, fish stocks), the Indus Delta (saline water, groundwater, sea level, river flow), and whether the portal is working.";
 
 /** A greeting or a thank-you is answered here, at once: there is nothing to look up, and a local model takes a minute to say so. */
 export function smallTalk(question) {
   if (/[^\x00-\x7F]/.test(question) && !/[a-z]{3}/i.test(question)) return null; // not Latin letters: not a greeting to guess at
   const s = question.toLowerCase().replace(/[^a-z' ]/g, " ").replace(/\s+/g, " ").trim();
-  const topics = "mangroves, coastal erosion, ocean health, saltwater intrusion, sea level and plastics, or whether a layer is working";
+  const topics = "mangroves, coastal erosion, ocean health, saline water intrusion, sea level and plastics, or whether a layer is working";
   if (!s || /^(hi+|hello+|hey+|yo|salam|salaam|assalam ?o? ?alaikum|aoa|good (morning|afternoon|evening))( there| again)?( how are you| how r u)?$/.test(s) || /^how are you$/.test(s))
     return `Hello, I'm ${NAME}. I can look things up in the portal's data: ${topics}. What would you like to know?`;
   if (/^(who|what) (are|r) (you|u)( exactly| really)?$|^(what is|what's|whats|tell me) your name|^who is hela|^what is hela|^what are you called|^(are you|r u) (a |an )?(robot|ai|bot|human)|^who (made|built|created) you/.test(s))
@@ -283,6 +284,8 @@ export function smallTalk(question) {
   if (/^what can you do|^help$|^what (do|can) (you|i) (know|ask)/.test(s)) return `I can look things up in the portal's data: ${topics}. Try "How has mangrove area changed since 1990?" or "What are the plastics levels at the Karachi stations?"`;
   if (/^(i was |i am |i'm |im )?(just |only )?(tryna|trying to|wanted to|saying|said|say) (say )?(hi|hello|hey)$|^(whats ?up|what's up|wass?up|sup|whatsyo|kya haal hai|kaise ho|kese ho)$/.test(s))
     return `Hello! I'm ${NAME}. Ask me anything about the portal's data: ${topics}.`;
+  if (/^(can|could|may) i (ask|have|get|hear) (for )?(your|you|ur) (opinion|view|thoughts|take)( on something)?$|^(do|can) you (have|give) (an |your )?opinions?$/.test(s))
+    return "Yes. Ask me what I think of anything in the portal: the layout, a layer, or what the data shows, and I'll give you my view. Any figures still come from the data.";
   if (/^(thanks|thank you|thankyou|thx|shukria|ok thanks|great thanks)( a lot| so much)?( hela)?$/.test(s)) return "You're welcome. Ask me anything else about the portal's data.";
   if (/^(ok|okay|k|cool|nice|great|good|got it|i see|alright|fine|perfect|wow)( then| thanks)?$/.test(s)) return "Good. Ask me anything else about the portal's data.";
   if (/^(bye|goodbye|good bye|see you|see ya|khuda hafiz|allah hafiz|good night)( hela)?$/.test(s)) return "Goodbye. I'll be here when you need the portal's data.";
@@ -302,6 +305,23 @@ export async function chat(rawMessages, { voice = false } = {}) {
   /* Urdu script: the subject words are read (understand.mjs) and the answer is in English; with no subject found, say which languages work */
   const urdu = inUrduScript(asked);
   if (urdu && !answer && !TOPIC.test(tidy(asked))) answer = "I can read English and Roman Urdu (Urdu typed in English letters), and the main subject words in Urdu script. Please ask again that way, for example: \"Karachi mein plastic kitna hai?\"\n\nبراہِ مہربانی اپنا سوال انگریزی یا رومن اردو میں لکھیں۔"; // mode: "data" = written from the database here, "model" = written by the language model
+  /* Today's date, what is new in Hela herself, and today's coastal news are written in code, without the model (converse.mjs, news.mjs) */
+  if (!answer) { const r = quick(asked); if (r) { answer = r.answer; used.push(...r.tools); } }
+  if (!answer && wantsNews(asked)) try { const r = await news(asked); answer = r.answer; used.push(...r.tools); } catch (e) { console.warn(`assistant news: ${e.message}`); }
+  /* Asked to investigate ("what could explain the salinity rise, and what do the papers say?"): the data's figures first, then
+     hypotheses checked against published papers, with verified quotes (research.mjs). With the model unreachable it falls through. */
+  if (!answer && PROVIDER() !== "anthropic" && wantsResearch(asked, messages.slice(0, -1).filter((m) => m.role === "user").map((m) => m.content))) try {
+    const q = await provider();
+    const r = q.ready ? await research(messages, q.model, usage) : null;
+    if (r) { answer = r.answer; used.push(...r.tools); mode = "research"; p = q; }
+  } catch (e) { console.warn(`assistant research: ${e.message}`); }
+  /* Asked for her own view ("what do you think of the layout?"): the model writes it, with no figures (opinion.mjs). Figures, when
+     the question names a subject, still come from the database. With the model unreachable, the ready-made answers below say so. */
+  if (!answer && PROVIDER() !== "anthropic" && wantsView(asked, messages.slice(0, -1).filter((m) => m.role === "user").map((m) => m.content))) try {
+    const q = await provider();
+    const r = q.ready ? await opinion(messages, q.model, usage, { voice }) : null;
+    if (r) { answer = r.answer; used.push(...r.tools); mode = "opinion"; p = q; }
+  } catch (e) { console.warn(`assistant opinion: ${e.message}`); }
   /* Ready-made answers first: instant, and right by construction. They need no model, so they work when Ollama is unreachable too.
      With Claude as the provider every question goes to it: it reads the tools' output reliably and writes a fuller answer. */
   if (!answer && PROVIDER() !== "anthropic") {

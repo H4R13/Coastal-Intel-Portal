@@ -5,7 +5,9 @@
  *   openTerminal({ auto })   auto = true: run the check, then close; resolves when the window has closed
  *   <Terminal />             the window (mounted once in App);  <TerminalButton />  the chip button on the map
  * The server half of the check is server/diagnostics.mjs (GET api/diagnostics); the browser half is clientChecks below.
- * Typing works when it was opened by hand: help, diag, layers, clear, exit.
+ * Typing works when it was opened by hand: help, diag, layers, hide <layer>, show <layer>|all, clear, exit. The up and
+ * down keys bring back earlier commands, as in a shell; the server keeps them while it runs, and keeps the hidden layers
+ * (server/terminal.mjs), so both survive a page reload. hide / show take a layer out of the layer dock and put it back.
  * The window is handled the macOS way, with the three lights at the top left: red closes, yellow minimises it into
  * the chip button (which brings it back), green fills the screen and back.
  */
@@ -13,7 +15,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import maplibregl from "maplibre-gl";
 import { LAYERS } from "../config/layers.js";
-import { getState } from "../state.js";
+import { getState, setHiddenLayers } from "../state.js";
 import { Icon } from "../lib.jsx";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -27,12 +29,37 @@ async function clientChecks() {
   const map = window.__map, gl = map?.getCanvas().getContext("webgl2") ?? map?.getCanvas().getContext("webgl");
   add("Map engine", map ? "ok" : "fail", map ? `MapLibre ${maplibregl.getVersion?.() ?? ""} · ${gl ? "graphics running" : "no graphics context"} · zoom ${map.getZoom().toFixed(1)}` : "the map did not start");
   const sw = "serviceWorker" in navigator ? await navigator.serviceWorker.getRegistration().catch(() => null) : null;
-  add("Tile cache in the browser", sw?.active ? "ok" : "warn", sw?.active ? "service worker active: basemap tiles are kept between visits" : "not active yet: it starts on the next reload");
+  // Browsers allow service workers only on localhost or https, so it never starts on a network address like http://172.x.x.x.
+  if (!window.isSecureContext) add("Tile cache in the browser", "ok", `off on this address (browsers allow it only on localhost or https); tiles still come from the server's cache`);
+  else add("Tile cache in the browser", sw?.active ? "ok" : "warn", sw?.active ? "service worker active: basemap tiles are kept between visits" : "not active yet: it starts on the next reload");
   const nav = performance.getEntriesByType("navigation")[0], mem = performance.memory;
   add("Page", "ok", `${performance.getEntriesByType("resource").length} files loaded${nav ? ` · ready in ${(nav.domContentLoadedEventEnd / 1000).toFixed(1)} s` : ""}${mem ? ` · ${Math.round(mem.usedJSHeapSize / 1048576)} MB of browser memory` : ""} · screen ${window.innerWidth}×${window.innerHeight}`);
   const s = getState();
   add("Layers on the map", "ok", s.activeLayers.length ? s.activeLayers.map((id) => LAYERS.find((l) => l.id === id)?.title).join(", ") : "none switched on");
   return out;
+}
+
+/* ---- what the server keeps for the terminal: typed commands and the layers hidden from the dock ---- */
+let history = []; // typed commands, oldest first
+
+/** Fetch the command history and apply the hidden layers. Called once when the page loads (App) and when the window opens. */
+export async function loadTerminalState() {
+  const saved = await fetch("api/terminal", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (!saved) return; // a server older than this page, or not running: nothing remembered, nothing hidden
+  history = saved.history;
+  const hidden = saved.hidden.filter((id) => LAYERS.some((l) => l.id === id));
+  if (hidden.join() !== getState().hiddenLayers.join()) setHiddenLayers(hidden);
+}
+
+function remember(command) {
+  if (history.at(-1) !== command) history.push(command);
+  fetch("api/terminal/history", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ command }) }).catch(() => {});
+}
+
+/** The layers a name or id points to: an exact id or title wins, else every one whose id starts with it or title contains it. */
+function matchLayer(q) {
+  const exact = LAYERS.filter((l) => l.id === q || l.title.toLowerCase() === q);
+  return exact.length ? exact : LAYERS.filter((l) => l.id.startsWith(q) || l.title.toLowerCase().includes(q));
 }
 
 /* ---- the one terminal session, shared by the window and the chip button ---- */
@@ -61,12 +88,15 @@ function Line({ line }) {
   if (k === "wait") return <div className="term-line"><span className="term-dim">{line.text}<span className="term-wait" /></span></div>;
   if (k === "head") return <div className="term-line"><span className="term-head">── {line.text} {"─".repeat(Math.max(4, 58 - line.text.length))}</span></div>;
   if (k === "row") return <div className="term-line"><span className={`term-tag ${line.c.status}`}>[{TAG[line.c.status]}]</span> <b>{line.c.name}</b> <span className="term-dim">{line.c.detail}</span></div>;
-  if (k === "layer") return <div className="term-line"><span className={`term-tag ${line.on ? "ok" : "off"}`}>[{line.on ? "  ON  " : " off  "}]</span> <b>{line.title}</b> <span className="term-dim">{line.text}</span></div>;
+  if (k === "layer") return <div className="term-line"><span className={`term-tag ${line.hidden ? "warn" : line.on ? "ok" : "off"}`}>[{line.hidden ? "HIDDEN" : line.on ? "  ON  " : " off  "}]</span> <b>{line.title}</b> <span className="term-dim">{line.id} · {line.text}</span></div>;
   if (k === "sum") return <div className="term-line"><span className={`term-sum ${line.fail ? "fail" : line.warn ? "warn" : "ok"}`}>{line.ok} passed · {line.warn} warning{line.warn === 1 ? "" : "s"} · {line.fail} failed</span> <span className="term-dim">{line.time}</span></div>;
   return (
     <div className="term-line">
-      <span className="term-dim">diag</span>    run the health check again<br /><span className="term-dim">layers</span>  list the portal's layers<br />
-      <span className="term-dim">clear</span>   clear the screen<br /><span className="term-dim">exit</span>    close this window (or the red light, or Esc)
+      <span className="term-dim">diag</span>          run the health check again<br /><span className="term-dim">layers</span>        list the portal's layers (factors), with their ids<br />
+      <span className="term-dim">hide</span> &lt;layer&gt;  take a layer out of the layer dock (name or id; stays hidden after a restart)<br />
+      <span className="term-dim">show</span> &lt;layer&gt;  put it back; <span className="term-dim">show all</span> brings back every one<br />
+      <span className="term-dim">clear</span>         clear the screen<br /><span className="term-dim">exit</span>          close this window (or the red light, or Esc)<br />
+      <span className="term-dim">↑ ↓</span>           earlier commands, kept while the server runs
     </div>
   );
 }
@@ -74,6 +104,7 @@ function Line({ line }) {
 function Window({ auto, min }) {
   const [lines, setLines] = useState([]), [typing, setTyping] = useState(false), [zoomed, setZoomed] = useState(false), [leaving, setLeaving] = useState(false);
   const alive = useRef(true), out = useRef(null), input = useRef(null), seq = useRef(0);
+  const browsing = useRef({ at: -1, draft: "" }); // at: which history entry is in the input (-1: the line being typed, kept in draft)
   const print = (line) => { const id = ++seq.current; setLines((all) => [...all, { ...line, id }]); return id; };
   const close = () => { if (!alive.current) return; alive.current = false; setLeaving(true); setTimeout(endSession, 260); };
 
@@ -100,22 +131,58 @@ function Window({ auto, min }) {
     return { fail: n("fail"), warn: n("warn") };
   }
 
+  async function hideLayer(arg, hide) {
+    const hidden = getState().hiddenLayers, verb = hide ? "hide" : "show";
+    if (!arg) return print({ kind: "dim", text: `usage: ${verb} <layer>${hide ? "" : " | all"}   (names and ids: type layers)` });
+    let ids, what;
+    if (!hide && arg === "all") { ids = []; what = "Every layer is"; }
+    else {
+      const found = matchLayer(arg);
+      if (found.length !== 1) return print({ kind: "dim", text: found.length ? `"${arg}" could be ${found.map((l) => l.id).join(", ")}: be more exact` : `no layer called "${arg}": type layers` });
+      const l = found[0];
+      if (hide === hidden.includes(l.id)) return print({ kind: "dim", text: `${l.title} is already ${hide ? "hidden" : "in the dock"}` });
+      ids = hide ? [...hidden, l.id] : hidden.filter((id) => id !== l.id);
+      if (ids.length >= LAYERS.length) return print({ kind: "dim", text: "that is the last layer in the dock: at least one stays" });
+      what = `${l.title} is`;
+    }
+    setHiddenLayers(ids);
+    const saved = await fetch("api/terminal/hidden", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hidden: ids }) }).then((r) => r.ok, () => false);
+    print({ kind: "dim", text: `${what} ${hide ? "hidden from" : "back in"} the layer dock${saved ? "" : " (on this page only: the server did not save it)"}` });
+  }
+
   const COMMANDS = {
     help: () => print({ kind: "help" }),
     diag: diagnose,
-    layers: () => { const on = getState().activeLayers; LAYERS.forEach((l) => print({ kind: "layer", on: on.includes(l.id), title: l.title, text: l.descriptor })); },
+    layers: () => { const { activeLayers: on, hiddenLayers: hidden } = getState(); LAYERS.forEach((l) => print({ kind: "layer", on: on.includes(l.id), hidden: hidden.includes(l.id), id: l.id, title: l.title, text: l.descriptor })); },
+    hide: (arg) => hideLayer(arg, true),
+    show: (arg) => hideLayer(arg, false),
     clear: () => setLines([]),
     exit: close,
   };
+  Object.assign(COMMANDS, { factors: COMMANDS.layers, disable: COMMANDS.hide, enable: COMMANDS.show });
   const submit = async (e) => {
     e.preventDefault();
-    const cmd = input.current.value.trim().toLowerCase(); input.current.value = "";
+    const typed = input.current.value.trim(), cmd = typed.toLowerCase(); input.current.value = "";
+    browsing.current = { at: -1, draft: "" };
     if (!cmd) return;
-    if (cmd !== "diag") print({ kind: "prompt", text: cmd });
-    await (COMMANDS[cmd.split(/\s+/)[0]] ?? (() => print({ kind: "dim", text: `unknown command "${cmd}": type help` })))();
+    remember(typed);
+    if (cmd !== "diag") print({ kind: "prompt", text: typed });
+    const [name, ...rest] = cmd.split(/\s+/);
+    await (COMMANDS[name] ?? (() => print({ kind: "dim", text: `unknown command "${typed}": type help` })))(rest.join(" "));
+  };
+  const onKeyDown = (e) => { // up and down walk through earlier commands; past the newest comes back what was being typed
+    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+    e.preventDefault();
+    const b = browsing.current, el = input.current;
+    if (b.at === -1) { if (e.key === "ArrowDown") return; b.draft = el.value; b.at = history.length; }
+    b.at = Math.max(0, Math.min(history.length, b.at + (e.key === "ArrowUp" ? -1 : 1)));
+    el.value = b.at === history.length ? b.draft : history[b.at];
+    if (b.at === history.length) b.at = -1;
+    el.setSelectionRange(el.value.length, el.value.length);
   };
 
   useEffect(() => { // the check runs once, when the window opens
+    loadTerminalState(); // commands typed since the page loaded, in any browser
     (async () => {
       print({ kind: "dim", text: "NGT coastal portal · system check" });
       await sleep(auto ? 350 : 120);
@@ -151,7 +218,7 @@ function Window({ auto, min }) {
           <b>ngt@coastal-portal — diagnostics</b><span className="term-lights-pad" />
         </div>
         <div className="term-out" aria-live="polite" ref={out}>{lines.map((l) => <Line key={l.id} line={l} />)}</div>
-        <form className="term-in" autoComplete="off" hidden={!typing} onSubmit={submit}><span>{PROMPT}</span><input type="text" spellCheck="false" aria-label="Command" ref={input} /></form>
+        <form className="term-in" autoComplete="off" hidden={!typing} onSubmit={submit}><span>{PROMPT}</span><input type="text" spellCheck="false" aria-label="Command" ref={input} onKeyDown={onKeyDown} /></form>
       </div>
     </div>
   );

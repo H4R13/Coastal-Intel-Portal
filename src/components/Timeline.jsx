@@ -1,11 +1,12 @@
 /**
- * Time control: a year slider with play / pause over the active mode's range.
- * It only moves state.year; map layers and charts read that year. The range past PRESENT_YEAR is hatched as forecast.
+ * Time control: a year slider with play / pause from TIME_RANGE.from to state.yearTo (2050, or later for a layer whose
+ * data goes further: useTimeEnd in src/App.jsx).
+ * It only moves state.year; map layers and charts read that year. The range past PRESENT_YEAR is hatched as projection.
  * Hovering the play button shows two bubbles above it: twice the speed, and loop (start over at the last year).
  */
 import { useEffect } from "react";
-import { PRESENT_YEAR } from "../config/layers.js";
-import { getState, setState, setYear, modeRange, useStore } from "../state.js";
+import { PRESENT_YEAR, TIME_RANGE } from "../config/layers.js";
+import { getState, setState, setYear, useStore } from "../state.js";
 import { Icon } from "../lib.jsx";
 
 const STEP_MS = 700; // one year per step while playing (halved at 2× speed)
@@ -15,23 +16,26 @@ const LOOP = '<path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 
 const at = (f) => `calc(${THUMB / 2}px + (100% - ${THUMB}px) * ${f})`;
 
 function ticks(from, to) {
-  const out = [from];
-  for (let y = Math.ceil((from + 1) / 10) * 10; y < to; y += 10) if (y - from >= 4 && to - y >= 4) out.push(y);
+  const out = [from], every = to - from > 70 ? 20 : 10; // a longer range labels every other decade
+  for (let y = Math.ceil((from + 1) / every) * every + (every === 20 ? 10 : 0); y < to; y += every) if (y - from >= 4 && to - y >= (every === 20 ? 12 : 4)) out.push(y);
   out.push(to);
   return out;
 }
 
+let gate = null; // (year) => whether that year's map has arrived; while set, playback waits for it (the showcase sets it)
+export const setPlayGate = (fn) => { gate = fn; };
+
 function step() {
-  const s = getState(), { from, to } = modeRange();
-  if (s.year < to) setYear(s.year + 1);
+  const s = getState(), { from } = TIME_RANGE, to = s.yearTo;
+  if (s.year < to) { if (!gate || gate(s.year + 1)) setYear(s.year + 1); }
   else if (s.loop) setYear(from);
   else setState({ playing: false });
 }
 
 export function Timeline() {
-  const mode = useStore((s) => s.mode), year = useStore((s) => s.year), playing = useStore((s) => s.playing);
+  const year = useStore((s) => s.year), playing = useStore((s) => s.playing);
   const speed = useStore((s) => s.speed), loop = useStore((s) => s.loop), anyOnMap = useStore((s) => s.activeLayers.length > 0);
-  const { from, to } = modeRange(mode);
+  const yearTo = useStore((s) => s.yearTo), { from } = TIME_RANGE, to = yearTo;
   const f = (y) => (y - from) / (to - from);
 
   useEffect(() => { // one year per step while playing; restarted when the speed changes
@@ -40,11 +44,11 @@ export function Timeline() {
     return () => clearInterval(timer);
   }, [playing, speed]);
 
-  const phase = year < PRESENT_YEAR ? "Historical" : year === PRESENT_YEAR ? "Present" : "Forecast";
+  const phase = year < PRESENT_YEAR ? "Historical" : year === PRESENT_YEAR ? "Present" : "Projection";
   const play = () => {
-    const st = getState(), r = modeRange();
+    const st = getState();
     if (st.playing) return setState({ playing: false });
-    setState({ playing: true, year: st.year >= r.to ? r.from : st.year }); // at the end, play starts over
+    setState({ playing: true, year: st.year >= st.yearTo ? TIME_RANGE.from : st.year }); // at the end, play starts over
   };
   return (
     <div className="timeline" id="timeline">
@@ -60,7 +64,7 @@ export function Timeline() {
         <span className="tl-note" id="tlNote">{anyOnMap ? "Map layers and charts follow this year" : "Switch a layer on to see it change"}</span>
       </div>
       <div className="tl-track">
-        {to > PRESENT_YEAR ? <span className="tl-zone" style={{ left: at(f(Math.max(from, PRESENT_YEAR))) }} title="Forecast period" /> : null}
+        {to > PRESENT_YEAR ? <span className="tl-zone" style={{ left: at(f(Math.max(from, PRESENT_YEAR))) }} title="Projection period" /> : null}
         <input className="tl-range" id="tlRange" type="range" min={from} max={to} step="1" aria-label="Year" value={year}
           onChange={(e) => { if (getState().playing) setState({ playing: false }); setYear(+e.target.value); }} />
         {ticks(from, to).map((y) => <span className="tl-tick" key={y} style={{ left: at(f(y)) }}><i /><em>{y}</em></span>)}

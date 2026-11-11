@@ -12,20 +12,30 @@
  *   GET /api/amib/<key>                 saltwater intrusion / salinity package: catalog, series/<product>, vector/<id>
  *   GET /api/amib/image/<id>/<step>     PNG of one of its map layers at a time step (see server/amib.mjs; drawn in worker threads and kept on disk);
  *                                       ?bg=clear makes the picture's most common colour see-through,
- *                                       ?hide=rrggbb,... makes those class colours see-through
+ *                                       ?hide=rrggbb,... makes those class colours see-through,
+ *                                       ?tint=rrggbb:pct[:rrggbb],... draws those class colours only pct % opaque (in the
+ *                                       second colour when given), feathered, or outlined with ?crisp=1,
+ *                                       ?ramp=<name> draws the raw values in that ramp of src/amib/hazards.js RAMPS
  *   GET /api/dmjm/<key>                 plastic debris material: stations, species, hazards, literature (see server/load-dmjm.mjs)
+ *   GET /api/nutrients/<key>            nutrients and plankton: points, chlorophyll, nitrate, phosphate, sources (see server/load-nutrients.mjs)
+ *   GET /api/ndma/manifest, /api/ndma/<set>/<YYYY[-MM]>.png, /api/ndma/pixel/<set>?lat=&lon=   NDMA satellite chlorophyll / SST
+ *                                       1998-2025 (see server/ndma.mjs, loaded by server/load-ndma.mjs)
  *   GET /api/mangroves/change/<frame>/<scenario>/<year>.png   that year's extent against the first mapped year
  *                                       (kept / gained / lost; see server/mangrove-change.mjs)
  *   POST /api/assistant/chat, /feedback; GET /api/assistant/status   the portal assistant (server/assistant/chat.mjs)
  *   GET /api/assistant/voice; POST /api/assistant/speak              its voice (server/assistant/voice.mjs)
+ *   GET /api/terminal; POST /api/terminal/history, /hidden           the terminal's command history and hidden layers (server/terminal.mjs)
  * Every request except tiles, health and the assistant is written to access_log (route, status, time).
  */
 import { query, cached, redis } from "./db.mjs";
-import { amibImage, hexToRgb } from "./amib.mjs";
+import { amibImage, hexToRgb, rampStops } from "./amib.mjs";
+import { injaStamp, injaSeries, withInjaCatalog } from "./inja.mjs";
 import { mangroveChangeImage, FRAMES, FIRST_YEAR } from "./mangrove-change.mjs";
 import { diagnostics } from "./diagnostics.mjs";
 import { chat, feedback, allowed, assistantStatus, logAccess, spokenAnswer } from "./assistant/chat.mjs";
 import { speak, voiceStatus } from "./assistant/voice.mjs";
+import { terminalState, addCommand, setHidden } from "./terminal.mjs";
+import { ndmaRoute } from "./ndma.mjs";
 
 const JSON_TYPE = "application/json; charset=utf-8";
 const send = (res, status, type, body, extra = {}) => { res.writeHead(status, { "Content-Type": type, ...extra }); res.end(body); };
@@ -64,6 +74,16 @@ async function mangroveSeries() {
   for (const r of rows) (by.get(r.scenario) ?? by.set(r.scenario, []).get(r.scenario)).push({ x: r.year, y: r.area_km2 });
   const order = ["observed", ...[...by.keys()].filter((k) => k !== "observed")];
   return { unit: "km²", series: order.filter((k) => by.has(k)).map((k) => ({ name: title(k), points: by.get(k) })) };
+}
+
+/** Gross gain and loss per year (mangrove_by_year_1985_2050.csv): mapped years, then each scenario's projection. */
+async function mangroveGainLoss() {
+  const { rows } = await query("select scenario, year, gain_km2, loss_km2, net_km2 from mangrove_gainloss where year >= $1 order by scenario, year", [FIRST_YEAR]);
+  if (!rows.length) return null;
+  const by = new Map();
+  for (const r of rows) (by.get(r.scenario) ?? by.set(r.scenario, []).get(r.scenario)).push({ x: r.year, gain: r.gain_km2, loss: r.loss_km2, net: r.net_km2 });
+  const order = ["observed", ...[...by.keys()].filter((k) => k !== "observed")];
+  return { unit: "km²", series: order.filter((k) => by.has(k)).map((k) => ({ name: title(k), scenario: k, points: by.get(k) })) };
 }
 
 async function mangroveTile(scenario, year, z, x, y) {
@@ -127,6 +147,7 @@ async function erosionTile(z, x, y) {
 const JSON_ROUTES = {
   "/api/layers/mangroves": ["mangroves:manifest:v3", mangroveManifest],
   "/api/layers/mangroves/series": ["mangroves:series:v3", mangroveSeries],
+  "/api/layers/mangroves/gainloss": ["mangroves:gainloss", mangroveGainLoss],
   "/api/layers/erosion": ["erosion:manifest", erosionManifest],
   "/api/layers/erosion/series": ["erosion:series", erosionSeries],
   "/api/layers/erosion/periods": ["erosion:periods", erosionByPeriod],
@@ -174,6 +195,13 @@ export async function handleApi(req, res) {
       const { status, body: out } = path.endsWith("/chat") ? await chat(body.messages, { voice: body.voice === true }) : await feedback(body);
       return sendJson(res, status, out);
     }
+    if (path === "/api/terminal") return send(res, 200, JSON_TYPE, JSON.stringify(await terminalState()), { "Cache-Control": "no-store" });
+    if (path === "/api/terminal/history" || path === "/api/terminal/hidden") {
+      if (req.method !== "POST") return sendJson(res, 405, { error: "POST only" });
+      const body = await readJson(req).catch(() => null);
+      const ok = body && (path.endsWith("/history") ? addCommand(body.command) : await setHidden(body.hidden));
+      return sendJson(res, ok ? 200 : 400, ok ? { ok: true } : { ok: false, error: "Bad request" });
+    }
     if (path === "/api/health") {
       const [db, cache] = await Promise.all([query("select 1").then(() => true, () => false), redis.ping().then(() => true, () => false)]);
       return sendJson(res, 200, { database: db, cache });
@@ -190,9 +218,15 @@ export async function handleApi(req, res) {
       const params = new URL(req.url, "http://localhost").searchParams;
       const clear = params.get("bg") === "clear"; // ?bg=clear: hide the even background colour
       const hide = (params.get("hide") ?? "").split(",").filter((h) => /^[0-9a-f]{6}$/i.test(h)).slice(0, 8).map((h) => h.toLowerCase()); // ?hide=rrggbb,...: hide these class colours
+      const clipSea = params.get("clip") === "sea"; // ?clip=sea: only what lies inside Pakistan's EEZ (sea maps)
+      const softEdges = params.get("edge") === "soft"; // ?edge=soft: a rectangular pilot area fades out along a wavy rim
+      const tints = (params.get("tint") ?? "").split(",").filter((t) => /^[0-9a-f]{6}:\d{1,3}(:[0-9a-f]{6})?$/i.test(t)).slice(0, 12)
+        .map((t) => { const [h, p, shown] = t.toLowerCase().split(":"); return [...hexToRgb(h), Math.min(100, +p) / 100, ...(shown ? [hexToRgb(shown)] : [])]; }); // ?tint=rrggbb:pct[:rrggbb],...: class colours drawn part see-through, optionally in another colour
+      const crisp = params.get("crisp") === "1"; // ?crisp=1: no smoothing of the tinted classes, an outline instead
+      const ramp = rampStops(params.get("ramp")); // ?ramp=<name>: drawn from the raw values in that ramp of src/amib/hazards.js
       const gone = new AbortController(); // the page stopped waiting (it moved on to another map): a drawing not yet started is dropped
       res.on("close", () => res.writableEnded || gone.abort());
-      const drawn = await amibImage(id, +image[2], { clearBackground: clear, hideColors: hide.map(hexToRgb) }, gone.signal).catch((e) => { if (e.dropped) return "dropped"; throw e; }); // kept on disk, not in Redis (server/amib.mjs)
+      const drawn = await amibImage(id, +image[2], { clearBackground: clear, hideColors: hide.map(hexToRgb), clipSea, softEdges, tints, crisp, ramp }, gone.signal).catch((e) => { if (e.dropped) return "dropped"; throw e; }); // kept on disk, not in Redis (server/amib.mjs)
       if (drawn === "dropped") return;
       const { body, cache } = drawn ?? { body: Buffer.alloc(0) };
       return body.length ? send(res, 200, "image/png", body, { "X-Cache": cache, "Cache-Control": "public, max-age=86400" }) : sendJson(res, 404, { error: "No such layer image" });
@@ -203,10 +237,17 @@ export async function handleApi(req, res) {
       const { body, cache } = await cached(`mangroves:change:${base}:${frame}:${scenario}:${year}`, async () => (base && (await mangroveChangeImage(frame, scenario, +year, base))) || Buffer.alloc(0));
       return body.length ? send(res, 200, "image/png", body, { "X-Cache": cache, "Cache-Control": "public, max-age=86400" }) : sendJson(res, 404, { error: "No such picture" });
     }
-    const doc = path.match(/^\/api\/(ocean|amib|dmjm)\/(.+)$/);
+    const ndma = await ndmaRoute(path, new URL(req.url, "http://localhost").searchParams);
+    if (ndma) return send(res, ndma.status, ndma.type, ndma.body, ndma.headers);
+    const doc = path.match(/^\/api\/(ocean|amib|dmjm|nutrients)\/(.+)$/);
     if (doc && !doc[2].startsWith("files/")) { // files/<id> lists server paths and is not served
       const key = decodeURIComponent(doc[2]);
-      const { body, cache } = await cached(`${doc[1]}:${key}`, async () => Buffer.from((await query(`select body::text as body from ${doc[1]}_doc where key = $1`, [key])).rows[0]?.body ?? "null"));
+      const inja = doc[1] === "amib" && (key === "catalog" || key === "series/J"); // the INJA erosion package is added to the AMIB answers (server/inja.mjs)
+      const { body, cache } = await cached(`${doc[1]}:${key}${inja ? `:${injaStamp()}` : ""}`, async () => {
+        if (inja && key === "series/J") return Buffer.from(JSON.stringify(injaSeries()));
+        const text = (await query(`select body::text as body from ${doc[1]}_doc where key = $1`, [key])).rows[0]?.body ?? "null";
+        return Buffer.from(inja ? withInjaCatalog(text) : text);
+      });
       return send(res, body.toString() === "null" ? 404 : 200, JSON_TYPE, body, { "X-Cache": cache, "Cache-Control": "no-cache" });
     }
     let t = path.match(MANGROVE_TILE);

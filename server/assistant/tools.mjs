@@ -57,7 +57,7 @@ const OCEAN_TOPICS = {
   exposure: { keys: ["data/exposure_summary", "data/national_index"], keep: eez, theme: /exposure|warm|acid/i, note: "Climate exposure index (0-1) from heat and acidification pressure, whole EEZ." },
 };
 const DELTA_TOPICS = { saltwater: ["B"], groundwater: ["C", "E"], interface: ["GH"], sea_level: ["D", "GH"], salt_land: ["A"], shelf: ["G"], river_flow: ["drivers"], climate_models: ["H"] };
-const DELTA_TITLES = { saltwater: "Salt water in the river", groundwater: "Fresh groundwater", interface: "Fresh / salt groundwater boundary", sea_level: "Sea level", salt_land: "Salt-affected land", shelf: "Salinity at sea (shelf)", river_flow: "River flow reaching the delta", climate_models: "Climate model outlook" };
+const DELTA_TITLES = { saltwater: "Saline water in the river", groundwater: "Fresh groundwater", interface: "Fresh / salt groundwater boundary", sea_level: "Sea level", salt_land: "Salt-affected land", shelf: "Salinity at sea (shelf)", river_flow: "River flow reaching the delta", climate_models: "Climate model outlook" };
 const DELTA_NOTES = {
   saltwater: "The flow scenarios differ only in how much Indus water reaches the delta: 'accord flow' = the release promised by the water accord, 'current flow' = as today, 'degraded flow' = less than today. Comparing them shows what river flow does to salt intrusion; the slow rise within one scenario is the sea-level part.",
   groundwater: "'current' and 'accord' are the same river-flow assumptions as for salt intrusion. The usable fresh lens is the fresh groundwater people can pump.",
@@ -72,7 +72,7 @@ const DELTA_NOTES = {
 const LABELS = [
   [/intrusion length L1/, "in the dry season slightly salty water (1 psu) reaches up the Indus as far as"],
   [/intrusion length L5/, "in the dry season salty water (5 psu) reaches up the Indus as far as"],
-  [/days with L1 > 60/, "salt water reaches more than 60 km up the Indus on"],
+  [/days with L1 > 60/, "saline water reaches more than 60 km up the Indus on"],
   [/usable fresh-lens area/, "the usable fresh groundwater under the delta (the fresh lens people can pump) covers"],
   [/usable lens thickness/, "the usable fresh groundwater lens is on average as thick as"],
   [/mixed \/ uncertain lens/, "groundwater that is mixed or uncertain covers"],
@@ -139,7 +139,7 @@ export const TOOLS = [
           mangroves: "Global Mangrove Watch yearly extent (observed 1988–2025) and the team's good / normal / worst scenarios to 2050. Use mangrove_area.",
           erosion: "Eroded land per mapped period, plus a yearly projection to 2050. Use erosion_summary.",
           ocean: "Ocean pH, aragonite saturation, oxygen, sea-surface temperature, marine heatwaves, fisheries / stock status, exposure (documents under 'ocean').",
-          amib: "Saltwater intrusion, salinity index, sea-level rise at the Indus Delta, coastal hazard maps and series (documents under 'amib').",
+          amib: "Saline water intrusion, salinity index, sea-level rise at the Indus Delta, coastal hazard maps and series (documents under 'amib').",
           dmjm: "Plastic debris: sampling stations, species, hazards, literature (documents under 'dmjm').",
         },
         not_in_the_database: NOT_LOADED,
@@ -268,7 +268,7 @@ export const TOOLS = [
   },
   {
     name: "delta_series",
-    description: "Year-by-year series for the Indus Delta and coast from the saltwater / sea-level package, as values at key years (first, 2000, 2020, now, 2030, 2040, 2050, last). Topics: saltwater (how far salt reaches up the river and underground), groundwater (fresh groundwater lens), sea_level (tide gauge and relative sea-level rise), salt_land (salt-affected land, tidal flats), shelf (shelf salinity and river plume), river_flow (Indus flow below Kotri), climate_models (CMIP6 anomalies). Each series says observed, modelled or projected.",
+    description: "Year-by-year series for the Indus Delta and coast from the saline water / sea-level package, as values at key years (first, 2000, 2020, now, 2030, 2040, 2050, last). Topics: saltwater (how far salt reaches up the river and underground), groundwater (fresh groundwater lens), sea_level (tide gauge and relative sea-level rise), salt_land (salt-affected land, tidal flats), shelf (shelf salinity and river plume), river_flow (Indus flow below Kotri), climate_models (CMIP6 anomalies). Each series says observed, modelled or projected.",
     input_schema: { type: "object", properties: { topic: { type: "string", enum: Object.keys(DELTA_TOPICS) }, scenario: { type: "string", description: "Emissions scenario for projections: ssp126, ssp245 (default, medium) or ssp585." } }, required: ["topic"] },
     run: async ({ topic, scenario = "ssp245", place, measure, years = [] }) => { // measure: part of a metric's name to lead with; years: years asked about, shown beside the first one
       const keys = DELTA_TOPICS[topic];
@@ -296,7 +296,7 @@ export const TOOLS = [
       /* why salt reaches where it does, as far as this data can say: the same year under two river flows */
       const top = lines[0], v0 = (l) => { const y = Object.keys(l.k.at)[0], v = l.k.at[y]; return { y, v: round(v?.p50 ?? v, 1) }; };
       const now = lines.find((l) => /intrusion length L1/.test(l.metric) && /current/.test(l.tag)), accord = lines.find((l) => /intrusion length L1/.test(l.metric) && /accord/.test(l.tag));
-      const driver = now && accord ? `River flow is the main driver in this data: in ${v0(now).y}, salt water reaches ${v0(now).v} km up the river with today's flow but ${v0(accord).v} km if the water accord's flow is delivered. Sea-level rise adds the slow increase after that.` : undefined;
+      const driver = now && accord ? `River flow is the main driver in this data: in ${v0(now).y}, saline water reaches ${v0(now).v} km up the river with today's flow but ${v0(accord).v} km if the water accord's flow is delivered. Sea-level rise adds the slow increase after that.` : undefined;
       return { source: keys.map((k) => `amib:series/${k}`).join(", "), topic, title: DELTA_TITLES[topic], note: DELTA_NOTES[topic], driver, matched: lines.some((l) => l.asked), core: lines.filter((l) => l.rank < (top?.rank ?? 0) + 3).length, statements: lines.slice(0, 8).map((l) => l.text) }; // core: how many lines are on the main measure at the place asked about
     },
   },
@@ -374,7 +374,7 @@ export async function retrieve(question, max = 5000, earlier = []) {
   /* ocean and delta topics: the headline numbers, not a text search */
   const scenario = s.match(/ssp ?-?(1-?2\.?6|2-?4\.?5|5-?8\.?5)/)?.[1]?.replace(/\D/g, "");
   const ocean = [[/heat ?wave/, "heatwave"], [/temperature|warming|warmer|\bsst\b|\bhot(ter)?\b/, "temperature"], [/acidif|\bph\b|acid/, "ph"], [/aragonite|omega|shell/, "aragonite"], [/oxygen|plankton|hypoxi|dead zone/, "oxygen"], [/stock|fisher|catch|overfish|\bfish\b/, "fisheries"], [/exposure|vulnerab/, "exposure"]];
-  const delta = [[/saltwater|salt water|intrusion|salt wedge/, "saltwater"], [/groundwater|aquifer|fresh ?water|\blens\b|tube ?wells?/, "groundwater"], [/sea.?level|tide gauge|inundat|subsid|sinking|flood/, "sea_level"], [/salt.affected|saline (soil|land)|tidal flat|soil salinity/, "salt_land"], [/shelf salinity|plume|turbid/, "shelf"], [/kotri|river flow|indus flow|discharge|barrage/, "river_flow"]];
+  const delta = [[/saltwater|salt water|saline water|intrusion|salt wedge/, "saltwater"], [/groundwater|aquifer|fresh ?water|\blens\b|tube ?wells?/, "groundwater"], [/sea.?level|tide gauge|inundat|subsid|sinking|flood/, "sea_level"], [/salt.affected|saline (soil|land)|tidal flat|soil salinity/, "salt_land"], [/shelf salinity|plume|turbid/, "shelf"], [/kotri|river flow|indus flow|discharge|barrage/, "river_flow"]];
   const want = new Set(delta.filter(([re]) => has(re)).map(([, topic]) => topic)), salty = has(/salinity|saline|\bsalt(y|ier|iness)?\b/);
   if (salty && !want.has("salt_land")) { want.add("saltwater"); want.add("shelf"); } // "salinity" alone: how far salt reaches up the river (projected) and the measured shelf salinity
   if (salty || want.has("saltwater")) {
