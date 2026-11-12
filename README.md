@@ -33,8 +33,7 @@ Never commit `.env`, `Other Data/` (raw team data), `data/` or the caches: they 
 | `npm run update:data` | stage external updates (USGS earthquakes, PSMSL Karachi tide); a person approves with `-- --approve=N` |
 | `npm run watch:papers` | records new papers on 8 coastal topics and prints a 30-day digest |
 
-The team's data is never fetched or overwritten by the automatic updates. The ocean monitoring package is licensed: do not copy,
-share or change its numbers or texts, and keep it out of git.
+The team's data is never fetched or overwritten by the automatic updates.
 
 ## What is in the portal
 
