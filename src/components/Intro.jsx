@@ -12,7 +12,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { introSound } from "../introSound.js";
 import { Icon } from "../lib.jsx";
 
-const TITLE = "Nereus Sentinel";
+const TITLE = "PCOP";
 const MARK_MS = 3600, TITLE_MS = 3900, OUT_MS = 450;
 const MUTED_KEY = "introMuted";
 const SPEAKER = '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/>', ON = '<path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11"/>', OFF = '<path d="m16 9.5 5 5M21 9.5l-5 5"/>';

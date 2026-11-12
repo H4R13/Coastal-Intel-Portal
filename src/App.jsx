@@ -46,9 +46,9 @@ function AboutDialog({ dialog }) {
   return (
     <dialog id="aboutDialog" ref={dialog} onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}>
       <h2 className="eyebrow">About this portal</h2>
-      <h3>Nereus Sentinel</h3>
-      <p>A monitoring portal for understanding how Pakistan's coastline is changing across seven environmental layers.</p>
-      <p className="muted">This is the initial interface. No environmental datasets are connected yet, so no measurements, trends or projections are shown. Each layer is configured in <code>src/config/layers.js</code>; connecting data requires no interface redesign.</p>
+      <h3>PCOP: Pakistan Coastal Observation &amp; Projection</h3>
+      <p>One map of Pakistan's coast, from past records to climate projections for 2050 and, where a dataset runs that far, 2100.</p>
+      <p className="muted">Each layer is the team's own data, loaded into the portal's database and played year by year on one timeline. Projections are scenarios, not forecasts.</p>
       <button id="closeAbout" className="btn" onClick={() => dialog.current.close()}>Close</button>
     </dialog>
   );

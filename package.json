@@ -2,7 +2,7 @@
   "name": "coastal-hazards-2",
   "private": true,
   "type": "module",
-  "description": "React + Node version of the Nereus Sentinel portal (formerly Coastal Environmental Intelligence). Same port (5173), same data API, same database and caches as the original.",
+  "description": "React + Node version of the PCOP portal (Pakistan Coastal Observation & Projection; formerly Nereus Sentinel, Coastal Environmental Intelligence). Same port (5173), same data API, same database and caches as the original.",
   "scripts": {
     "start": "vite build && node server.mjs",
     "serve": "node server.mjs",

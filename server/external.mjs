@@ -97,7 +97,7 @@ export async function fetchSource(id) {
   await ensure();
   await query("insert into ext_source (id) values ($1) on conflict do nothing", [id]);
   try {
-    const r = await fetch(src.url(), { signal: AbortSignal.timeout(60000), headers: { "User-Agent": "NereusSentinel-DataUpdate/1.0 (coastal research portal)" } });
+    const r = await fetch(src.url(), { signal: AbortSignal.timeout(60000), headers: { "User-Agent": "PCOP-DataUpdate/1.0 (coastal research portal)" } });
     if (!r.ok) throw new Error(`${src.provider} answered ${r.status}`);
     const rows = src.parse(src.url().endsWith(".rlrdata") ? await r.text() : await r.json()), hash = crypto.createHash("sha256").update(JSON.stringify(rows)).digest("hex");
     await query("update ext_source set last_checked = now(), last_error = null where id = $1", [id]);

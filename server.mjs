@@ -38,7 +38,7 @@ async function loadTile(target) {
   if (stat && (!isVolatile(target) || Date.now() - stat.mtimeMs < DAY)) return { status: 200, body: fs.readFileSync(file), state: "hit" };
   const stale = () => ({ status: 200, body: fs.readFileSync(file), state: "stale" });
   try {
-    const r = await fetch(target, { headers: { "User-Agent": "NereusSentinel-tile-cache/1.0" } });
+    const r = await fetch(target, { headers: { "User-Agent": "PCOP-tile-cache/1.0" } });
     if (!r.ok) return stat ? stale() : { status: r.status, body: Buffer.alloc(0), state: "miss" };
     const body = Buffer.from(await r.arrayBuffer());
     fs.mkdirSync(path.dirname(file), { recursive: true });

@@ -27,7 +27,7 @@ const hazard = (id, hz) => setState({ amibView: { ...getState().amibView, [id]: 
 const panels = () => document.querySelectorAll(".shell.left-closed .panel-handle.left, .shell.right-closed .panel-handle.right").forEach((b) => b.click()); // both panels open
 
 const STEPS = [
-  { title: "Nereus Sentinel", text: "One map of Pakistan's coast, from Jiwani to the Indus Delta, with every environmental layer the team has delivered, from 1990 to 2050.", ms: 7000,
+  { title: "PCOP: Pakistan Coastal Observation & Projection", text: "One map of Pakistan's coast, from Jiwani to the Indus Delta, with every environmental layer the team has delivered, from 1990 to 2050.", ms: 7000,
     run: () => { panels(); stop(); setSsp("ssp245"); setState({ year: 2026, activeLayers: [], floodId: null }); selectLayer("sealevel"); tool("globe"); } },
   { title: "The study area", text: "The portal opens on the globe and flies to the coast: about a thousand kilometres of shoreline in Balochistan and Sindh.", ms: 7000, run: () => tool("reset") },
   { title: "Ten layers", text: "Each icon opens one subject and puts it on the map: sea level, saline water intrusion, salinity, coastal hazards, mangroves, erosion, plastics, fisheries, the ocean, and nutrients and plankton.", target: ".dock", side: "right", ms: 8000 },

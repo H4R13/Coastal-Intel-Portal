@@ -19,7 +19,7 @@ async function feed(query, region) {
   const key = `${query}|${region}`, hit = cache.get(key);
   if (hit && Date.now() - hit.at < 30 * 60000) return hit.items;
   const url = `${FEED}?${new URLSearchParams({ q: `${query} when:7d`, hl: "en", gl: region, ceid: `${region}:en` })}`;
-  const r = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { "User-Agent": "NereusSentinel-Hela/1.0 (coastal research portal)" } });
+  const r = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { "User-Agent": "PCOP-Hela/1.0 (coastal research portal)" } });
   if (!r.ok) throw new Error(`news feed ${r.status}`);
   const xml = await r.text();
   const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map((m) => {

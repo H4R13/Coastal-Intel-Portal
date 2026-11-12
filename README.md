@@ -1,4 +1,4 @@
-# Nereus Sentinel (Coastal Hazards 2): the coastal intelligence portal for Pakistan
+# PCOP, Pakistan Coastal Observation & Projection: the coastal intelligence portal for Pakistan
 
 A React (Vite) + Node portal for the coast of Pakistan: map layers (MapLibre), a year timeline, charts, a standby showcase,
 and Hela, a chat and voice assistant. Data lives in PostgreSQL + PostGIS (Redis/Memurai optional).

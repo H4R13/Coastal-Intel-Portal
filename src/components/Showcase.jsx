@@ -329,7 +329,7 @@ async function round(catalog, plans, t, from) {
   const maps = (id) => async () => { for (const p of plans.filter((x) => x.layer.id === id)) await playMap(catalog, p, t); };
   const parts = [
     ["coast", async () => {
-      caption({ kicker: "Nereus Sentinel", title: "Pakistan's coast, 1990 to 2100", sub: "Every layer, playing by itself" });
+      caption({ kicker: "PCOP", title: "Pakistan's coast, 1990 to 2100", sub: "Every layer, playing by itself" });
       document.querySelector('.map-tools [data-act="reset"]')?.click(); // every layer off, the whole coast
       await sleep(3800, t);
       await playExposure(t);

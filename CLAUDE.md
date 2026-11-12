@@ -1,4 +1,4 @@
-# Nereus Sentinel (Coastal Hazards 2): project notes for Claude
+# PCOP, Pakistan Coastal Observation & Projection (formerly Nereus Sentinel / Coastal Hazards 2): project notes for Claude
 
 React (Vite) + Node portal for the coast of Pakistan: map layers (MapLibre), a year timeline, charts, and a chat assistant.
 Same server, API and database as the original portal. Read README.md first; this file is what is not obvious from the code.

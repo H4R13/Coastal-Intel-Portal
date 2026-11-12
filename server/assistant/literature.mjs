@@ -44,7 +44,7 @@ export async function searchPapers(keywords, { limit = 5 } = {}) {
   if (!online()) return [];
   const url = `${API}?search=${encodeURIComponent(q)}&filter=has_abstract:true,type:article,from_publication_date:1995-01-01&per-page=${Math.max(limit * 2, 8)}`
     + "&select=id,doi,title,publication_year,authorships,primary_location,abstract_inverted_index,cited_by_count";
-  const r = await fetch(url, { signal: AbortSignal.timeout(20000), headers: { "User-Agent": "NereusSentinel-Hela/1.0 (coastal research portal)" } });
+  const r = await fetch(url, { signal: AbortSignal.timeout(20000), headers: { "User-Agent": "PCOP-Hela/1.0 (coastal research portal)" } });
   if (!r.ok) throw new Error(`OpenAlex ${r.status}`);
   const papers = ((await r.json()).results ?? []).map(shape).filter((p) => p.title && p.abstract.length > 200 && p.year)
     .sort((a, b) => b.cited - a.cited || b.year - a.year); // the most cited first: a claim backed by well-read work counts for more
