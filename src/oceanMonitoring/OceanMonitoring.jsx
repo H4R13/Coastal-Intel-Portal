@@ -290,7 +290,7 @@ function Map2() {
   useLayoutEffect(() => {
     const bm = BASEMAPS.find((b) => b.id === getState().basemap);
     const style = bm?.type === "raster"
-      ? { version: 8, sources: { bm: { type: "raster", tiles: bm.tiles, tileSize: bm.tileSize ?? 256, maxzoom: bm.maxzoom } }, layers: [{ id: "bg", type: "background", paint: { "background-color": "#0a1d2a" } }, { id: "bm", type: "raster", source: "bm", paint: bm.paint ?? {} }] }
+      ? { version: 8, sources: { bm: { type: "raster", tiles: bm.tiles, tileSize: bm.tileSize ?? 256, maxzoom: bm.maxzoom } }, layers: [{ id: "bg", type: "background", paint: { "background-color": "#1a1a1a" } }, { id: "bm", type: "raster", source: "bm", paint: bm.paint ?? {} }] }
       : "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json";
     const done = om.initMap2(host.current, style);
     const place = () => { // the main map keeps its EEZ in the left half: tell om.js where the halves meet

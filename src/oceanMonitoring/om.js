@@ -646,9 +646,9 @@ export async function indexCardHtml() {
     <line x1="${pad}" x2="${W - pad}" y1="${H - 14}" y2="${H - 14}" stroke="rgba(190,215,215,.35)"/>
     ${[0, 0.25, 0.5, 0.75, 1].map((x) => `<text x="${pad + x * (W - 2 * pad)}" y="${H - 2}" font-size="9.5" fill="#9db4b7" text-anchor="middle">${x}</text>`).join("")}
     ${dots.map((d) => (d === me ? "" : `<circle cx="${d.x}" cy="${d.y}" r="${R}" fill="#9db4b7" fill-opacity=".55"><title>${d.r.country}: ${d.r.S.toFixed(2)} (rank ${d.r.S_rank})</title></circle>`)).join("")}
-    <circle cx="${me.x}" cy="${me.y}" r="${R + 3}" fill="#3fb37a" stroke="#10232b" stroke-width="2"><title>Pakistan: ${pk.S.toFixed(2)} (rank ${pk.S_rank})</title></circle>
+    <circle cx="${me.x}" cy="${me.y}" r="${R + 3}" fill="#3fb37a" stroke="#202020" stroke-width="2"><title>Pakistan: ${pk.S.toFixed(2)} (rank ${pk.S_rank})</title></circle>
     <line x1="${me.x}" x2="${me.x}" y1="16" y2="${me.y - R - 4}" stroke="#e6eef0" stroke-width="1"/>
-    <text x="${me.x - 4}" y="11" font-size="11" font-weight="700" fill="#f1f5f3" paint-order="stroke" stroke="#10232b" stroke-width="3">Pakistan ${pk.S.toFixed(2)} · rank ${pk.S_rank} of ${n}</text></svg>`;
+    <text x="${me.x - 4}" y="11" font-size="11" font-weight="700" fill="#f1f5f3" paint-order="stroke" stroke="#202020" stroke-width="3">Pakistan ${pk.S.toFixed(2)} · rank ${pk.S_rank} of ${n}</text></svg>`;
   return `<div class="cc-k" style="color:#c9d0dc">Pakistan's national index · Step 11</div>
     <div class="ix-hero"><div><b>${PI.toFixed(2)}</b><span>potential impact (0-1)</span></div>
       <div class="ix-eq">= ( exposure <b style="color:#f07a5c">${E.toFixed(2)}</b> + sensitivity <b style="color:#3fb37a">${Sv.toFixed(2)}</b> ) ÷ 2</div></div>

@@ -3,7 +3,8 @@
  * that float over them (intro, terminal, tour, about). With the Ocean or Fisheries layer open (om-mode) the layer dock
  * lies above the year slider and the ocean package's layer list takes the left side (src/oceanMonitoring/); Nutrients &
  * Plankton is laid out the same way, with its month slider (src/nutrients/).
- * On every page load: the opening sequence, the system check (which closes by itself), then the assistant's warnings.
+ * On every page load: the opening sequence, the system check (which closes by itself), the assistant's warnings, then
+ * the showcase starts by itself (Esc during the sequence skips all of it).
  *   ?nointro skips all three;  ?tour then plays the guided tour (with ?nointro, as soon as the map is ready);
  *   ?showcase likewise starts the showcase (standby mode, src/components/Showcase.jsx);
  *   ?perf shows the frame-time read-out (src/perf.js).
@@ -80,13 +81,14 @@ export function App() {
   }, []);
   const afterIntro = ({ skipAll } = {}) => {
     setIntro(false);
-    const tour = () => {
-      const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(location.search);
+    if (skipAll) { // Esc: straight to the portal, no system check, no warnings and no showcase unless asked for
       if (params.has("tour")) whenMapReady(startTour);
       else if (params.has("showcase")) whenMapReady(startShowcase);
-    };
-    if (skipAll) return tour(); // Esc: straight to the portal, no system check and no warnings
-    openTerminal({ auto: true }).then(announce).then(tour);
+      return;
+    }
+    // after the system check the showcase starts by itself, as if its button had been pressed (owner request, 2026-11-20); ?tour plays the tour instead
+    openTerminal({ auto: true }).then(announce).then(() => whenMapReady(params.has("tour") ? startTour : startShowcase));
   };
 
   const handles = ["left", "right"].map((side) => {

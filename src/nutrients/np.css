@@ -2,18 +2,18 @@
    only its own pieces: the place names on the map, the nutrient cell values, the month slider's gap marks and the panel extras. */
 
 /* place names beside the monitoring points, with this month's value */
-.np-name { display: flex; flex-direction: column; gap: 1px; pointer-events: none; white-space: nowrap; color: #e2eef0; text-shadow: 0 1px 3px rgba(5, 14, 18, 0.95), 0 0 6px rgba(5, 14, 18, 0.85); }
+.np-name { display: flex; flex-direction: column; gap: 1px; pointer-events: none; white-space: nowrap; color: #ececec; text-shadow: 0 1px 3px rgba(12, 12, 12, 0.95), 0 0 6px rgba(12, 12, 12, 0.85); }
 .np-name b { font-size: calc(11px * var(--fs)); font-weight: 700; letter-spacing: 0.02em; }
 .np-name span { font-size: calc(10.5px * var(--fs)); color: var(--muted); font-variant-numeric: tabular-nums; }
 .np-name.left { align-items: flex-end; }
 .np-name.on b { color: #fff; }
 .np-name.on span { color: var(--text); font-weight: 600; }
 /* nutrient value in the middle of each one-degree cell */
-.np-cell { font-size: calc(10.5px * var(--fs)); font-weight: 700; color: #0b1820; background: rgba(241, 245, 243, 0.82); border-radius: 6px; padding: 1px 5px; pointer-events: none; font-variant-numeric: tabular-nums; }
+.np-cell { font-size: calc(10.5px * var(--fs)); font-weight: 700; color: #161616; background: rgba(241, 245, 243, 0.82); border-radius: 6px; padding: 1px 5px; pointer-events: none; font-variant-numeric: tabular-nums; }
 
 /* legend marks: a hollow dot (no reading) and a dashed line (nearby pixel) */
-.legend-om .d i.hollow { background: transparent; box-shadow: 0 0 0 1.5px #9db4b7; width: 8px; height: 8px; }
-.legend-om .d i.dash { width: 16px; height: 0; border-radius: 0; background: none; box-shadow: none; border-top: 1.5px dashed #e6eef0; }
+.legend-om .d i.hollow { background: transparent; box-shadow: 0 0 0 1.5px #afafaf; width: 8px; height: 8px; }
+.legend-om .d i.dash { width: 16px; height: 0; border-radius: 0; background: none; box-shadow: none; border-top: 1.5px dashed #ececec; }
 
 /* the month slider */
 .om-year small.np-month { color: var(--muted); text-transform: none; letter-spacing: 0; font-size: calc(10.5px * var(--fs)); }

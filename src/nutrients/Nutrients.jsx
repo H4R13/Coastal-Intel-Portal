@@ -262,7 +262,7 @@ const MONTH_LINE = { id: "npLine", afterDatasetsDraw(c) {
 const PLACE_COLORS = ["#e2582c", "#e6d43a", "#6fcf8f", "#6cc3df", "#a48be0"];
 const toMonth = (e, _els, chart) => { const v = Math.round(chart.scales.x.getValueForPixel(e.x)); if (Number.isFinite(v)) { np.stop(); np.setIdx(v); } };
 const options = (extra) => ({ responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: "index", intersect: false },
-  plugins: { legend: { display: false }, tooltip: { backgroundColor: "#10232b", borderColor: "rgba(120,201,194,.4)", borderWidth: 1 } }, ...extra });
+  plugins: { legend: { display: false }, tooltip: { backgroundColor: "#202020", borderColor: "rgba(120,201,194,.4)", borderWidth: 1 } }, ...extra });
 
 /** A chart card: the chart is made again when `deps` change; only the month line moves with the slider. */
 function ChartCard({ title, sub, height = 210, make, deps, line = null }) {

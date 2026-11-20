@@ -127,13 +127,13 @@ function createMap(host, root, onStatus, onCoords) {
   /* Re-tint the stock dark style: navy sea, slate land, luminous coastline; drop road/building clutter. */
   function tintBasemap() {
     const set = (id, prop, v) => map.getLayer(id) && map.setPaintProperty(id, prop, v);
-    set("background", "background-color", "#1c3038");
-    ["landcover", "landuse", "park_national_park", "park_nature_reserve"].forEach((id) => set(id, "fill-color", "#1e343d"));
-    set("landuse_residential", "fill-color", "#1d2f38");
-    set("water", "fill-color", "#0a1d2a");
-    set("waterway", "line-color", "#2b5566");
-    set("boundary_country_outline", "line-color", "#2b3d47");
-    set("boundary_country_inner", "line-color", "#2b3d47");
+    set("background", "background-color", "#2c2c2c");
+    ["landcover", "landuse", "park_national_park", "park_nature_reserve"].forEach((id) => set(id, "fill-color", "#303030"));
+    set("landuse_residential", "fill-color", "#2c2c2c");
+    set("water", "fill-color", "#1a1a1a");
+    set("waterway", "line-color", "#4d4d4d");
+    set("boundary_country_outline", "line-color", "#3a3a3a");
+    set("boundary_country_inner", "line-color", "#3a3a3a");
     map.getStyle().layers.forEach((l) => {
       if (["transportation", "building", "aeroway"].includes(l["source-layer"]) && !/^road_(pri|trunk|mot)_fill/.test(l.id)) map.setLayoutProperty(l.id, "visibility", "none");
     });
@@ -143,8 +143,8 @@ function createMap(host, root, onStatus, onCoords) {
     // "dem://" serves the project's 12.5 m DEM (MSL-corrected) where it exists, else global terrain with a flat sea
     map.addSource("dem", { type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 13, tiles: ["dem://{z}/{x}/{y}"], attribution: "Terrain: project DEM (12.5 m) · global terrain: Mapzen / AWS Open Data" });
     map.addSource("dem-hs", { type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 11, tiles: ["demhs://{z}/{x}/{y}"] });
-    map.addLayer({ id: "hillshade", type: "hillshade", source: "dem-hs", paint: { "hillshade-shadow-color": "#050f14", "hillshade-highlight-color": "#4a6e74", "hillshade-accent-color": "#0a1d2a", "hillshade-exaggeration": 0.45 } }, "waterway");
-    try { map.setSky({ "sky-color": "#0b1820", "horizon-color": "#2a5560", "fog-color": "#0b1820", "sky-horizon-blend": 0.6, "horizon-fog-blend": 0.6, "fog-ground-blend": 0.9, "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 8, 0] }); } catch {}
+    map.addLayer({ id: "hillshade", type: "hillshade", source: "dem-hs", paint: { "hillshade-shadow-color": "#0d0d0d", "hillshade-highlight-color": "#676767", "hillshade-accent-color": "#1a1a1a", "hillshade-exaggeration": 0.45 } }, "waterway");
+    try { map.setSky({ "sky-color": "#161616", "horizon-color": "#4d4d4d", "fog-color": "#161616", "sky-horizon-blend": 0.6, "horizon-fog-blend": 0.6, "fog-ground-blend": 0.9, "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 8, 0] }); } catch {}
     map.addLayer({ id: "coast-line", type: "line", source: vectorSource(), "source-layer": "water", paint: { "line-color": "#5a9e9c", "line-opacity": 0.7, "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.7, 10, 1.3] } }, "water_shadow");
     addBorders();
     vectorLayers = map.getStyle().layers.filter((l) => l.source === vectorSource()).map((l) => ({ id: l.id, vis: l.layout?.visibility ?? "visible" }));
